@@ -24,66 +24,89 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 表單提交處理
     document.getElementById('score-form').addEventListener('submit', function(e) {
+        // 先阻止默認提交
         e.preventDefault();
         
-        // 獲取表單數據
-        const newEntry = {
-            id: Date.now(),
-            date: new Date().toISOString(),
-            year: document.getElementById('year').value,
-            school: document.getElementById('school').value,
-            department: document.getElementById('department').value || '普通班',
-            scores: {
-                chinese: document.getElementById('chinese').value,
-                english: document.getElementById('english').value,
-                math: document.getElementById('math').value,
-                science: document.getElementById('science').value,
-                social: document.getElementById('social').value
-            },
-            total: document.getElementById('total').value || calculateApproximateScore(),
-            comment: document.getElementById('comment').value
-        };
+        // 添加提交動畫
+        const submitButton = this.querySelector('button[type="submit"]');
+        const originalText = submitButton.innerHTML;
         
-        // 發送到後端 API
-        showLoading();
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<div class="spinner-border spinner-border-sm text-light me-2" role="status"></div> 提交中...';
         
-        // 使用JSONP方式處理跨域問題
-        const formData = new FormData();
-        formData.append('action', 'addEntry');
-        formData.append('entry', JSON.stringify(newEntry));
+        // 添加表單震動效果
+        this.classList.add('submitting');
         
-        fetch(API_URL, {
-            method: 'POST',
-            body: formData,
-            mode: 'no-cors' // 使用no-cors模式
-        })
-            .then(response => {
-                // 由於no-cors模式會返回一個不透明的響應
-                // 我們無法直接讀取response內容，所以直接認為成功了
-                // 向本地數據添加新條目
-                entries.unshift(newEntry);
-                
-                // 更新顯示
-                updateStatistics();
-                displayEntries();
-                
-                // 重置表單
-                document.getElementById('score-form').reset();
-                
-                // 提交成功特效
-                showApiMessage('success', '感謝您的分享！您的錄取資訊已成功提交。');
-                
-                // 若在手機版，滾動到結果區
-                if(window.innerWidth < 768) {
-                    document.querySelector('.card.mb-4:last-of-type').scrollIntoView({behavior: 'smooth'});
-                }
+        // 延遲執行原始提交邏輯
+        setTimeout(() => {
+            // 移除動畫類
+            this.classList.remove('submitting');
+            
+            // 獲取表單數據
+            const newEntry = {
+                id: Date.now(),
+                date: new Date().toISOString(),
+                year: document.getElementById('year').value,
+                school: document.getElementById('school').value,
+                department: document.getElementById('department').value || '普通班',
+                scores: {
+                    chinese: document.getElementById('chinese').value,
+                    english: document.getElementById('english').value,
+                    math: document.getElementById('math').value,
+                    science: document.getElementById('science').value,
+                    social: document.getElementById('social').value
+                },
+                total: document.getElementById('total').value || calculateApproximateScore(),
+                comment: document.getElementById('comment').value
+            };
+            
+            // 發送到後端 API
+            showLoading();
+            
+            // 使用JSONP方式處理跨域問題
+            const formData = new FormData();
+            formData.append('action', 'addEntry');
+            formData.append('entry', JSON.stringify(newEntry));
+            
+            fetch(API_URL, {
+                method: 'POST',
+                body: formData,
+                mode: 'no-cors' // 使用no-cors模式
             })
-            .catch(error => {
-                showApiMessage('error', '提交失敗: ' + error.message);
-            })
-            .finally(() => {
-                hideLoading();
-            });
+                .then(response => {
+                    // 由於no-cors模式會返回一個不透明的響應
+                    // 我們無法直接讀取response內容，所以直接認為成功了
+                    // 向本地數據添加新條目
+                    entries.unshift(newEntry);
+                    
+                    // 更新顯示
+                    updateStatistics();
+                    displayEntries();
+                    
+                    // 重置表單
+                    document.getElementById('score-form').reset();
+                    
+                    // 提交成功特效
+                    showApiMessage('success', '感謝您的分享！您的錄取資訊已成功提交。');
+                    
+                    // 若在手機版，滾動到結果區
+                    if(window.innerWidth < 768) {
+                        document.querySelector('.card.mb-4:last-of-type').scrollIntoView({behavior: 'smooth'});
+                    }
+                })
+                .catch(error => {
+                    showApiMessage('error', '提交失敗: ' + error.message);
+                })
+                .finally(() => {
+                    hideLoading();
+                    
+                    // 恢復按鈕狀態
+                    setTimeout(() => {
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalText;
+                    }, 1000);
+                });
+        }, 800);
     });
     
     // API 相關功能
@@ -146,7 +169,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // 顯示 API 相關訊息
-    function showApiMessage(type, message) {
+    const originalShowApiMessage = function(type, message) {
         const alertDiv = document.createElement('div');
         alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} api-alert ${type}`;
         alertDiv.innerHTML = `
@@ -163,9 +186,39 @@ document.addEventListener('DOMContentLoaded', function() {
             alertDiv.classList.add('fade');
             setTimeout(() => alertDiv.remove(), 300);
         }, 3000);
+    };
+    
+    function showApiMessage(type, message) {
+        originalShowApiMessage(type, message);
+        
+        // 查找最後添加的提示框
+        const alertDiv = document.querySelector('.api-alert:last-child');
+        if (alertDiv) {
+            // 添加圖標和更美觀的樣式
+            const icon = type === 'success' ? 
+                '<i class="bi bi-check-circle-fill me-2 fs-4"></i>' : 
+                '<i class="bi bi-exclamation-circle-fill me-2 fs-4"></i>';
+            
+            alertDiv.innerHTML = `
+                <div class="d-flex align-items-center p-2">
+                    ${icon}
+                    <div>${message}</div>
+                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+        }
     }
     
     // 搜尋功能
+    document.getElementById('search-input').addEventListener('input', function() {
+        if (this.value.length >= 1) {
+            const keyword = this.value.trim().toLowerCase();
+            displayEntries(keyword);
+        } else if (this.value.length === 0) {
+            displayEntries('');
+        }
+    });
+    
     document.getElementById('search-form').addEventListener('submit', function(e) {
         e.preventDefault();
         const keyword = document.getElementById('search-input').value.trim().toLowerCase();
@@ -201,7 +254,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // 根據目前設定的排序顯示項目
-    function displayEntries(searchKeyword = '') {
+    const originalDisplayEntries = function(searchKeyword = '') {
         let filteredEntries = entries;
         
         // 搜尋過濾
@@ -323,6 +376,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 setTimeout(() => row.style.opacity = '1', 10);
             });
         }
+    };
+    
+    function displayEntries(searchKeyword = '') {
+        originalDisplayEntries(searchKeyword);
+        
+        // 添加項目進入動畫
+        const tableRows = document.querySelectorAll('#results-table tr, #results-table .mobile-row');
+        tableRows.forEach((row, index) => {
+            row.style.opacity = '0';
+            row.style.transform = 'translateY(20px)';
+            row.style.transition = `opacity 0.5s ease, transform 0.5s ease ${index * 0.05}s`;
+            
+            setTimeout(() => {
+                row.style.opacity = '1';
+                row.style.transform = 'translateY(0)';
+            }, 50);
+        });
     }
     
     function getSubjectName(subject) {
@@ -376,7 +446,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 使用D3.js繪製簡單統計圖表
     function createChart(schoolCounts) {
-        // 取前5名最多分享的學校
+        // 使用現有代碼的前5名資料
         const chartData = Object.entries(schoolCounts)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 5);
@@ -384,23 +454,31 @@ document.addEventListener('DOMContentLoaded', function() {
         const svg = d3.select('#stats-chart');
         svg.selectAll('*').remove();
         
-        const margin = {top: 20, right: 20, bottom: 60, left: 60};
+        const margin = {top: 30, right: 30, bottom: 70, left: 60};
         const width = svg.node().clientWidth - margin.left - margin.right;
         const height = svg.node().clientHeight - margin.top - margin.bottom;
         
         const x = d3.scaleBand()
             .domain(chartData.map(d => d[0]))
             .range([0, width])
-            .padding(0.3);
+            .padding(0.4);
             
         const y = d3.scaleLinear()
-            .domain([0, d3.max(chartData, d => d[1])])
+            .domain([0, d3.max(chartData, d => d[1]) * 1.2])
             .nice()
             .range([height, 0]);
             
         const g = svg.append('g')
             .attr('transform', `translate(${margin.left},${margin.top})`);
             
+        // 增強圖表背景
+        g.append('rect')
+            .attr('width', width)
+            .attr('height', height)
+            .attr('fill', 'rgba(255,255,255,0.5)')
+            .attr('rx', 10)
+            .attr('ry', 10);
+        
         // 添加網格線
         g.append('g')
             .attr('class', 'grid')
@@ -411,69 +489,128 @@ document.addEventListener('DOMContentLoaded', function() {
             )
             .selectAll('line')
             .style('stroke', '#e9ecef')
+            .style('stroke-opacity', 0.7)
             .style('stroke-dasharray', '3,3');
             
         // 添加x軸
         g.append('g')
             .attr('transform', `translate(0,${height})`)
-            .call(d3.axisBottom(x))
+            .call(d3.axisBottom(x)
+                .tickSize(0))
             .selectAll('text')
             .attr('transform', 'rotate(-30)')
             .style('text-anchor', 'end')
             .attr('dx', '-.8em')
             .attr('dy', '.15em')
-            .style('font-size', '10px');
-            
+            .style('font-size', '11px')
+            .style('font-weight', '500');
+        
+        // 隱藏x軸線條
+        g.select('.domain').style('display', 'none');
+        
         // 添加y軸
         g.append('g')
-            .call(d3.axisLeft(y).ticks(5));
-            
-        // 添加標題
-        g.append('text')
-            .attr('x', width / 2)
-            .attr('y', -5)
-            .attr('text-anchor', 'middle')
-            .style('font-size', '12px')
-            .text('最熱門分享學校');
-            
-        // 添加漸變色彩範圍
+            .call(d3.axisLeft(y)
+                .ticks(5)
+                .tickSize(0))
+            .selectAll('text')
+            .style('font-size', '11px');
+        
+        // 隱藏y軸線條
+        g.selectAll('.domain').style('display', 'none');
+        
+        // 使用更美觀的漸變色彩
         const colorScale = d3.scaleSequential()
             .domain([0, chartData.length])
-            .interpolator(d3.interpolateInferno);
-            
-        // 添加柱狀圖並添加動畫效果
+            .interpolator(d3.interpolateRainbow);
+        
+        // 添加更美觀的柱狀圖
         g.selectAll('.bar')
             .data(chartData)
             .enter().append('rect')
             .attr('class', 'bar')
             .attr('x', d => x(d[0]))
-            .attr('y', height)  // 從底部開始動畫
+            .attr('y', height)  // 動畫起點
             .attr('width', x.bandwidth())
-            .attr('height', 0)  // 初始高度為0
+            .attr('height', 0)  // 動畫起點高度
+            .attr('rx', 5)      // 圓角
+            .attr('ry', 5)      // 圓角
             .attr('fill', (d, i) => colorScale(i))
-            .transition()  // 加入動畫過渡
-            .duration(800)
-            .delay((d, i) => i * 100)
+            .transition()
+            .duration(1200)
+            .delay((d, i) => i * 150)
+            .ease(d3.easeBounceOut)
             .attr('y', d => y(d[1]))
             .attr('height', d => height - y(d[1]));
-            
+        
         // 添加數值標籤
         g.selectAll('.label')
             .data(chartData)
             .enter().append('text')
             .attr('class', 'label')
             .attr('x', d => x(d[0]) + x.bandwidth() / 2)
-            .attr('y', d => y(d[1]) - 5)
+            .attr('y', d => y(d[1]) - 10)
             .attr('text-anchor', 'middle')
-            .style('font-size', '11px')
+            .style('font-size', '12px')
             .style('font-weight', 'bold')
-            .style('fill', 'white')
-            .style('opacity', 0)  // 初始設為不可見
+            .style('fill', '#495057')
+            .style('opacity', 0)  // 初始透明
             .text(d => d[1])
-            .transition()  // 加入淡入動畫
+            .transition()
             .duration(800)
-            .delay((d, i) => i * 100 + 300)
-            .style('opacity', 1);
+            .delay((d, i) => i * 150 + 500)
+            .style('opacity', 1);  // 淡入
+        
+        // 為柱狀圖添加懸停效果
+        g.selectAll('.bar-group')
+            .data(chartData)
+            .enter().append('rect')
+            .attr('class', 'bar-hover')
+            .attr('x', d => x(d[0]))
+            .attr('y', 0)
+            .attr('width', x.bandwidth())
+            .attr('height', height)
+            .attr('fill', 'transparent')
+            .on('mouseover', function(event, d) {
+                d3.select(this.parentNode).selectAll('.bar')
+                    .filter((bar, i) => bar[0] === d[0])
+                    .transition()
+                    .duration(300)
+                    .attr('opacity', 0.8)
+                    .attr('y', y => y - 5);
+                    
+                d3.select(this.parentNode).selectAll('.label')
+                    .filter((label, i) => label[0] === d[0])
+                    .transition()
+                    .duration(300)
+                    .attr('y', y => y - 5)
+                    .style('font-size', '14px');
+            })
+            .on('mouseout', function(event, d) {
+                d3.select(this.parentNode).selectAll('.bar')
+                    .filter((bar, i) => bar[0] === d[0])
+                    .transition()
+                    .duration(300)
+                    .attr('opacity', 1)
+                    .attr('y', y => y + 5);
+                    
+                d3.select(this.parentNode).selectAll('.label')
+                    .filter((label, i) => label[0] === d[0])
+                    .transition()
+                    .duration(300)
+                    .attr('y', y => y + 5)
+                    .style('font-size', '12px');
+            });
+        
+        // 添加標題
+        g.append('text')
+            .attr('x', width / 2)
+            .attr('y', -10)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '14px')
+            .style('font-weight', 'bold')
+            .style('fill', '#495057')
+            .text('最熱門分享學校');
     }
     
     // 根據五科成績估算約略總分
@@ -643,4 +780,71 @@ document.addEventListener('DOMContentLoaded', function() {
             navbar.classList.remove('navbar-scroll');
         }
     });
+    
+    // 添加頁面載入動畫
+    document.body.classList.add('page-loaded');
+    
+    // 為分數徽章添加工具提示
+    initializeTooltips();
+    
+    // 滾動動畫效果
+    initializeScrollAnimations();
+    
+    // 設置背景圖案顏色
+    setRandomBackgroundPattern();
 });
+
+// 初始化Bootstrap工具提示
+function initializeTooltips() {
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // 為分數徽章添加工具提示
+    document.querySelectorAll('.score-badge').forEach(badge => {
+        new bootstrap.Tooltip(badge);
+    });
+}
+
+// 設置隨機背景圖案顏色
+function setRandomBackgroundPattern() {
+    const colors = [
+        'rgba(13, 110, 253, 0.03)', // 藍色
+        'rgba(25, 135, 84, 0.03)',  // 綠色
+        'rgba(255, 193, 7, 0.03)',  // 黃色
+        'rgba(102, 16, 242, 0.03)'  // 紫色
+    ];
+    
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+    document.documentElement.style.setProperty('--pattern-color', randomColor);
+}
+
+// 添加滾動動畫效果
+function initializeScrollAnimations() {
+    const animatedElements = document.querySelectorAll('.card, .school-tag, .btn, header h1, header p');
+    
+    // 檢查元素是否在視口中
+    function checkIfInView() {
+        const windowHeight = window.innerHeight;
+        const windowTopPosition = window.scrollY;
+        const windowBottomPosition = windowTopPosition + windowHeight;
+        
+        animatedElements.forEach(element => {
+            const elementHeight = element.offsetHeight;
+            const elementTopPosition = element.getBoundingClientRect().top + windowTopPosition;
+            const elementBottomPosition = elementTopPosition + elementHeight;
+            
+            // 元素進入視口
+            if (elementBottomPosition >= windowTopPosition && elementTopPosition <= windowBottomPosition) {
+                element.classList.add('in-view');
+            }
+        });
+    }
+    
+    // 監聽滾動事件
+    window.addEventListener('scroll', checkIfInView);
+    
+    // 初始檢查
+    checkIfInView();
+}
