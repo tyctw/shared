@@ -1,0 +1,297 @@
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高中錄取分數分享平台</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- 頁首導航菜單 -->
+    <nav class="navbar navbar-expand-lg sticky-top" id="main-navbar">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="bi bi-journal-check"></i>高中分數分享</a>
+            <button class="navbar-toggler d-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <i class="bi bi-list fs-3"></i>
+            </button>
+            
+            <!-- 漢堡選單按鈕 -->
+            <button id="menu-toggle-btn" class="menu-toggle-btn">
+                <i class="bi bi-list d-block fs-3" style="display: block;"></i>
+            </button>
+        </div>
+    </nav>
+    
+    <!-- 右側彈出菜單 -->
+    <div id="sidebar-menu" class="sidebar-menu">
+        <button id="close-menu-btn" class="close-btn">
+            <i class="bi bi-x-lg"></i>
+        </button>
+        <div class="pt-4 pb-2 text-center">
+            <h5 class="fw-bold text-primary mb-0"><i class="bi bi-journal-check me-2"></i>選單</h5>
+        </div>
+        <div class="pt-2">
+            <a href="#" class="menu-item active">
+                <i class="bi bi-house-door"></i>首頁
+            </a>
+            <a href="#share-section" class="menu-item">
+                <i class="bi bi-share"></i>分享資訊
+            </a>
+            <a href="#search-section" class="menu-item">
+                <i class="bi bi-search"></i>搜尋資訊
+            </a>
+            <a href="#results-section" class="menu-item">
+                <i class="bi bi-list-stars"></i>錄取資料
+            </a>
+            <a href="#stats-section" class="menu-item">
+                <i class="bi bi-bar-chart"></i>統計資訊
+            </a>
+            <div class="border-top my-3"></div>
+            <a href="javascript:void(0)" class="btn btn-primary menu-btn">
+                <i class="bi bi-lightbulb me-2"></i>使用說明
+            </a>
+        </div>
+    </div>
+    
+    <!-- 側邊欄背景遮罩 -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <div class="container">
+        <header class="mb-4 mt-3 text-center">
+            <h1><i class="bi bi-journal-check me-2"></i>高中錄取分數分享平台</h1>
+            <p>分享你的會考成績與錄取高中，幫助學弟妹了解各校錄取分數區間</p>
+        </header>
+
+        <div class="row">
+            <div class="col-lg-6 mb-4" id="share-section">
+                <div class="card">
+                    <div class="card-header gradient-card-header">
+                        <h3 class="mb-0"><i class="bi bi-share me-2"></i>分享你的錄取資訊</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="score-form">
+                            <div class="mb-3">
+                                <label for="year" class="form-label"><i class="bi bi-calendar-event me-1"></i>會考年份</label>
+                                <select class="form-select" id="year" required>
+                                    <option value="" selected disabled>請選擇年份</option>
+                                    <option value="2023">112年 (2023)</option>
+                                    <option value="2022">111年 (2022)</option>
+                                    <option value="2021">110年 (2021)</option>
+                                    <option value="2020">109年 (2020)</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="school" class="form-label"><i class="bi bi-building me-1"></i>錄取學校</label>
+                                <input type="text" class="form-control" id="school" placeholder="例：建國中學" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="department" class="form-label"><i class="bi bi-book me-1"></i>科系/班別</label>
+                                <input type="text" class="form-control" id="department" placeholder="例：普通班、資訊班、數理班...">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label"><i class="bi bi-award me-1"></i>會考成績</label>
+                                <div class="row g-2">
+                                    <div class="col">
+                                        <label for="chinese" class="form-label">國文</label>
+                                        <select class="form-select" id="chinese" required>
+                                            <option value="" selected disabled>請選擇</option>
+                                            <option value="A++">A++</option>
+                                            <option value="A+">A+</option>
+                                            <option value="A">A</option>
+                                            <option value="B++">B++</option>
+                                            <option value="B+">B+</option>
+                                            <option value="B">B</option>
+                                            <option value="C">C</option>
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        <label for="english" class="form-label">英文</label>
+                                        <select class="form-select" id="english" required>
+                                            <option value="" selected disabled>請選擇</option>
+                                            <option value="A++">A++</option>
+                                            <option value="A+">A+</option>
+                                            <option value="A">A</option>
+                                            <option value="B++">B++</option>
+                                            <option value="B+">B+</option>
+                                            <option value="B">B</option>
+                                            <option value="C">C</option>
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        <label for="math" class="form-label">數學</label>
+                                        <select class="form-select" id="math" required>
+                                            <option value="" selected disabled>請選擇</option>
+                                            <option value="A++">A++</option>
+                                            <option value="A+">A+</option>
+                                            <option value="A">A</option>
+                                            <option value="B++">B++</option>
+                                            <option value="B+">B+</option>
+                                            <option value="B">B</option>
+                                            <option value="C">C</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row g-2 mt-2">
+                                    <div class="col">
+                                        <label for="science" class="form-label">自然</label>
+                                        <select class="form-select" id="science" required>
+                                            <option value="" selected disabled>請選擇</option>
+                                            <option value="A++">A++</option>
+                                            <option value="A+">A+</option>
+                                            <option value="A">A</option>
+                                            <option value="B++">B++</option>
+                                            <option value="B+">B+</option>
+                                            <option value="B">B</option>
+                                            <option value="C">C</option>
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        <label for="social" class="form-label">社會</label>
+                                        <select class="form-select" id="social" required>
+                                            <option value="" selected disabled>請選擇</option>
+                                            <option value="A++">A++</option>
+                                            <option value="A+">A+</option>
+                                            <option value="A">A</option>
+                                            <option value="B++">B++</option>
+                                            <option value="B+">B+</option>
+                                            <option value="B">B</option>
+                                            <option value="C">C</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="total" class="form-label"><i class="bi bi-calculator me-1"></i>總積分</label>
+                                <input type="number" class="form-control" id="total" min="0" max="100" step="0.01" placeholder="例：97.5">
+                            </div>
+                            <div class="mb-3">
+                                <label for="comment" class="form-label"><i class="bi bi-chat-square-text me-1"></i>附加說明 (選填)</label>
+                                <textarea class="form-control" id="comment" rows="2" placeholder="例：加分條件、特殊管道錄取、心得..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-send me-1"></i>分享我的成績</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card mb-4" id="search-section">
+                    <div class="card-header success-gradient-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="mb-0"><i class="bi bi-search me-2"></i>搜尋錄取資訊</h3>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form id="search-form" class="mb-3">
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                                <input type="text" class="form-control" id="search-input" placeholder="輸入學校或科系關鍵字...">
+                                <button class="btn btn-success" type="submit">搜尋</button>
+                            </div>
+                        </form>
+                        <div class="mb-3">
+                            <label class="form-label"><i class="bi bi-bookmark-star me-1"></i>學校快速選擇</label>
+                            <div class="d-flex flex-wrap gap-1">
+                                <button class="btn btn-sm btn-outline-secondary school-tag">建國中學</button>
+                                <button class="btn btn-sm btn-outline-secondary school-tag">師大附中</button>
+                                <button class="btn btn-sm btn-outline-secondary school-tag">北一女中</button>
+                                <button class="btn btn-sm btn-outline-secondary school-tag">中山女高</button>
+                                <button class="btn btn-sm btn-outline-secondary school-tag">成功高中</button>
+                                <button class="btn btn-sm btn-outline-secondary school-tag">台中一中</button>
+                                <button class="btn btn-sm btn-outline-secondary school-tag">台中女中</button>
+                                <button class="btn btn-sm btn-outline-secondary school-tag">高雄中學</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="stats-section" class="card mb-4">
+                    <div class="card-header info-gradient-header">
+                        <h3 class="mb-0"><i class="bi bi-bar-chart me-2"></i>統計資訊</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="p-3 bg-light rounded-circle me-3">
+                                <i class="bi bi-file-earmark-text" style="font-size: 1.5rem; color: #0d6efd;"></i>
+                            </div>
+                            <div>
+                                <div class="text-muted">累計分享資料</div>
+                                <div class="fs-4 fw-bold" id="total-entries">0</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="p-3 bg-light rounded-circle me-3">
+                                <i class="bi bi-building" style="font-size: 1.5rem; color: #fd7e14;"></i>
+                            </div>
+                            <div>
+                                <div class="text-muted">最熱門學校</div>
+                                <div class="fs-5 fw-bold" id="popular-school">暫無資料</div>
+                            </div>
+                        </div>
+                        <div id="chart-container" style="height: 220px;">
+                            <svg id="stats-chart" width="100%" height="100%"></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4" id="results-section">
+            <div class="card-header warning-gradient-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0"><i class="bi bi-list-stars me-2"></i>最新分享資訊</h3>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-light dropdown-toggle" id="sort-dropdown" data-bs-toggle="dropdown">
+                            <i class="bi bi-sort-down me-1"></i>排序方式
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item sort-option" data-sort="newest" href="#"><i class="bi bi-clock me-2"></i>最新分享</a></li>
+                            <li><a class="dropdown-item sort-option" data-sort="highest" href="#"><i class="bi bi-arrow-down-up me-2"></i>積分高至低</a></li>
+                            <li><a class="dropdown-item sort-option" data-sort="lowest" href="#"><i class="bi bi-arrow-up-down me-2"></i>積分低至高</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-header">
+                            <tr>
+                                <th>學校 / 科系</th>
+                                <th>會考成績</th>
+                                <th>總積分</th>
+                                <th>年份</th>
+                                <th>說明</th>
+                            </tr>
+                        </thead>
+                        <tbody id="results-table">
+                            <!-- 分享資料會顯示在這裡 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <footer class="text-center text-muted mb-3">
+            <p><i class="bi bi-heart-fill me-1 text-danger"></i> 2023 高中錄取分數分享平台 | 本平台僅供參考，錄取標準依各高中公告為準</p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
+    <script src="script.js"></script>
+    <script>
+      // 確保Apps Script已正確設置為網路應用程式
+      // 1. 確認已部署為網路應用程式(Web App)
+      // 2. 確認權限設置為"所有人，甚至匿名使用者"
+      // 3. 確認在部署後已執行新網址
+    </script>
+    <div id="loading-overlay" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+</body>
+</html>
