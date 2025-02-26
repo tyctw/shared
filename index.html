@@ -110,16 +110,15 @@
                                 <label for="year" class="form-label"><i class="bi bi-calendar-event me-1"></i>會考年份</label>
                                 <select class="form-select" id="year" required>
                                     <option value="" selected disabled>請選擇年份</option>
-                                    <option value="2023">114年 (2025)</option>
-                                    <option value="2023">113年 (2024)</option>
                                     <option value="2023">112年 (2023)</option>
                                     <option value="2022">111年 (2022)</option>
                                     <option value="2021">110年 (2021)</option>
+                                    <option value="2020">109年 (2020)</option>
                                 </select>
                             </div>
                             <div class="mb-3">
                                 <label for="school" class="form-label"><i class="bi bi-building me-1"></i>錄取學校</label>
-                                <input type="text" class="form-control" id="school" placeholder="例：武陵高中" required>
+                                <input type="text" class="form-control" id="school" placeholder="例：建國中學" required>
                             </div>
                             <div class="mb-3">
                                 <label for="department" class="form-label"><i class="bi bi-book me-1"></i>科系/班別</label>
@@ -195,11 +194,30 @@
                                             <option value="C">C</option>
                                         </select>
                                     </div>
+                                    <div class="col">
+                                        <label for="composition" class="form-label">作文</label>
+                                        <select class="form-select" id="composition" required>
+                                            <option value="" selected disabled>級分</option>
+                                            <option value="0">0級</option>
+                                            <option value="1">1級</option>
+                                            <option value="2">2級</option>
+                                            <option value="3">3級</option>
+                                            <option value="4">4級</option>
+                                            <option value="5">5級</option>
+                                            <option value="6">6級</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="mb-3">
-                                <label for="total" class="form-label"><i class="bi bi-calculator me-1"></i>總積分</label>
-                                <input type="number" class="form-control" id="total" min="0" max="100" step="0.01" placeholder="例：97.5">
+                            <div class="row g-2 mb-3">
+                                <div class="col-md-6">
+                                    <label for="total" class="form-label"><i class="bi bi-calculator me-1"></i>總積分</label>
+                                    <input type="number" class="form-control" id="total" min="0" max="100" step="0.01" placeholder="例：97.5">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="totalPoints" class="form-label"><i class="bi bi-award me-1"></i>總積點</label>
+                                    <input type="number" class="form-control" id="totalPoints" min="0" max="35" step="1" placeholder="例：28">
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label for="comment" class="form-label"><i class="bi bi-chat-square-text me-1"></i>附加說明 (選填)</label>
@@ -296,7 +314,7 @@
                             <tr>
                                 <th>學校 / 科系</th>
                                 <th>會考成績</th>
-                                <th>總積分</th>
+                                <th>總分</th>
                                 <th>年份</th>
                                 <th>說明</th>
                             </tr>
@@ -310,7 +328,7 @@
         </div>
 
         <footer class="text-center text-muted mb-3">
-            <p><i class="bi bi-heart-fill me-1 text-danger"></i> 2025 TYCTW高中錄取分數分享平台 | 本平台僅供參考，錄取標準依各高中公告為準</p>
+            <p><i class="bi bi-heart-fill me-1 text-danger"></i> 2023 高中錄取分數分享平台 | 本平台僅供參考，錄取標準依各高中公告為準</p>
         </footer>
     </div>
 

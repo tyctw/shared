@@ -56,7 +56,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     science: document.getElementById('science').value,
                     social: document.getElementById('social').value
                 },
+                composition: document.getElementById('composition').value || '0',
                 total: document.getElementById('total').value || calculateApproximateScore(),
+                totalPoints: document.getElementById('totalPoints').value || calculateTotalPoints(),
                 comment: document.getElementById('comment').value
             };
             
@@ -275,7 +277,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (filteredEntries.length === 0) {
             resultsTable.innerHTML = `
                 <tr>
-                    <td colspan="5" class="text-center py-5">
+                    <td colspan="6" class="text-center py-5">
                         <div class="d-flex flex-column align-items-center">
                             <i class="bi bi-info-circle mb-3" style="font-size: 2rem; color: #6c757d;"></i>
                             <p class="mb-0">尚無符合條件的資料，請嘗試其他關鍵字或分享你的資訊！</p>
@@ -308,6 +310,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     return `<span class="score-badge score-${grade}" title="${getSubjectName(subject)}">${subjectIcons[subject]} ${grade}</span>`;
                 }).join('');
                 
+                // 添加作文級分顯示
+                const compositionDisplay = entry.composition ? 
+                    `<span class="composition-badge composition-${entry.composition}" title="作文級分">
+                        <i class="bi bi-pencil-square"></i> ${entry.composition}級
+                    </span>` : '';
+                
                 cardRow.innerHTML = `
                     <div class="mobile-cell">
                         <span class="mobile-label">學校/科系:</span>
@@ -316,11 +324,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                     <div class="mobile-cell">
                         <span class="mobile-label">會考成績:</span>
-                        <div>${scoreDisplay}</div>
+                        <div>${scoreDisplay} ${compositionDisplay}</div>
                     </div>
                     <div class="mobile-cell">
-                        <span class="mobile-label">總積分:</span>
-                        <span class="fw-bold">${entry.total}</span>
+                        <span class="mobile-label">總分:</span>
+                        <div>
+                            <span class="fw-bold">積分: ${entry.total || "未提供"}</span>
+                            <span class="ms-2">積點: ${entry.totalPoints || "未提供"}</span>
+                        </div>
                     </div>
                     <div class="mobile-cell">
                         <span class="mobile-label">年份:</span>
@@ -357,13 +368,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     return `<span class="score-badge score-${grade}" title="${getSubjectName(subject)}">${subjectIcons[subject]} ${grade}</span>`;
                 }).join('');
                 
+                // 添加作文級分顯示
+                const compositionDisplay = entry.composition ? 
+                    `<span class="composition-badge composition-${entry.composition}" title="作文級分">
+                        <i class="bi bi-pencil-square"></i> ${entry.composition}級
+                    </span>` : '';
+                
                 row.innerHTML = `
                     <td>
                         <div class="fw-bold">${entry.school}</div>
                         <div class="small text-muted">${entry.department}</div>
                     </td>
-                    <td>${scoreDisplay}</td>
-                    <td class="fw-bold">${entry.total}</td>
+                    <td>${scoreDisplay} ${compositionDisplay}</td>
+                    <td>
+                        <div class="fw-bold">積分: ${entry.total || "未提供"}</div>
+                        <div>積點: ${entry.totalPoints || "未提供"}</div>
+                    </td>
                     <td>${entry.year}</td>
                     <td>${entry.comment ? `<i class="bi bi-chat-text me-1"></i>${entry.comment}` : '-'}</td>
                 `;
@@ -613,7 +633,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .text('最熱門分享學校');
     }
     
-    // 根據五科成績估算約略總分
+    // 根據五科成績和作文級分估算約略總分
     function calculateApproximateScore() {
         const scoreValues = {
             'A++': 7, 'A+': 6, 'A': 5, 'B++': 4, 'B+': 3, 'B': 2, 'C': 1
@@ -624,11 +644,44 @@ document.addEventListener('DOMContentLoaded', function() {
         const math = scoreValues[document.getElementById('math').value] || 0;
         const science = scoreValues[document.getElementById('science').value] || 0;
         const social = scoreValues[document.getElementById('social').value] || 0;
+        const composition = parseInt(document.getElementById('composition').value) || 0;
         
         // 簡單估算，實際錄取分數計算方式可能更複雜
-        const approximateScore = (chinese + english + math + science + social) * 3;
+        const subjectScore = (chinese + english + math + science + social) * 3;
+        const compositionScore = composition * 2;
+        const approximateScore = subjectScore + compositionScore;
         return approximateScore.toFixed(1);
     }
+    
+    // 計算總積點 (新增)
+    function calculateTotalPoints() {
+        const pointValues = {
+            'A++': 7, 'A+': 6, 'A': 5, 'B++': 4, 'B+': 3, 'B': 2, 'C': 1
+        };
+        
+        const chinese = pointValues[document.getElementById('chinese').value] || 0;
+        const english = pointValues[document.getElementById('english').value] || 0;
+        const math = pointValues[document.getElementById('math').value] || 0;
+        const science = pointValues[document.getElementById('science').value] || 0;
+        const social = pointValues[document.getElementById('social').value] || 0;
+        
+        // 總積點為五科的積點總和
+        return (chinese + english + math + science + social).toString();
+    }
+    
+    // 自動更新總積分和總積點
+    function updateScoreFields() {
+        const score = calculateApproximateScore();
+        const points = calculateTotalPoints();
+        
+        document.getElementById('total').value = score;
+        document.getElementById('totalPoints').value = points;
+    }
+    
+    // 監聽分數改變自動更新總分
+    document.querySelectorAll('#chinese, #english, #math, #science, #social, #composition').forEach(select => {
+        select.addEventListener('change', updateScoreFields);
+    });
     
     // 設置移動端優化功能
     function setupMobileOptimizations() {
@@ -802,7 +855,7 @@ function initializeTooltips() {
     });
     
     // 為分數徽章添加工具提示
-    document.querySelectorAll('.score-badge').forEach(badge => {
+    document.querySelectorAll('.score-badge, .composition-badge').forEach(badge => {
         new bootstrap.Tooltip(badge);
     });
 }

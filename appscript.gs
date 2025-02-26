@@ -71,8 +71,10 @@ function getAllEntries() {
       school: row[3],
       department: row[4],
       scores: JSON.parse(row[5]),
-      total: row[6],
-      comment: row[7]
+      composition: row[6],
+      total: row[7],
+      totalPoints: row[8],
+      comment: row[9]
     };
     entries.push(entry);
   }
@@ -95,7 +97,9 @@ function addEntry(entry) {
     entry.school,
     entry.department,
     JSON.stringify(entry.scores),  // 分數以 JSON 格式存儲
+    entry.composition,
     entry.total,
+    entry.totalPoints,
     entry.comment
   ];
   
@@ -114,7 +118,7 @@ function getDataSheet() {
   if (!sheet) {
     sheet = ss.insertSheet('ScoreEntries');
     // 設置表頭
-    sheet.appendRow(['ID', '日期', '年份', '學校', '科系', '分數', '總分', '備註']);
+    sheet.appendRow(['ID', '日期', '年份', '學校', '科系', '分數', '作文級分', '總積分', '總積點', '備註']);
     // 凍結表頭
     sheet.setFrozenRows(1);
   }
