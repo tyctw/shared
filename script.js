@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
             hideLoading();
             setupMobileOptimizations();
             setupSidebarMenu(); // 初始化側邊欄選單
+            setupHelpModal(); // 初始化使用說明模態框
         });
     
     // 表單提交處理
@@ -163,11 +164,94 @@ document.addEventListener('DOMContentLoaded', function() {
     // UI 顯示相關功能
     // 顯示/隱藏載入中狀態
     function showLoading() {
-        document.getElementById('loading-overlay').style.display = 'flex';
+        const loadingOverlay = document.getElementById('loading-overlay');
+        loadingOverlay.style.display = 'flex';
+        
+        // 添加進度動畫
+        if (!document.querySelector('#loading-overlay .loading-animation')) {
+            const loadingAnimation = document.createElement('div');
+            loadingAnimation.className = 'loading-animation';
+            loadingAnimation.innerHTML = `
+                <div class="loading-circles">
+                    <div class="circle"></div>
+                    <div class="circle"></div>
+                    <div class="circle"></div>
+                </div>
+                <div class="loading-text">資料載入中</div>
+                <div class="loading-progress">
+                    <div class="progress-bar"></div>
+                </div>
+            `;
+            
+            // 替換原有的spinner
+            const spinner = document.querySelector('#loading-overlay .spinner-border');
+            if (spinner) {
+                spinner.parentNode.replaceChild(loadingAnimation, spinner);
+            } else {
+                loadingOverlay.appendChild(loadingAnimation);
+            }
+            
+            // 模擬進度條
+            simulateProgress();
+        }
     }
     
     function hideLoading() {
-        document.getElementById('loading-overlay').style.display = 'none';
+        const loadingOverlay = document.getElementById('loading-overlay');
+        
+        // 進度條完成動畫
+        const progressBar = document.querySelector('#loading-overlay .progress-bar');
+        if (progressBar) {
+            progressBar.style.width = '100%';
+            
+            // 添加完成動畫
+            setTimeout(() => {
+                const loadingAnimation = document.querySelector('#loading-overlay .loading-animation');
+                if (loadingAnimation) {
+                    loadingAnimation.classList.add('completed');
+                    
+                    setTimeout(() => {
+                        loadingOverlay.style.display = 'none';
+                        
+                        // 重置進度條
+                        setTimeout(() => {
+                            progressBar.style.width = '0%';
+                            loadingAnimation.classList.remove('completed');
+                        }, 500);
+                    }, 600);
+                } else {
+                    loadingOverlay.style.display = 'none';
+                }
+            }, 300);
+        } else {
+            loadingOverlay.style.display = 'none';
+        }
+    }
+    
+    function simulateProgress() {
+        const progressBar = document.querySelector('#loading-overlay .progress-bar');
+        if (!progressBar) return;
+        
+        let width = 0;
+        const maxWidth = 90; // 最大進度為90%，留下10%在數據加載完成時填滿
+        
+        // 模擬不同階段的加載速度
+        const interval = setInterval(() => {
+            if (width >= maxWidth) {
+                clearInterval(interval);
+                return;
+            }
+            
+            if (width < 30) {
+                width += 1;
+            } else if (width < 60) {
+                width += 0.5;
+            } else {
+                width += 0.2;
+            }
+            
+            progressBar.style.width = width + '%';
+        }, 50);
     }
     
     // 顯示 API 相關訊息
@@ -210,50 +294,6 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         }
     }
-    
-    // 搜尋功能
-    document.getElementById('search-input').addEventListener('input', function() {
-        if (this.value.length >= 1) {
-            const keyword = this.value.trim().toLowerCase();
-            displayEntries(keyword);
-        } else if (this.value.length === 0) {
-            displayEntries('');
-        }
-    });
-    
-    document.getElementById('search-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const keyword = document.getElementById('search-input').value.trim().toLowerCase();
-        displayEntries(keyword);
-        
-        // 若在手機版，滾動到結果區
-        if(window.innerWidth < 768) {
-            document.querySelector('.card.mb-4:last-of-type').scrollIntoView({behavior: 'smooth'});
-        }
-    });
-    
-    // 學校標籤點擊
-    document.querySelectorAll('.school-tag').forEach(tag => {
-        tag.addEventListener('click', function() {
-            document.getElementById('search-input').value = this.textContent;
-            displayEntries(this.textContent.toLowerCase());
-            
-            // 若在手機版，滾動到結果區
-            if(window.innerWidth < 768) {
-                document.querySelector('.card.mb-4:last-of-type').scrollIntoView({behavior: 'smooth'});
-            }
-        });
-    });
-    
-    // 排序選項
-    document.querySelectorAll('.sort-option').forEach(option => {
-        option.addEventListener('click', function(e) {
-            e.preventDefault();
-            currentSort = this.dataset.sort;
-            document.getElementById('sort-dropdown').innerHTML = `<i class="bi bi-sort-down me-1"></i>${this.textContent}`;
-            displayEntries(document.getElementById('search-input').value.trim().toLowerCase());
-        });
-    });
     
     // 根據目前設定的排序顯示項目
     const originalDisplayEntries = function(searchKeyword = '') {
@@ -299,6 +339,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // 格式化分數顯示
                 const scoreDisplay = Object.entries(entry.scores).map(([subject, grade]) => {
+                    const subjectNames = {
+                        chinese: '國文',
+                        english: '英文',
+                        math: '數學',
+                        science: '自然',
+                        social: '社會'
+                    };
+                    
                     const subjectIcons = {
                         chinese: '<i class="bi bi-book"></i>',
                         english: '<i class="bi bi-translate"></i>',
@@ -307,13 +355,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         social: '<i class="bi bi-globe"></i>'
                     };
                     
-                    return `<span class="score-badge score-${grade}" title="${getSubjectName(subject)}">${subjectIcons[subject]} ${grade}</span>`;
+                    return `<span class="score-badge score-${grade}" title="${getSubjectName(subject)}">${subjectIcons[subject]} ${subjectNames[subject]}: ${grade}</span>`;
                 }).join('');
                 
                 // 添加作文級分顯示
                 const compositionDisplay = entry.composition ? 
                     `<span class="composition-badge composition-${entry.composition}" title="作文級分">
-                        <i class="bi bi-pencil-square"></i> ${entry.composition}級
+                        <i class="bi bi-pencil-square"></i> 作文: ${entry.composition}級
                     </span>` : '';
                 
                 cardRow.innerHTML = `
@@ -357,6 +405,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // 格式化分數顯示
                 const scoreDisplay = Object.entries(entry.scores).map(([subject, grade]) => {
+                    const subjectNames = {
+                        chinese: '國文',
+                        english: '英文',
+                        math: '數學',
+                        science: '自然',
+                        social: '社會'
+                    };
+                    
                     const subjectIcons = {
                         chinese: '<i class="bi bi-book"></i>',
                         english: '<i class="bi bi-translate"></i>',
@@ -365,13 +421,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         social: '<i class="bi bi-globe"></i>'
                     };
                     
-                    return `<span class="score-badge score-${grade}" title="${getSubjectName(subject)}">${subjectIcons[subject]} ${grade}</span>`;
+                    return `<span class="score-badge score-${grade}" title="${getSubjectName(subject)}">${subjectIcons[subject]} ${subjectNames[subject]}: ${grade}</span>`;
                 }).join('');
                 
                 // 添加作文級分顯示
                 const compositionDisplay = entry.composition ? 
                     `<span class="composition-badge composition-${entry.composition}" title="作文級分">
-                        <i class="bi bi-pencil-square"></i> ${entry.composition}級
+                        <i class="bi bi-pencil-square"></i> 作文: ${entry.composition}級
                     </span>` : '';
                 
                 row.innerHTML = `
@@ -824,6 +880,39 @@ document.addEventListener('DOMContentLoaded', function() {
         updateActiveSidebarItem();
     }
     
+    // 設置使用說明模態框
+    function setupHelpModal() {
+        // 監聽所有開啟使用說明的按鈕
+        document.querySelectorAll('.help-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const helpModal = new bootstrap.Modal(document.getElementById('helpModal'));
+                helpModal.show();
+            });
+        });
+        
+        // 設置引導步驟切換
+        const stepButtons = document.querySelectorAll('.guide-step-btn');
+        const stepContents = document.querySelectorAll('.guide-step-content');
+        
+        stepButtons.forEach((button, index) => {
+            button.addEventListener('click', () => {
+                // 移除所有活動類
+                stepButtons.forEach(btn => btn.classList.remove('active'));
+                stepContents.forEach(content => content.classList.remove('active'));
+                
+                // 添加當前活動類
+                button.classList.add('active');
+                stepContents[index].classList.add('active');
+                
+                // 動畫效果
+                stepContents[index].style.opacity = 0;
+                setTimeout(() => {
+                    stepContents[index].style.opacity = 1;
+                }, 50);
+            });
+        });
+    }
+    
     // 導航欄滾動效果
     window.addEventListener('scroll', function() {
         const navbar = document.querySelector('.navbar');
@@ -843,7 +932,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 滾動動畫效果
     initializeScrollAnimations();
     
-    // 設置背景圖案顏色
+    // 設置 背景圖案顏色
     setRandomBackgroundPattern();
 });
 
