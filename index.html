@@ -117,10 +117,11 @@
                                 <label for="year" class="form-label"><i class="bi bi-calendar-event me-1"></i>會考年份</label>
                                 <select class="form-select" id="year" required>
                                     <option value="" selected disabled>請選擇年份</option>
-                                    <option value="2023">112年 (2023)</option>
-                                    <option value="2022">111年 (2022)</option>
-                                    <option value="2021">110年 (2021)</option>
-                                    <option value="2020">109年 (2020)</option>
+                                    <option value="114">114年 (2025)</option>
+                                    <option value="113">113年 (2024)</option>
+                                    <option value="112">112年 (2023)</option>
+                                    <option value="111">111年 (2022)</option>
+                                    <option value="110">110年 (2021)</option>
                                 </select>
                             </div>
                             <div class="mb-3">
@@ -129,7 +130,9 @@
                             </div>
                             <div class="mb-3">
                                 <label for="department" class="form-label"><i class="bi bi-book me-1"></i>科系/班別</label>
-                                <input type="text" class="form-control" id="department" placeholder="例：普通班、資訊班、數理班...">
+                                <select class="form-select" id="department">
+                                    <option value="" selected disabled>請選擇科系或班別</option>
+                                </select>
                             </div>
                             <div class="mb-3">
                                 <label for="region" class="form-label"><i class="bi bi-geo-alt me-1"></i>所屬區域</label>
@@ -375,7 +378,7 @@
         </div>
 
         <footer class="text-center text-muted mb-3">
-            <p><i class="bi bi-heart-fill me-1 text-danger"></i> 2023 高中錄取分數分享平台 | 本平台僅供參考，錄取標準依各高中公告為準</p>
+            <p><i class="bi bi-heart-fill me-1 text-danger"></i> 2025 高中錄取分數分享平台 | 本平台僅供參考，錄取標準依各高中公告為準</p>
             <p class="mb-0">
                 <button class="btn btn-sm btn-outline-primary animated-btn help-btn">
                     <i class="bi bi-info-circle me-1"></i>使用說明
@@ -591,7 +594,7 @@
                                 </h2>
                                 <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
                                     <div class="accordion-body">
-                                        請填寫您所錄取的科系或班別名稱，例如「普通班」、「資訊班」、「數理資優班」等。若學校沒有特別區分，可填寫「普通班」或留空。
+                                        請填寫您所錄取的科系或班別名稱，例如「普通班」、「資訊班」、「數理班」等。若學校沒有特別區分，可填寫「普通班」或留空。
                                     </div>
                                 </div>
                             </div>
