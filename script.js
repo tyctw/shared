@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
             setupMobileOptimizations();
             setupSidebarMenu(); // 初始化側邊欄選單
             setupHelpModal(); // 初始化使用說明模態框
+            setupRegionFilter();
         });
     
     // 表單提交處理
@@ -50,6 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 year: document.getElementById('year').value,
                 school: document.getElementById('school').value,
                 department: document.getElementById('department').value || '普通班',
+                region: document.getElementById('region').value, 
                 scores: {
                     chinese: document.getElementById('chinese').value,
                     english: document.getElementById('english').value,
@@ -455,6 +457,16 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     
     function displayEntries(searchKeyword = '') {
+        // 檢查目前選中的區域
+        const activeRegion = document.querySelector('.region-btn.active');
+        const regionValue = activeRegion ? activeRegion.getAttribute('data-region') : 'all';
+        
+        // 如果不是"全部"區域，使用區域過濾
+        if (regionValue !== 'all') {
+            filterByRegion(regionValue);
+            return;
+        }
+        
         originalDisplayEntries(searchKeyword);
         
         // 添加項目進入動畫
@@ -934,6 +946,206 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 設置 背景圖案顏色
     setRandomBackgroundPattern();
+    
+    // 設置區域過濾功能
+    function setupRegionFilter() {
+        // 初始化區域過濾按鈕
+        const regionFilterContainer = document.getElementById('region-filter');
+        
+        // 設置全部區域按鈕狀態為活躍
+        document.getElementById('region-all').classList.add('active');
+        
+        // 監聽區域按鈕點擊事件
+        regionFilterContainer.addEventListener('click', function(e) {
+            // 檢查是否點擊了區域按鈕
+            if (e.target.classList.contains('region-btn') || e.target.parentElement.classList.contains('region-btn')) {
+                const button = e.target.classList.contains('region-btn') ? e.target : e.target.parentElement;
+                const region = button.getAttribute('data-region');
+                
+                // 更新按鈕狀態
+                document.querySelectorAll('.region-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                button.classList.add('active');
+                
+                // 根據選擇的區域過濾資料
+                filterByRegion(region);
+            }
+        });
+    }
+    
+    // 根據區域過濾資料
+    function filterByRegion(region) {
+        // 獲取搜尋關鍵字
+        const searchKeyword = document.getElementById('search-input').value.trim().toLowerCase();
+        
+        // 如果選擇的是"全部"
+        if (region === 'all') {
+            displayEntries(searchKeyword);
+            return;
+        }
+        
+        // 根據區域過濾資料
+        let filteredEntries = entries.filter(entry => {
+            // 檢查學校所屬區域
+            return entry.region === region && 
+                  (searchKeyword === '' || 
+                   entry.school.toLowerCase().includes(searchKeyword) || 
+                   entry.department.toLowerCase().includes(searchKeyword));
+        });
+        
+        // 顯示過濾後的資料
+        displayFilteredEntries(filteredEntries);
+    }
+    
+    // 顯示過濾後的資料
+    function displayFilteredEntries(filteredEntries) {
+        // 排序
+        filteredEntries = sortEntries(filteredEntries, currentSort);
+        
+        // 顯示結果
+        const resultsTable = document.getElementById('results-table');
+        resultsTable.innerHTML = '';
+        
+        if (filteredEntries.length === 0) {
+            resultsTable.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center py-5">
+                        <div class="d-flex flex-column align-items-center">
+                            <i class="bi bi-info-circle mb-3" style="font-size: 2rem; color: #6c757d;"></i>
+                            <p class="mb-0">尚無符合條件的資料，請嘗試其他區域或關鍵字，或分享你的資訊！</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        // 檢查是否需要使用移動版卡片布局
+        const useCardView = window.innerWidth < 576 && document.querySelector('.table-responsive').classList.contains('mobile-card-view');
+        
+        if (useCardView) {
+            // 移動版卡片布局
+            filteredEntries.forEach(entry => {
+                const cardRow = document.createElement('div');
+                cardRow.className = 'mobile-row';
+                
+                // 格式化分數顯示
+                const scoreDisplay = Object.entries(entry.scores).map(([subject, grade]) => {
+                    const subjectNames = {
+                        chinese: '國文',
+                        english: '英文',
+                        math: '數學',
+                        science: '自然',
+                        social: '社會'
+                    };
+                    
+                    const subjectIcons = {
+                        chinese: '<i class="bi bi-book"></i>',
+                        english: '<i class="bi bi-translate"></i>',
+                        math: '<i class="bi bi-calculator"></i>',
+                        science: '<i class="bi bi-moisture"></i>',
+                        social: '<i class="bi bi-globe"></i>'
+                    };
+                    
+                    return `<span class="score-badge score-${grade}" title="${getSubjectName(subject)}">${subjectIcons[subject]} ${subjectNames[subject]}: ${grade}</span>`;
+                }).join('');
+                
+                // 添加作文級分顯示
+                const compositionDisplay = entry.composition ? 
+                    `<span class="composition-badge composition-${entry.composition}" title="作文級分">
+                        <i class="bi bi-pencil-square"></i> 作文: ${entry.composition}級
+                    </span>` : '';
+                
+                cardRow.innerHTML = `
+                    <div class="mobile-cell">
+                        <span class="mobile-label">學校/科系:</span>
+                        <div class="fw-bold">${entry.school}</div>
+                        <div class="small text-muted">${entry.department}</div>
+                    </div>
+                    <div class="mobile-cell">
+                        <span class="mobile-label">會考成績:</span>
+                        <div>${scoreDisplay} ${compositionDisplay}</div>
+                    </div>
+                    <div class="mobile-cell">
+                        <span class="mobile-label">總分:</span>
+                        <div>
+                            <span class="fw-bold">積分: ${entry.total || "未提供"}</span>
+                            <span class="ms-2">積點: ${entry.totalPoints || "未提供"}</span>
+                        </div>
+                    </div>
+                    <div class="mobile-cell">
+                        <span class="mobile-label">年份:</span>
+                        <span>${entry.year}</span>
+                    </div>
+                    <div class="mobile-cell">
+                        <span class="mobile-label">說明:</span>
+                        <span>${entry.comment ? `<i class="bi bi-chat-text me-1"></i>${entry.comment}` : '-'}</span>
+                    </div>
+                `;
+                
+                resultsTable.appendChild(cardRow);
+                
+                // 新增項目的淡入效果
+                cardRow.style.opacity = '0';
+                cardRow.style.transition = 'opacity 0.5s';
+                setTimeout(() => cardRow.style.opacity = '1', 10);
+            });
+        } else {
+            // 桌面版表格布局
+            filteredEntries.forEach(entry => {
+                const row = document.createElement('tr');
+                
+                // 格式化分數顯示
+                const scoreDisplay = Object.entries(entry.scores).map(([subject, grade]) => {
+                    const subjectNames = {
+                        chinese: '國文',
+                        english: '英文',
+                        math: '數學',
+                        science: '自然',
+                        social: '社會'
+                    };
+                    
+                    const subjectIcons = {
+                        chinese: '<i class="bi bi-book"></i>',
+                        english: '<i class="bi bi-translate"></i>',
+                        math: '<i class="bi bi-calculator"></i>',
+                        science: '<i class="bi bi-moisture"></i>',
+                        social: '<i class="bi bi-globe"></i>'
+                    };
+                    
+                    return `<span class="score-badge score-${grade}" title="${getSubjectName(subject)}">${subjectIcons[subject]} ${subjectNames[subject]}: ${grade}</span>`;
+                }).join('');
+                
+                // 添加作文級分顯示
+                const compositionDisplay = entry.composition ? 
+                    `<span class="composition-badge composition-${entry.composition}" title="作文級分">
+                        <i class="bi bi-pencil-square"></i> 作文: ${entry.composition}級
+                    </span>` : '';
+                
+                row.innerHTML = `
+                    <td>
+                        <div class="fw-bold">${entry.school}</div>
+                        <div class="small text-muted">${entry.department}</div>
+                    </td>
+                    <td>${scoreDisplay} ${compositionDisplay}</td>
+                    <td>
+                        <div class="fw-bold">積分: ${entry.total || "未提供"}</div>
+                        <div>積點: ${entry.totalPoints || "未提供"}</div>
+                    </td>
+                    <td>${entry.year}</td>
+                    <td>${entry.comment ? `<i class="bi bi-chat-text me-1"></i>${entry.comment}` : '-'}</td>
+                `;
+                
+                resultsTable.appendChild(row);
+                
+                // 新增項目的淡入效果
+                row.style.opacity = '0';
+                row.style.transition = 'opacity 0.5s';
+                setTimeout(() => row.style.opacity = '1', 10);
+            });
+        }
+    }
 });
 
 // 初始化Bootstrap工具提示

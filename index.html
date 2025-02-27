@@ -117,11 +117,10 @@
                                 <label for="year" class="form-label"><i class="bi bi-calendar-event me-1"></i>會考年份</label>
                                 <select class="form-select" id="year" required>
                                     <option value="" selected disabled>請選擇年份</option>
-                                    <option value="114">114年 (2025)</option>
-                                    <option value="113">113年 (2024)</option>
-                                    <option value="112">112年 (2023)</option>
-                                    <option value="111">111年 (2022)</option>
-                                    <option value="110">110年 (2021)</option>
+                                    <option value="2023">112年 (2023)</option>
+                                    <option value="2022">111年 (2022)</option>
+                                    <option value="2021">110年 (2021)</option>
+                                    <option value="2020">109年 (2020)</option>
                                 </select>
                             </div>
                             <div class="mb-3">
@@ -131,6 +130,26 @@
                             <div class="mb-3">
                                 <label for="department" class="form-label"><i class="bi bi-book me-1"></i>科系/班別</label>
                                 <input type="text" class="form-control" id="department" placeholder="例：普通班、資訊班、數理班...">
+                            </div>
+                            <div class="mb-3">
+                                <label for="region" class="form-label"><i class="bi bi-geo-alt me-1"></i>所屬區域</label>
+                                <select class="form-select" id="region" required>
+                                    <option value="" selected disabled>請選擇區域</option>
+                                    <option value="基北區">基北區</option>
+                                    <option value="桃連區">桃連區</option>
+                                    <option value="竹苗區">竹苗區</option>
+                                    <option value="中投區">中投區</option>
+                                    <option value="雲林區">雲林區</option>
+                                    <option value="彰化區">彰化區</option>
+                                    <option value="嘉義區">嘉義區</option>
+                                    <option value="台南區">台南區</option>
+                                    <option value="高雄區">高雄區</option>
+                                    <option value="屏東區">屏東區</option>
+                                    <option value="宜蘭區">宜蘭區</option>
+                                    <option value="花蓮區">花蓮區</option>
+                                    <option value="澎湖區">澎湖區</option>
+                                    <option value="金門區">金門區</option>
+                                </select>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label"><i class="bi bi-award me-1"></i>會考成績</label>
@@ -253,6 +272,26 @@
                             </div>
                         </form>
                         <div class="mb-3">
+                            <label class="form-label"><i class="bi bi-geo-alt me-1"></i>選擇區域</label>
+                            <div class="region-filter" id="region-filter">
+                                <button class="region-btn active" data-region="all" id="region-all"><i class="bi bi-globe-asia-australia me-1"></i>全部區域</button>
+                                <button class="region-btn" data-region="基北區"><i class="bi bi-geo me-1"></i>基北區</button>
+                                <button class="region-btn" data-region="桃連區"><i class="bi bi-geo me-1"></i>桃連區</button>
+                                <button class="region-btn" data-region="竹苗區"><i class="bi bi-geo me-1"></i>竹苗區</button>
+                                <button class="region-btn" data-region="中投區"><i class="bi bi-geo me-1"></i>中投區</button>
+                                <button class="region-btn" data-region="雲林區"><i class="bi bi-geo me-1"></i>雲林區</button>
+                                <button class="region-btn" data-region="彰化區"><i class="bi bi-geo me-1"></i>彰化區</button>
+                                <button class="region-btn" data-region="嘉義區"><i class="bi bi-geo me-1"></i>嘉義區</button>
+                                <button class="region-btn" data-region="台南區"><i class="bi bi-geo me-1"></i>台南區</button>
+                                <button class="region-btn" data-region="高雄區"><i class="bi bi-geo me-1"></i>高雄區</button>
+                                <button class="region-btn" data-region="屏東區"><i class="bi bi-geo me-1"></i>屏東區</button>
+                                <button class="region-btn" data-region="宜蘭區"><i class="bi bi-geo me-1"></i>宜蘭區</button>
+                                <button class="region-btn" data-region="花蓮區"><i class="bi bi-geo me-1"></i>花蓮區</button>
+                                <button class="region-btn" data-region="澎湖區"><i class="bi bi-geo me-1"></i>澎湖區</button>
+                                <button class="region-btn" data-region="金門區"><i class="bi bi-geo me-1"></i>金門區</button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label"><i class="bi bi-bookmark-star me-1"></i>學校快速選擇</label>
                             <div class="d-flex flex-wrap gap-1">
                                 <button class="btn btn-sm btn-outline-secondary school-tag">建國中學</button>
@@ -336,7 +375,7 @@
         </div>
 
         <footer class="text-center text-muted mb-3">
-            <p><i class="bi bi-heart-fill me-1 text-danger"></i> 2025 高中錄取分數分享平台 | 本平台僅供參考，錄取標準依各高中公告為準</p>
+            <p><i class="bi bi-heart-fill me-1 text-danger"></i> 2023 高中錄取分數分享平台 | 本平台僅供參考，錄取標準依各高中公告為準</p>
             <p class="mb-0">
                 <button class="btn btn-sm btn-outline-primary animated-btn help-btn">
                     <i class="bi bi-info-circle me-1"></i>使用說明
@@ -432,6 +471,7 @@
                         <ol class="mt-3">
                             <li class="mb-3">前往「分享你的錄取資訊」區塊</li>
                             <li class="mb-3">填寫會考年份、錄取學校和科系班別</li>
+                            <li class="mb-3">選擇學校所屬區域（如基北區、中投區等）</li>
                             <li class="mb-3">選擇您的會考五科成績 (A++、A+、A、B++、B+、B、C)</li>
                             <li class="mb-3">選擇作文級分 (0-6級)</li>
                             <li class="mb-3">填寫總積分和總積點 (如果不確定，系統會自動估算)</li>
@@ -457,6 +497,7 @@
                             <li class="mb-2">使用搜尋框輸入學校或科系名稱關鍵字</li>
                             <li class="mb-2">點擊「搜尋」按鈕</li>
                             <li class="mb-2">或直接點擊快速選擇區的學校標籤</li>
+                            <li class="mb-2">您也可以通過選擇特定區域（如基北區、高雄區）來過濾學校</li>
                         </ol>
                         
                         <h6 class="mt-4 mb-3">排序結果：</h6>

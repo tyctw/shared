@@ -70,11 +70,12 @@ function getAllEntries() {
       year: row[2],
       school: row[3],
       department: row[4],
-      scores: JSON.parse(row[5]),
-      composition: row[6],
-      total: row[7],
-      totalPoints: row[8],
-      comment: row[9]
+      region: row[5], 
+      scores: JSON.parse(row[6]),
+      composition: row[7],
+      total: row[8],
+      totalPoints: row[9],
+      comment: row[10]
     };
     entries.push(entry);
   }
@@ -96,7 +97,8 @@ function addEntry(entry) {
     entry.year,
     entry.school,
     entry.department,
-    JSON.stringify(entry.scores),  // 分數以 JSON 格式存儲
+    entry.region, 
+    JSON.stringify(entry.scores),  
     entry.composition,
     entry.total,
     entry.totalPoints,
@@ -106,7 +108,7 @@ function addEntry(entry) {
   // 加入到試算表中
   sheet.appendRow(rowData);
   
-  return entry; // 返回新增的項目
+  return entry; 
 }
 
 // 取得或建立資料工作表
@@ -118,7 +120,7 @@ function getDataSheet() {
   if (!sheet) {
     sheet = ss.insertSheet('ScoreEntries');
     // 設置表頭
-    sheet.appendRow(['ID', '日期', '年份', '學校', '科系', '分數', '作文級分', '總積分', '總積點', '備註']);
+    sheet.appendRow(['ID', '日期', '年份', '學校', '科系', '區域', '分數', '作文級分', '總積分', '總積點', '備註']);
     // 凍結表頭
     sheet.setFrozenRows(1);
   }
