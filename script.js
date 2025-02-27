@@ -1243,130 +1243,180 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
+        // 對學校進行分組
+        let schoolGroups = {};
+        
+        filteredEntries.forEach(entry => {
+            if (!schoolGroups[entry.school]) {
+                schoolGroups[entry.school] = [];
+            }
+            schoolGroups[entry.school].push(entry);
+        });
+        
+        // 計數器用於交替顏色
+        let rowCount = 0;
+        
         // 檢查是否需要使用移動版卡片布局
         const useCardView = window.innerWidth < 576 && document.querySelector('.table-responsive').classList.contains('mobile-card-view');
         
         if (useCardView) {
             // 移動版卡片布局
-            filteredEntries.forEach(entry => {
-                const cardRow = document.createElement('div');
-                cardRow.className = 'mobile-row';
+            Object.keys(schoolGroups).forEach(schoolName => {
+                // 學校標題
+                const schoolHeader = document.createElement('div');
+                schoolHeader.className = 'school-divider px-3 py-2 bg-light text-primary fw-bold';
+                schoolHeader.innerHTML = `<i class="bi bi-building me-2"></i>${schoolName} <span class="badge bg-primary ms-2">${schoolGroups[schoolName].length}筆</span>`;
+                resultsTable.appendChild(schoolHeader);
                 
-                // 格式化分數顯示
-                const scoreDisplay = Object.entries(entry.scores).map(([subject, grade]) => {
-                    const subjectNames = {
-                        chinese: '國文',
-                        english: '英文',
-                        math: '數學',
-                        science: '自然',
-                        social: '社會'
-                    };
+                // 學校的條目
+                schoolGroups[schoolName].forEach(entry => {
+                    rowCount++;
+                    const cardRow = document.createElement('div');
+                    cardRow.className = 'mobile-row' + (rowCount % 2 === 0 ? ' even-row' : ' odd-row');
                     
-                    const subjectIcons = {
-                        chinese: '<i class="bi bi-book"></i>',
-                        english: '<i class="bi bi-translate"></i>',
-                        math: '<i class="bi bi-calculator"></i>',
-                        science: '<i class="bi bi-moisture"></i>',
-                        social: '<i class="bi bi-globe"></i>'
-                    };
+                    // 格式化分數顯示
+                    const scoreDisplay = Object.entries(entry.scores).map(([subject, grade]) => {
+                        const subjectNames = {
+                            chinese: '國文',
+                            english: '英文',
+                            math: '數學',
+                            science: '自然',
+                            social: '社會'
+                        };
+                        
+                        const subjectIcons = {
+                            chinese: '<i class="bi bi-book"></i>',
+                            english: '<i class="bi bi-translate"></i>',
+                            math: '<i class="bi bi-calculator"></i>',
+                            science: '<i class="bi bi-moisture"></i>',
+                            social: '<i class="bi bi-globe"></i>'
+                        };
+                        
+                        return `<span class="score-badge score-${grade}" title="${getSubjectName(subject)}">${subjectIcons[subject]} ${subjectNames[subject]}: ${grade}</span>`;
+                    }).join('');
                     
-                    return `<span class="score-badge score-${grade}" title="${getSubjectName(subject)}">${subjectIcons[subject]} ${subjectNames[subject]}: ${grade}</span>`;
-                }).join('');
-                
-                // 添加作文級分顯示
-                const compositionDisplay = entry.composition ? 
-                    `<span class="composition-badge composition-${entry.composition}" title="作文級分">
-                        <i class="bi bi-pencil-square"></i> 作文: ${entry.composition}級
-                    </span>` : '';
-                
-                cardRow.innerHTML = `
-                    <div class="mobile-cell">
-                        <span class="mobile-label">學校/科系:</span>
-                        <div class="fw-bold">${entry.school}</div>
-                        <div class="small text-muted">${entry.department}</div>
-                    </div>
-                    <div class="mobile-cell">
-                        <span class="mobile-label">會考成績:</span>
-                        <div>${scoreDisplay} ${compositionDisplay}</div>
-                    </div>
-                    <div class="mobile-cell">
-                        <span class="mobile-label">總分:</span>
-                        <div>
-                            <span class="fw-bold">積分: ${entry.total || "未提供"}</span>
-                            <span class="ms-2">積點: ${entry.totalPoints || "未提供"}</span>
+                    // 添加作文級分顯示
+                    const compositionDisplay = entry.composition ? 
+                        `<span class="composition-badge composition-${entry.composition}" title="作文級分">
+                            <i class="bi bi-pencil-square"></i> 作文: ${entry.composition}級
+                        </span>` : '';
+                    
+                    cardRow.innerHTML = `
+                        <div class="mobile-cell">
+                            <span class="mobile-label">科系:</span>
+                            <div class="fw-bold">${entry.department}</div>
                         </div>
-                    </div>
-                    <div class="mobile-cell">
-                        <span class="mobile-label">年份:</span>
-                        <span>${entry.year}</span>
-                    </div>
-                    <div class="mobile-cell">
-                        <span class="mobile-label">說明:</span>
-                        <span>${entry.comment ? `<i class="bi bi-chat-text me-1"></i>${entry.comment}` : '-'}</span>
-                    </div>
-                `;
-                
-                resultsTable.appendChild(cardRow);
-                
-                // 新增項目的淡入效果
-                cardRow.style.opacity = '0';
-                cardRow.style.transition = 'opacity 0.5s';
-                setTimeout(() => cardRow.style.opacity = '1', 10);
+                        <div class="mobile-cell">
+                            <span class="mobile-label">會考成績:</span>
+                            <div>${scoreDisplay} ${compositionDisplay}</div>
+                        </div>
+                        <div class="mobile-cell">
+                            <span class="mobile-label">總分:</span>
+                            <div>
+                                <span class="fw-bold">積分: ${entry.total || "未提供"}</span>
+                                <span class="ms-2">積點: ${entry.totalPoints || "未提供"}</span>
+                            </div>
+                        </div>
+                        <div class="mobile-cell">
+                            <span class="mobile-label">年份:</span>
+                            <span>${entry.year}</span>
+                        </div>
+                        <div class="mobile-cell">
+                            <span class="mobile-label">說明:</span>
+                            <span>${entry.comment ? `<i class="bi bi-chat-text me-1"></i>${entry.comment}` : '-'}</span>
+                        </div>
+                    `;
+                    
+                    resultsTable.appendChild(cardRow);
+                    
+                    // 新增項目的淡入效果
+                    cardRow.style.opacity = '0';
+                    cardRow.style.transition = 'opacity 0.5s';
+                    setTimeout(() => cardRow.style.opacity = '1', 10);
+                });
             });
         } else {
             // 桌面版表格布局
-            filteredEntries.forEach(entry => {
-                const row = document.createElement('tr');
-                
-                // 格式化分數顯示
-                const scoreDisplay = Object.entries(entry.scores).map(([subject, grade]) => {
-                    const subjectNames = {
-                        chinese: '國文',
-                        english: '英文',
-                        math: '數學',
-                        science: '自然',
-                        social: '社會'
-                    };
-                    
-                    const subjectIcons = {
-                        chinese: '<i class="bi bi-book"></i>',
-                        english: '<i class="bi bi-translate"></i>',
-                        math: '<i class="bi bi-calculator"></i>',
-                        science: '<i class="bi bi-moisture"></i>',
-                        social: '<i class="bi bi-globe"></i>'
-                    };
-                    
-                    return `<span class="score-badge score-${grade}" title="${getSubjectName(subject)}">${subjectIcons[subject]} ${subjectNames[subject]}: ${grade}</span>`;
-                }).join('');
-                
-                // 添加作文級分顯示
-                const compositionDisplay = entry.composition ? 
-                    `<span class="composition-badge composition-${entry.composition}" title="作文級分">
-                        <i class="bi bi-pencil-square"></i> 作文: ${entry.composition}級
-                    </span>` : '';
-                
-                row.innerHTML = `
-                    <td>
-                        <div class="fw-bold">${entry.school}</div>
-                        <div class="small text-muted">${entry.department}</div>
+            Object.keys(schoolGroups).forEach(schoolName => {
+                // 學校標題行
+                const headerRow = document.createElement('tr');
+                headerRow.className = 'school-header bg-light';
+                headerRow.innerHTML = `
+                    <td colspan="5" class="text-primary fw-bold">
+                        <i class="bi bi-building me-2"></i>${schoolName} 
+                        <span class="badge bg-primary ms-2">${schoolGroups[schoolName].length}筆</span>
                     </td>
-                    <td>${scoreDisplay} ${compositionDisplay}</td>
-                    <td>
-                        <div class="fw-bold">積分: ${entry.total || "未提供"}</div>
-                        <div>積點: ${entry.totalPoints || "未提供"}</div>
-                    </td>
-                    <td>${entry.year}</td>
-                    <td>${entry.comment ? `<i class="bi bi-chat-text me-1"></i>${entry.comment}` : '-'}</td>
                 `;
+                resultsTable.appendChild(headerRow);
                 
-                resultsTable.appendChild(row);
-                
-                // 新增項目的淡入效果
-                row.style.opacity = '0';
-                row.style.transition = 'opacity 0.5s';
-                setTimeout(() => row.style.opacity = '1', 10);
+                // 學校條目
+                schoolGroups[schoolName].forEach(entry => {
+                    rowCount++;
+                    const row = document.createElement('tr');
+                    row.className = rowCount % 2 === 0 ? 'even-row' : 'odd-row';
+                    
+                    // 格式化分數顯示
+                    const scoreDisplay = Object.entries(entry.scores).map(([subject, grade]) => {
+                        const subjectNames = {
+                            chinese: '國文',
+                            english: '英文',
+                            math: '數學',
+                            science: '自然',
+                            social: '社會'
+                        };
+                        
+                        const subjectIcons = {
+                            chinese: '<i class="bi bi-book"></i>',
+                            english: '<i class="bi bi-translate"></i>',
+                            math: '<i class="bi bi-calculator"></i>',
+                            science: '<i class="bi bi-moisture"></i>',
+                            social: '<i class="bi bi-globe"></i>'
+                        };
+                        
+                        return `<span class="score-badge score-${grade}" title="${getSubjectName(subject)}">${subjectIcons[subject]} ${subjectNames[subject]}: ${grade}</span>`;
+                    }).join('');
+                    
+                    // 添加作文級分顯示
+                    const compositionDisplay = entry.composition ? 
+                        `<span class="composition-badge composition-${entry.composition}" title="作文級分">
+                            <i class="bi bi-pencil-square"></i> 作文: ${entry.composition}級
+                        </span>` : '';
+                    
+                    row.innerHTML = `
+                        <td>
+                            <div class="fw-bold text-truncate">${entry.department}</div>
+                        </td>
+                        <td>${scoreDisplay} ${compositionDisplay}</td>
+                        <td>
+                            <div class="fw-bold">積分: ${entry.total || "未提供"}</div>
+                            <div>積點: ${entry.totalPoints || "未提供"}</div>
+                        </td>
+                        <td>${entry.year}</td>
+                        <td>${entry.comment ? `<i class="bi bi-chat-text me-1"></i>${entry.comment}` : '-'}</td>
+                    `;
+                    
+                    resultsTable.appendChild(row);
+                    
+                    // 新增項目的淡入效果
+                    row.style.opacity = '0';
+                    row.style.transition = 'opacity 0.5s';
+                    setTimeout(() => row.style.opacity = '1', 10);
+                });
             });
         }
+        
+        // 添加項目進入動畫
+        const tableItems = document.querySelectorAll('#results-table tr, #results-table .mobile-row, #results-table .school-divider, #results-table .school-header');
+        tableItems.forEach((item, index) => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(10px)';
+            item.style.transition = `opacity 0.5s ease, transform 0.5s ease ${index * 0.05}s`;
+            
+            setTimeout(() => {
+                item.style.opacity = '1';
+                item.style.transform = 'translateY(0)';
+            }, 50);
+        });
     }
     
     // 填入科系群組資料
