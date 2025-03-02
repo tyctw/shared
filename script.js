@@ -35,6 +35,9 @@ document.addEventListener('DOMContentLoaded', function() {
             setupAdvancedFilters(); // 設置進階篩選功能
             populateDepartmentGroups();
             setupSchoolTags(); // 設置學校快速選擇功能
+            enhanceVisualElements();
+            addParallaxEffect();
+            setupGradientAnimations();
         });
     
     // 表單提交處理
@@ -731,38 +734,40 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 根據五科成績和作文級分估算約略總分
     function calculateApproximateScore() {
-        const scoreValues = {
-            'A++': 7, 'A+': 6, 'A': 5, 'B++': 4, 'B+': 3, 'B': 2, 'C': 1
-        };
+        const compositionPoints = { 0: 0, 1: 1, 2: 2, 3: 2, 4: 3, 5: 3, 6: 3 };
+        const scorePoints = { 'A++': 6, 'A+': 6, 'A': 6, 'B++': 4, 'B+': 4, 'B': 4, 'C': 2 };
         
-        const chinese = scoreValues[document.getElementById('chinese').value] || 0;
-        const english = scoreValues[document.getElementById('english').value] || 0;
-        const math = scoreValues[document.getElementById('math').value] || 0;
-        const science = scoreValues[document.getElementById('science').value] || 0;
-        const social = scoreValues[document.getElementById('social').value] || 0;
+        const chinese = document.getElementById('chinese').value;
+        const english = document.getElementById('english').value;
+        const math = document.getElementById('math').value;
+        const science = document.getElementById('science').value;
+        const social = document.getElementById('social').value;
         const composition = parseInt(document.getElementById('composition').value) || 0;
         
-        // 簡單估算，實際錄取分數計算方式可能更複雜
-        const subjectScore = (chinese + english + math + science + social) * 3;
-        const compositionScore = composition * 2;
-        const approximateScore = subjectScore + compositionScore;
-        return approximateScore.toFixed(1);
+        // 使用新的計算公式
+        const totalPoints = scorePoints[chinese] + scorePoints[english] +
+                           scorePoints[math] + scorePoints[science] +
+                           scorePoints[social] + compositionPoints[composition];
+        
+        return totalPoints.toString();
     }
     
     // 計算總積點 (新增)
     function calculateTotalPoints() {
-        const pointValues = {
-            'A++': 7, 'A+': 6, 'A': 5, 'B++': 4, 'B+': 3, 'B': 2, 'C': 1
-        };
+        const creditPoints = { 'A++': 7, 'A+': 6, 'A': 5, 'B++': 4, 'B+': 3, 'B': 2, 'C': 1 };
         
-        const chinese = pointValues[document.getElementById('chinese').value] || 0;
-        const english = pointValues[document.getElementById('english').value] || 0;
-        const math = pointValues[document.getElementById('math').value] || 0;
-        const science = pointValues[document.getElementById('science').value] || 0;
-        const social = pointValues[document.getElementById('social').value] || 0;
+        const chinese = document.getElementById('chinese').value;
+        const english = document.getElementById('english').value;
+        const math = document.getElementById('math').value;
+        const science = document.getElementById('science').value;
+        const social = document.getElementById('social').value;
         
         // 總積點為五科的積點總和
-        return (chinese + english + math + science + social).toString();
+        const totalCredits = creditPoints[chinese] + creditPoints[english] +
+                            creditPoints[math] + creditPoints[science] +
+                            creditPoints[social];
+        
+        return totalCredits.toString();
     }
     
     // 自動更新總積分和總積點
@@ -1274,32 +1279,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     const cardRow = document.createElement('div');
                     cardRow.className = 'mobile-row' + (rowCount % 2 === 0 ? ' even-row' : ' odd-row');
                     
-                    // 格式化分數顯示
-                    const scoreDisplay = Object.entries(entry.scores).map(([subject, grade]) => {
-                        const subjectNames = {
-                            chinese: '國文',
-                            english: '英文',
-                            math: '數學',
-                            science: '自然',
-                            social: '社會'
-                        };
-                        
-                        const subjectIcons = {
-                            chinese: '<i class="bi bi-book"></i>',
-                            english: '<i class="bi bi-translate"></i>',
-                            math: '<i class="bi bi-calculator"></i>',
-                            science: '<i class="bi bi-moisture"></i>',
-                            social: '<i class="bi bi-globe"></i>'
-                        };
-                        
-                        return `<span class="score-badge score-${grade}" title="${getSubjectName(subject)}">${subjectIcons[subject]} ${subjectNames[subject]}: ${grade}</span>`;
-                    }).join('');
-                    
-                    // 添加作文級分顯示
-                    const compositionDisplay = entry.composition ? 
-                        `<span class="composition-badge composition-${entry.composition}" title="作文級分">
-                            <i class="bi bi-pencil-square"></i> 作文: ${entry.composition}級
-                        </span>` : '';
+                    // 使用新的格式化函數
+                    const scoreDisplay = formatScoreDisplay(entry.scores, entry.composition);
                     
                     cardRow.innerHTML = `
                         <div class="mobile-cell">
@@ -1308,7 +1289,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                         <div class="mobile-cell">
                             <span class="mobile-label">會考成績:</span>
-                            <div>${scoreDisplay} ${compositionDisplay}</div>
+                            <div>${scoreDisplay}</div>
                         </div>
                         <div class="mobile-cell">
                             <span class="mobile-label">總分:</span>
@@ -1355,38 +1336,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     const row = document.createElement('tr');
                     row.className = rowCount % 2 === 0 ? 'even-row' : 'odd-row';
                     
-                    // 格式化分數顯示
-                    const scoreDisplay = Object.entries(entry.scores).map(([subject, grade]) => {
-                        const subjectNames = {
-                            chinese: '國文',
-                            english: '英文',
-                            math: '數學',
-                            science: '自然',
-                            social: '社會'
-                        };
-                        
-                        const subjectIcons = {
-                            chinese: '<i class="bi bi-book"></i>',
-                            english: '<i class="bi bi-translate"></i>',
-                            math: '<i class="bi bi-calculator"></i>',
-                            science: '<i class="bi bi-moisture"></i>',
-                            social: '<i class="bi bi-globe"></i>'
-                        };
-                        
-                        return `<span class="score-badge score-${grade}" title="${getSubjectName(subject)}">${subjectIcons[subject]} ${subjectNames[subject]}: ${grade}</span>`;
-                    }).join('');
-                    
-                    // 添加作文級分顯示
-                    const compositionDisplay = entry.composition ? 
-                        `<span class="composition-badge composition-${entry.composition}" title="作文級分">
-                            <i class="bi bi-pencil-square"></i> 作文: ${entry.composition}級
-                        </span>` : '';
+                    // 使用新的格式化函數
+                    const scoreDisplay = formatScoreDisplay(entry.scores, entry.composition);
                     
                     row.innerHTML = `
                         <td>
                             <div class="fw-bold text-truncate">${entry.department}</div>
                         </td>
-                        <td>${scoreDisplay} ${compositionDisplay}</td>
+                        <td>${scoreDisplay}</td>
                         <td>
                             <div class="fw-bold">積分: ${entry.total || "未提供"}</div>
                             <div>積點: ${entry.totalPoints || "未提供"}</div>
@@ -1417,6 +1374,77 @@ document.addEventListener('DOMContentLoaded', function() {
                 item.style.transform = 'translateY(0)';
             }, 50);
         });
+    }
+    
+    // 新增：更好地顯示成績的函數
+    function formatScoreDisplay(scores, composition) {
+        // 將成績按科目分組顯示
+        const scoreGroups = {
+            languages: {
+                chinese: scores.chinese,
+                english: scores.english
+            },
+            math: {
+                math: scores.math
+            },
+            sciences: {
+                science: scores.science,
+                social: scores.social
+            }
+        };
+        
+        // 科目顯示名稱和圖標
+        const subjectNames = {
+            chinese: '國文',
+            english: '英文',
+            math: '數學',
+            science: '自然',
+            social: '社會'
+        };
+        
+        const subjectIcons = {
+            chinese: '<i class="bi bi-book"></i>',
+            english: '<i class="bi bi-translate"></i>',
+            math: '<i class="bi bi-calculator"></i>',
+            science: '<i class="bi bi-moisture"></i>',
+            social: '<i class="bi bi-globe"></i>'
+        };
+        
+        // 生成HTML
+        let html = '<div class="score-display">';
+        
+        // 語文類
+        html += '<div class="score-group languages">';
+        Object.entries(scoreGroups.languages).forEach(([subject, grade]) => {
+            html += `<span class="score-badge score-${grade}" title="${subjectNames[subject]}">${subjectIcons[subject]} ${subjectNames[subject]}: ${grade}</span>`;
+        });
+        html += '</div>';
+        
+        // 數學
+        html += '<div class="score-group math">';
+        Object.entries(scoreGroups.math).forEach(([subject, grade]) => {
+            html += `<span class="score-badge score-${grade}" title="${subjectNames[subject]}">${subjectIcons[subject]} ${subjectNames[subject]}: ${grade}</span>`;
+        });
+        html += '</div>';
+        
+        // 自然社會
+        html += '<div class="score-group sciences">';
+        Object.entries(scoreGroups.sciences).forEach(([subject, grade]) => {
+            html += `<span class="score-badge score-${grade}" title="${subjectNames[subject]}">${subjectIcons[subject]} ${subjectNames[subject]}: ${grade}</span>`;
+        });
+        html += '</div>';
+        
+        // 作文
+        if (composition) {
+            html += `<div class="score-group composition">
+                <span class="composition-badge composition-${composition}" title="作文級分">
+                    <i class="bi bi-pencil-square"></i> 作文: ${composition}級
+                </span>
+            </div>`;
+        }
+        
+        html += '</div>';
+        return html;
     }
     
     // 填入科系群組資料
@@ -1565,6 +1593,50 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 平滑滾動到結果區域
                 document.getElementById('results-section').scrollIntoView({behavior: 'smooth'});
             });
+        });
+    }
+    
+    function enhanceVisualElements() {
+        // Add floating animation to key elements
+        document.querySelectorAll('header h1, .card-header h3').forEach(element => {
+            element.classList.add('floating-element');
+        });
+        
+        // Add 3D card effect
+        document.querySelectorAll('.card').forEach(card => {
+            card.classList.add('card-3d');
+        });
+        
+        // Add pulse effect to submit buttons
+        document.querySelectorAll('button[type="submit"]').forEach(button => {
+            button.classList.add('pulse-effect');
+        });
+        
+        // Enhance badges with glass morphism
+        document.querySelectorAll('.score-badge, .composition-badge').forEach(badge => {
+            badge.style.backdropFilter = 'blur(4px)';
+            badge.style.boxShadow = '0 3px 10px rgba(0, 0, 0, 0.15)';
+        });
+    }
+    
+    function addParallaxEffect() {
+        document.addEventListener('mousemove', function(e) {
+            const moveX = (e.clientX - window.innerWidth / 2) * 0.01;
+            const moveY = (e.clientY - window.innerHeight / 2) * 0.01;
+            
+            document.body.style.backgroundPositionX = moveX + 'px';
+            document.body.style.backgroundPositionY = moveY + 'px';
+        });
+    }
+    
+    function setupGradientAnimations() {
+        // Create dynamic gradient transitions for card headers
+        document.querySelectorAll('.gradient-card-header, .success-gradient-header, .info-gradient-header, .warning-gradient-header').forEach(header => {
+            let hue = 0;
+            setInterval(() => {
+                hue = (hue + 1) % 360;
+                header.style.filter = `hue-rotate(${hue}deg)`;
+            }, 100);
         });
     }
 });
