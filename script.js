@@ -1,10 +1,16 @@
 document.addEventListener('DOMContentLoaded', function() {
     // 後端 API 網址 (Apps Script 發布的網址)
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwCjELScYntx661Zw_1sV8SzR7XrbS1f2myK0TyTCFxP8IMENAgG68JmOgJ3mFoG9E5/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzfw2lbBojiknx4vSaM73yt_9L9SZPAnyKbrWBowKupAYFV-pfOgaQe4WpjvqrDxzcu/exec';
     
     // 資料儲存
     let entries = [];
     let currentSort = 'newest';
+    
+    // 分頁相關變數
+    let currentPage = 1;
+    let pageSize = 10;
+    let totalPages = 1;
+    let displayedEntries = [];
     
     // 過濾器狀態
     let activeFilters = {
@@ -22,6 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(() => {
             updateStatistics();
             displayEntries();
+            setupPagination(); // 設置分頁功能
         })
         .catch(error => {
             showApiMessage('error', '無法載入資料: ' + error.message);
@@ -149,47 +156,23 @@ document.addEventListener('DOMContentLoaded', function() {
     // 獲取所有項目
     async function fetchEntries() {
         try {
-            const response = await fetch(`${API_URL}?action=getEntries`);
+            const response = await fetch(`${API_URL}?action=getEntries&page=${currentPage}&pageSize=${pageSize}`);
             if (!response.ok) throw new Error('網路回應不正常');
             
             const data = await response.json();
             if (data.success) {
                 entries = data.entries;
+                
+                // 更新分頁資訊
+                totalPages = data.totalPages || Math.ceil(data.total / pageSize) || 1;
+                displayedEntries = data.entries;
+                
                 return data.entries;
             } else {
                 throw new Error(data.message || '獲取資料失敗');
             }
         } catch (error) {
             console.error('獲取資料錯誤:', error);
-            throw error;
-        }
-    }
-    
-    // 新增項目 - 這個方法不再使用，改用直接fetch
-    async function addEntry(entry) {
-        try {
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    action: 'addEntry',
-                    entry: entry
-                }),
-                mode: 'cors'
-            });
-            
-            if (!response.ok) throw new Error('網路回應不正常');
-            
-            const data = await response.json();
-            if (data.success) {
-                return data;
-            } else {
-                throw new Error(data.message || '新增資料失敗');
-            }
-        } catch (error) {
-            console.error('新增資料錯誤:', error);
             throw error;
         }
     }
@@ -329,25 +312,27 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // 根據目前設定的排序顯示項目
-    const originalDisplayEntries = function(searchKeyword = '') {
-        let filteredEntries = entries;
+    function displayEntries() {
+        // 檢查目前選中的區域
+        const activeRegion = document.querySelector('.region-btn.active');
+        const regionValue = activeRegion ? activeRegion.getAttribute('data-region') : 'all';
         
-        // 搜尋過濾
-        if (searchKeyword) {
-            filteredEntries = entries.filter(entry => {
-                return entry.school.toLowerCase().includes(searchKeyword) || 
-                       entry.department.toLowerCase().includes(searchKeyword);
-            });
+        // 如果不是"全部"區域，使用區域過濾
+        if (regionValue !== 'all') {
+            filterByRegion(regionValue);
+            return;
         }
         
-        // 排序
-        filteredEntries = sortEntries(filteredEntries, currentSort);
+        // 顯示分頁後的結果
+        const start = (currentPage - 1) * pageSize;
+        const end = start + pageSize;
+        const paginatedEntries = displayedEntries.slice(start, end);
         
         // 顯示結果
         const resultsTable = document.getElementById('results-table');
         resultsTable.innerHTML = '';
         
-        if (filteredEntries.length === 0) {
+        if (paginatedEntries.length === 0) {
             resultsTable.innerHTML = `
                 <tr>
                     <td colspan="6" class="text-center py-5">
@@ -361,155 +346,178 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
+        // 對學校進行分組
+        let schoolGroups = {};
+        
+        paginatedEntries.forEach(entry => {
+            if (!schoolGroups[entry.school]) {
+                schoolGroups[entry.school] = [];
+            }
+            schoolGroups[entry.school].push(entry);
+        });
+        
+        // 計數器用於交替顏色
+        let rowCount = 0;
+        
         // 檢查是否需要使用移動版卡片布局
         const useCardView = window.innerWidth < 576 && document.querySelector('.table-responsive').classList.contains('mobile-card-view');
         
         if (useCardView) {
             // 移動版卡片布局
-            filteredEntries.forEach(entry => {
-                const cardRow = document.createElement('div');
-                cardRow.className = 'mobile-row';
+            Object.keys(schoolGroups).forEach(schoolName => {
+                // 學校標題
+                const schoolHeader = document.createElement('div');
+                schoolHeader.className = 'school-divider px-3 py-2 bg-light text-primary fw-bold';
+                schoolHeader.innerHTML = `<i class="bi bi-building me-2"></i>${schoolName} <span class="badge bg-primary ms-2">${schoolGroups[schoolName].length}筆</span>`;
+                resultsTable.appendChild(schoolHeader);
                 
-                // 格式化分數顯示
-                const scoreDisplay = Object.entries(entry.scores).map(([subject, grade]) => {
-                    const subjectNames = {
-                        chinese: '國文',
-                        english: '英文',
-                        math: '數學',
-                        science: '自然',
-                        social: '社會'
-                    };
+                // 學校的條目
+                schoolGroups[schoolName].forEach(entry => {
+                    rowCount++;
+                    const cardRow = document.createElement('div');
+                    cardRow.className = 'mobile-row' + (rowCount % 2 === 0 ? ' even-row' : ' odd-row');
                     
-                    const subjectIcons = {
-                        chinese: '<i class="bi bi-book"></i>',
-                        english: '<i class="bi bi-translate"></i>',
-                        math: '<i class="bi bi-calculator"></i>',
-                        science: '<i class="bi bi-moisture"></i>',
-                        social: '<i class="bi bi-globe"></i>'
-                    };
+                    // 格式化分數顯示
+                    const scoreDisplay = Object.entries(entry.scores).map(([subject, grade]) => {
+                        const subjectNames = {
+                            chinese: '國文',
+                            english: '英文',
+                            math: '數學',
+                            science: '自然',
+                            social: '社會'
+                        };
+                        
+                        const subjectIcons = {
+                            chinese: '<i class="bi bi-book"></i>',
+                            english: '<i class="bi bi-translate"></i>',
+                            math: '<i class="bi bi-calculator"></i>',
+                            science: '<i class="bi bi-moisture"></i>',
+                            social: '<i class="bi bi-globe"></i>'
+                        };
+                        
+                        return `<span class="score-badge score-${grade}" title="${getSubjectName(subject)}">${subjectIcons[subject]} ${subjectNames[subject]}: ${grade}</span>`;
+                    }).join('');
                     
-                    return `<span class="score-badge score-${grade}" title="${getSubjectName(subject)}">${subjectIcons[subject]} ${subjectNames[subject]}: ${grade}</span>`;
-                }).join('');
-                
-                // 添加作文級分顯示
-                const compositionDisplay = entry.composition ? 
-                    `<span class="composition-badge composition-${entry.composition}" title="作文級分">
-                        <i class="bi bi-pencil-square"></i> 作文: ${entry.composition}級
-                    </span>` : '';
-                
-                cardRow.innerHTML = `
-                    <div class="mobile-cell">
-                        <span class="mobile-label">學校/科系:</span>
-                        <div class="fw-bold">${entry.school}</div>
-                        <div class="small text-muted">${entry.department}</div>
-                    </div>
-                    <div class="mobile-cell">
-                        <span class="mobile-label">會考成績:</span>
-                        <div>${scoreDisplay} ${compositionDisplay}</div>
-                    </div>
-                    <div class="mobile-cell">
-                        <span class="mobile-label">總分:</span>
-                        <div>
-                            <span class="fw-bold">積分: ${entry.total || "未提供"}</span>
-                            <span class="ms-2">積點: ${entry.totalPoints || "未提供"}</span>
+                    // 添加作文級分顯示
+                    const compositionDisplay = entry.composition ? 
+                        `<span class="composition-badge composition-${entry.composition}" title="作文級分">
+                            <i class="bi bi-pencil-square"></i> 作文: ${entry.composition}級
+                        </span>` : '';
+                    
+                    cardRow.innerHTML = `
+                        <div class="mobile-cell">
+                            <span class="mobile-label">科系:</span>
+                            <div class="fw-bold">${entry.department}</div>
                         </div>
-                    </div>
-                    <div class="mobile-cell">
-                        <span class="mobile-label">年份:</span>
-                        <span>${entry.year}</span>
-                    </div>
-                    <div class="mobile-cell">
-                        <span class="mobile-label">說明:</span>
-                        <span>${entry.comment ? `<i class="bi bi-chat-text me-1"></i>${entry.comment}` : '-'}</span>
-                    </div>
-                `;
-                
-                resultsTable.appendChild(cardRow);
-                
-                // 新增項目的淡入效果
-                cardRow.style.opacity = '0';
-                cardRow.style.transition = 'opacity 0.5s';
-                setTimeout(() => cardRow.style.opacity = '1', 10);
+                        <div class="mobile-cell">
+                            <span class="mobile-label">會考成績:</span>
+                            <div>${scoreDisplay} ${compositionDisplay}</div>
+                        </div>
+                        <div class="mobile-cell">
+                            <span class="mobile-label">總分:</span>
+                            <div>
+                                <span class="fw-bold">積分: ${entry.total || "未提供"}</span>
+                                <span class="ms-2">積點: ${entry.totalPoints || "未提供"}</span>
+                            </div>
+                        </div>
+                        <div class="mobile-cell">
+                            <span class="mobile-label">年份:</span>
+                            <span>${entry.year}</span>
+                        </div>
+                        <div class="mobile-cell">
+                            <span class="mobile-label">說明:</span>
+                            <span>${entry.comment ? `<i class="bi bi-chat-text me-1"></i>${entry.comment}` : '-'}</span>
+                        </div>
+                    `;
+                    
+                    resultsTable.appendChild(cardRow);
+                    
+                    // 新增項目的淡入效果
+                    cardRow.style.opacity = '0';
+                    cardRow.style.transition = 'opacity 0.5s';
+                    setTimeout(() => cardRow.style.opacity = '1', 10);
+                });
             });
         } else {
             // 桌面版表格布局
-            filteredEntries.forEach(entry => {
-                const row = document.createElement('tr');
-                
-                // 格式化分數顯示
-                const scoreDisplay = Object.entries(entry.scores).map(([subject, grade]) => {
-                    const subjectNames = {
-                        chinese: '國文',
-                        english: '英文',
-                        math: '數學',
-                        science: '自然',
-                        social: '社會'
-                    };
-                    
-                    const subjectIcons = {
-                        chinese: '<i class="bi bi-book"></i>',
-                        english: '<i class="bi bi-translate"></i>',
-                        math: '<i class="bi bi-calculator"></i>',
-                        science: '<i class="bi bi-moisture"></i>',
-                        social: '<i class="bi bi-globe"></i>'
-                    };
-                    
-                    return `<span class="score-badge score-${grade}" title="${getSubjectName(subject)}">${subjectIcons[subject]} ${subjectNames[subject]}: ${grade}</span>`;
-                }).join('');
-                
-                // 添加作文級分顯示
-                const compositionDisplay = entry.composition ? 
-                    `<span class="composition-badge composition-${entry.composition}" title="作文級分">
-                        <i class="bi bi-pencil-square"></i> 作文: ${entry.composition}級
-                    </span>` : '';
-                
-                row.innerHTML = `
-                    <td>
-                        <div class="fw-bold">${entry.school}</div>
-                        <div class="small text-muted">${entry.department}</div>
+            Object.keys(schoolGroups).forEach(schoolName => {
+                // 學校標題行
+                const headerRow = document.createElement('tr');
+                headerRow.className = 'school-header bg-light';
+                headerRow.innerHTML = `
+                    <td colspan="5" class="text-primary fw-bold">
+                        <i class="bi bi-building me-2"></i>${schoolName} 
+                        <span class="badge bg-primary ms-2">${schoolGroups[schoolName].length}筆</span>
                     </td>
-                    <td>${scoreDisplay} ${compositionDisplay}</td>
-                    <td>
-                        <div class="fw-bold">積分: ${entry.total || "未提供"}</div>
-                        <div>積點: ${entry.totalPoints || "未提供"}</div>
-                    </td>
-                    <td>${entry.year}</td>
-                    <td>${entry.comment ? `<i class="bi bi-chat-text me-1"></i>${entry.comment}` : '-'}</td>
                 `;
+                resultsTable.appendChild(headerRow);
                 
-                resultsTable.appendChild(row);
-                
-                // 新增項目的淡入效果
-                row.style.opacity = '0';
-                row.style.transition = 'opacity 0.5s';
-                setTimeout(() => row.style.opacity = '1', 10);
+                // 學校條目
+                schoolGroups[schoolName].forEach(entry => {
+                    rowCount++;
+                    const row = document.createElement('tr');
+                    row.className = rowCount % 2 === 0 ? 'even-row' : 'odd-row';
+                    
+                    // 格式化分數顯示
+                    const scoreDisplay = Object.entries(entry.scores).map(([subject, grade]) => {
+                        const subjectNames = {
+                            chinese: '國文',
+                            english: '英文',
+                            math: '數學',
+                            science: '自然',
+                            social: '社會'
+                        };
+                        
+                        const subjectIcons = {
+                            chinese: '<i class="bi bi-book"></i>',
+                            english: '<i class="bi bi-translate"></i>',
+                            math: '<i class="bi bi-calculator"></i>',
+                            science: '<i class="bi bi-moisture"></i>',
+                            social: '<i class="bi bi-globe"></i>'
+                        };
+                        
+                        return `<span class="score-badge score-${grade}" title="${getSubjectName(subject)}">${subjectIcons[subject]} ${subjectNames[subject]}: ${grade}</span>`;
+                    }).join('');
+                    
+                    // 添加作文級分顯示
+                    const compositionDisplay = entry.composition ? 
+                        `<span class="composition-badge composition-${entry.composition}" title="作文級分">
+                            <i class="bi bi-pencil-square"></i> 作文: ${entry.composition}級
+                        </span>` : '';
+                    
+                    row.innerHTML = `
+                        <td>
+                            <div class="fw-bold text-truncate">${entry.department}</div>
+                        </td>
+                        <td>${scoreDisplay} ${compositionDisplay}</td>
+                        <td>
+                            <div class="fw-bold">積分: ${entry.total || "未提供"}</div>
+                            <div>積點: ${entry.totalPoints || "未提供"}</div>
+                        </td>
+                        <td>${entry.year}</td>
+                        <td>${entry.comment ? `<i class="bi bi-chat-text me-1"></i>${entry.comment}` : '-'}</td>
+                    `;
+                    
+                    resultsTable.appendChild(row);
+                    
+                    // 新增項目的淡入效果
+                    row.style.opacity = '0';
+                    row.style.transition = 'opacity 0.5s';
+                    setTimeout(() => row.style.opacity = '1', 10);
+                });
             });
         }
-    };
-    
-    function displayEntries(searchKeyword = '') {
-        // 檢查目前選中的區域
-        const activeRegion = document.querySelector('.region-btn.active');
-        const regionValue = activeRegion ? activeRegion.getAttribute('data-region') : 'all';
-        
-        // 如果不是"全部"區域，使用區域過濾
-        if (regionValue !== 'all') {
-            filterByRegion(regionValue);
-            return;
-        }
-        
-        originalDisplayEntries(searchKeyword);
         
         // 添加項目進入動畫
-        const tableRows = document.querySelectorAll('#results-table tr, #results-table .mobile-row');
-        tableRows.forEach((row, index) => {
-            row.style.opacity = '0';
-            row.style.transform = 'translateY(20px)';
-            row.style.transition = `opacity 0.5s ease, transform 0.5s ease ${index * 0.05}s`;
+        const tableItems = document.querySelectorAll('#results-table tr, #results-table .mobile-row, #results-table .school-divider, #results-table .school-header');
+        tableItems.forEach((item, index) => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(10px)';
+            item.style.transition = `opacity 0.5s ease, transform 0.5s ease ${index * 0.05}s`;
             
             setTimeout(() => {
-                row.style.opacity = '1';
-                row.style.transform = 'translateY(0)';
+                item.style.opacity = '1';
+                item.style.transform = 'translateY(0)';
             }, 50);
         });
     }
@@ -795,7 +803,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 tableResponsive.classList.remove('mobile-card-view');
             }
             // 重新顯示條目以適應新的佈局
-            displayEntries(document.getElementById('search-input').value.trim().toLowerCase());
+            displayEntries();
         }
         
         // 初始檢查
@@ -1190,6 +1198,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // 顯示過濾後的結果
         displayFilteredEntries(filteredEntries);
+        
+        // 更新分頁信息（當過濾時，用戶看到的是過濾後的結果集的分頁）
+        displayedEntries = filteredEntries;
+        totalPages = Math.ceil(filteredEntries.length / pageSize) || 1;
+        currentPage = 1;
+        updatePaginationControls();
         
         // 更新過濾結果計數
         updateFilterResultCount(filteredEntries.length);
@@ -1638,5 +1652,147 @@ document.addEventListener('DOMContentLoaded', function() {
                 header.style.filter = `hue-rotate(${hue}deg)`;
             }, 100);
         });
+    }
+    
+    // 設置分頁功能
+    function setupPagination() {
+        updatePaginationControls();
+        
+        // 監聽頁數按鈕點擊
+        document.querySelector('.pagination').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // 檢查是否點擊了頁數按鈕
+            if (e.target.hasAttribute('data-page')) {
+                const page = parseInt(e.target.getAttribute('data-page'));
+                if (page !== currentPage) {
+                    goToPage(page);
+                }
+            }
+            // 檢查是否點擊了上一頁
+            else if (e.target.closest('#prevPage') && !document.getElementById('prevPage').classList.contains('disabled')) {
+                goToPage(currentPage - 1);
+            }
+            // 檢查是否點擊了下一頁
+            else if (e.target.closest('#nextPage') && !document.getElementById('nextPage').classList.contains('disabled')) {
+                goToPage(currentPage + 1);
+            }
+        });
+        
+        // 監聽每頁顯示數量變更
+        document.querySelectorAll('.page-size-option').forEach(option => {
+            option.addEventListener('click', function(e) {
+                e.preventDefault();
+                const newPageSize = parseInt(this.getAttribute('data-size'));
+                if (newPageSize !== pageSize) {
+                    pageSize = newPageSize;
+                    document.getElementById('currentPageSize').textContent = newPageSize;
+                    goToPage(1); // 切換到第一頁
+                }
+            });
+        });
+    }
+    
+    // 更新分頁控制項
+    function updatePaginationControls() {
+        // 更新頁數信息
+        document.getElementById('currentPage').textContent = currentPage;
+        document.getElementById('totalPages').textContent = totalPages;
+        
+        // 更新分頁按鈕
+        const paginationContainer = document.querySelector('.pagination');
+        paginationContainer.innerHTML = '';
+        
+        // 上一頁按鈕
+        const prevPageLi = document.createElement('li');
+        prevPageLi.id = 'prevPage';
+        prevPageLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+        prevPageLi.innerHTML = `
+            <a class="page-link" href="#" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        `;
+        paginationContainer.appendChild(prevPageLi);
+        
+        // 生成頁數按鈕
+        const maxVisiblePages = 5; // 最大可見頁數
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+        
+        // 調整起始頁，確保顯示足夠頁數
+        if (endPage - startPage + 1 < maxVisiblePages && startPage > 1) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+        
+        // 如果頁數太多，顯示第一頁、省略號
+        if (startPage > 1) {
+            const firstPageLi = document.createElement('li');
+            firstPageLi.className = 'page-item';
+            firstPageLi.innerHTML = `<a class="page-link" href="#" data-page="1">1</a>`;
+            paginationContainer.appendChild(firstPageLi);
+            
+            if (startPage > 2) {
+                const ellipsisLi = document.createElement('li');
+                ellipsisLi.className = 'page-item disabled';
+                ellipsisLi.innerHTML = `<a class="page-link" href="#">...</a>`;
+                paginationContainer.appendChild(ellipsisLi);
+            }
+        }
+        
+        // 顯示頁數按鈕
+        for (let i = startPage; i <= endPage; i++) {
+            const pageLi = document.createElement('li');
+            pageLi.className = `page-item ${i === currentPage ? 'active' : ''}`;
+            pageLi.innerHTML = `<a class="page-link" href="#" data-page="${i}">${i}</a>`;
+            paginationContainer.appendChild(pageLi);
+        }
+        
+        // 如果頁數太多，顯示省略號、最後頁
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                const ellipsisLi = document.createElement('li');
+                ellipsisLi.className = 'page-item disabled';
+                ellipsisLi.innerHTML = `<a class="page-link" href="#">...</a>`;
+                paginationContainer.appendChild(ellipsisLi);
+            }
+            
+            const lastPageLi = document.createElement('li');
+            lastPageLi.className = 'page-item';
+            lastPageLi.innerHTML = `<a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a>`;
+            paginationContainer.appendChild(lastPageLi);
+        }
+        
+        // 下一頁按鈕
+        const nextPageLi = document.createElement('li');
+        nextPageLi.id = 'nextPage';
+        nextPageLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+        nextPageLi.innerHTML = `
+            <a class="page-link" href="#" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        `;
+        paginationContainer.appendChild(nextPageLi);
+    }
+    
+    // 跳轉到指定頁數
+    function goToPage(page) {
+        showLoading();
+        currentPage = page;
+        
+        // 獲取指定頁的數據
+        fetchEntries()
+            .then(() => {
+                displayEntries();
+                updatePaginationControls();
+                
+                // 滾動到結果頂部
+                document.getElementById('results-section').scrollIntoView({behavior: 'smooth'});
+            })
+            .catch(error => {
+                showApiMessage('error', '載入頁面失敗: ' + error.message);
+            })
+            .finally(() => {
+                hideLoading();
+            });
     }
 });
