@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     // 後端 API 網址 (Apps Script 發布的網址)
-    const API_URL = 'https://script.google.com/macros/s/AKfycbzfw2lbBojiknx4vSaM73yt_9L9SZPAnyKbrWBowKupAYFV-pfOgaQe4WpjvqrDxzcu/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwCjELScYntx661Zw_1sV8SzR7XrbS1f2myK0TyTCFxP8IMENAgG68JmOgJ3mFoG9E5/exec';
     
     // 資料儲存
     let entries = [];
