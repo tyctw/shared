@@ -25,6 +25,52 @@ function doGet(e) {
   }
 }
 
+function doPost(e) {
+  try {
+    let requestData;
+    let action;
+    let entry;
+    
+    if (e.postData && e.postData.type === "application/json") {
+      requestData = JSON.parse(e.postData.contents);
+      action = requestData.action;
+      entry = requestData.entry;
+    } else {
+      action = e.parameter.action;
+      if (e.parameter.entry) {
+        entry = JSON.parse(e.parameter.entry);
+      }
+    }
+    
+    if (action === 'addEntry' && entry) {
+      const result = addEntry(entry);
+      logAction('POST', 'addEntry', true, '成功新增資料');
+      return sendResponse(true, '成功新增資料', { entry: result });
+    } else {
+      logAction('POST', action || 'unknown', false, '未指定有效操作或缺少必要參數');
+      return sendResponse(false, '未指定有效操作或缺少必要參數');
+    }
+  } catch (error) {
+    logAction('POST', 'unknown', false, `處理請求時出錯: ${error.message}`);
+    return sendResponse(false, `處理請求時出錯: ${error.message}`);
+  }
+}
+
+// 新增日誌記錄函數
+function logAction(method, action, success, message) {
+  const logSheet = getLogSheet();
+  const timestamp = new Date().toISOString(); // 使用 ISO 格式記錄時間
+  const logEntry = [
+    timestamp,
+    method,      // GET 或 POST
+    action,      // 操作類型
+    success,     // true 或 false
+    message      // 訊息
+  ];
+  
+  logSheet.appendRow(logEntry);
+}
+
 // 取得所有資料，支援分頁
 function getAllEntries(page = 1, pageSize = 10) {
   const sheet = getDataSheet();
@@ -76,70 +122,7 @@ function getAllEntries(page = 1, pageSize = 10) {
     totalPages: totalPages
   };
 }
-    // 處理 Web App 的 GET 和 POST 請求
-function doGet(e) {
-  try {
-    const action = e.parameter.action;
-    
-    if (action === 'getEntries') {
-      const entries = getAllEntries();
-      logAction('GET', 'getEntries', true, '成功獲取資料');
-      return sendResponse(true, '成功獲取資料', { entries });
-    } else {
-      logAction('GET', action || 'unknown', false, '未指定有效操作');
-      return sendResponse(false, '未指定有效操作');
-    }
-  } catch (error) {
-    logAction('GET', 'unknown', false, `處理請求時出錯: ${error.message}`);
-    return sendResponse(false, `處理請求時出錯: ${error.message}`);
-  }
-}
 
-function doPost(e) {
-  try {
-    let requestData;
-    let action;
-    let entry;
-    
-    if (e.postData && e.postData.type === "application/json") {
-      requestData = JSON.parse(e.postData.contents);
-      action = requestData.action;
-      entry = requestData.entry;
-    } else {
-      action = e.parameter.action;
-      if (e.parameter.entry) {
-        entry = JSON.parse(e.parameter.entry);
-      }
-    }
-    
-    if (action === 'addEntry' && entry) {
-      const result = addEntry(entry);
-      logAction('POST', 'addEntry', true, '成功新增資料');
-      return sendResponse(true, '成功新增資料', { entry: result });
-    } else {
-      logAction('POST', action || 'unknown', false, '未指定有效操作或缺少必要參數');
-      return sendResponse(false, '未指定有效操作或缺少必要參數');
-    }
-  } catch (error) {
-    logAction('POST', 'unknown', false, `處理請求時出錯: ${error.message}`);
-    return sendResponse(false, `處理請求時出錯: ${error.message}`);
-  }
-}
-
-// 新增日誌記錄函數
-function logAction(method, action, success, message) {
-  const logSheet = getLogSheet();
-  const timestamp = new Date().toISOString(); // 使用 ISO 格式記錄時間
-  const logEntry = [
-    timestamp,
-    method,      // GET 或 POST
-    action,      // 操作類型
-    success,     // true 或 false
-    message      // 訊息
-  ];
-  
-  logSheet.appendRow(logEntry);
-}
 function addEntry(entry) {
   const sheet = getDataSheet();
   
