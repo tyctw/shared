@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     // 後端 API 網址 (Apps Script 發布的網址)
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwCjELScYntx661Zw_1sV8SzR7XrbS1f2myK0TyTCFxP8IMENAgG68JmOgJ3mFoG9E5/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzfw2lbBojiknx4vSaM73yt_9L9SZPAnyKbrWBowKupAYFV-pfOgaQe4WpjvqrDxzcu/exec';
     
     // 資料儲存
     let entries = [];
@@ -297,81 +297,158 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             schoolSection.appendChild(schoolHeader);
             
-            // Create table
-            const tableContainer = document.createElement('div');
-            tableContainer.className = 'table-responsive';
+            // Check if mobile view is active
+            if (window.innerWidth < 576) {
+                renderMobileView(schoolSection, schoolGroups[schoolName]);
+            } else {
+                renderTableView(schoolSection, schoolGroups[schoolName]);
+            }
             
-            const table = document.createElement('table');
-            table.className = 'table table-hover score-table';
-            
-            // Table header
-            const thead = document.createElement('thead');
-            thead.innerHTML = `
-                <tr>
-                    <th>年份</th>
-                    <th>科系/班別</th>
-                    <th>國文</th>
-                    <th>英文</th>
-                    <th>數學</th>
-                    <th>自然</th>
-                    <th>社會</th>
-                    <th>作文</th>
-                    <th>總積分</th>
-                    <th>總積點</th>
-                    <th>備註</th>
-                </tr>
-            `;
-            table.appendChild(thead);
-            
-            // Table body
-            const tbody = document.createElement('tbody');
-            schoolGroups[schoolName].forEach(entry => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${entry.year}年</td>
-                    <td>${entry.department || "普通班"}</td>
-                    <td><span class="score-badge score-${entry.scores.chinese}">${entry.scores.chinese}</span></td>
-                    <td><span class="score-badge score-${entry.scores.english}">${entry.scores.english}</span></td>
-                    <td><span class="score-badge score-${entry.scores.math}">${entry.scores.math}</span></td>
-                    <td><span class="score-badge score-${entry.scores.science}">${entry.scores.science}</span></td>
-                    <td><span class="score-badge score-${entry.scores.social}">${entry.scores.social}</span></td>
-                    <td><span class="composition-badge composition-${entry.composition}">${entry.composition}級</span></td>
-                    <td class="text-primary fw-bold">${entry.total || "未提供"}</td>
-                    <td>${entry.totalPoints || "未提供"}</td>
-                    <td>${entry.comment ? `<i class="bi bi-chat-text me-1"></i>${entry.comment}` : ""}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-            table.appendChild(tbody);
-            
-            tableContainer.appendChild(table);
-            schoolSection.appendChild(tableContainer);
             resultsContainer.appendChild(schoolSection);
         });
     }
-    
-    function getSubjectName(subject) {
-        const subjectNames = {
-            chinese: '國文',
-            english: '英文',
-            math: '數學',
-            science: '自然',
-            social: '社會'
-        };
-        return subjectNames[subject] || subject;
+
+    function renderMobileView(container, entries) {
+        const entriesContainer = document.createElement('div');
+        entriesContainer.className = 'mobile-entries-container p-3';
+        
+        entries.forEach(entry => {
+            const entryCard = document.createElement('div');
+            entryCard.className = 'mobile-entry-card';
+            
+            // Card header
+            const cardHeader = document.createElement('div');
+            cardHeader.className = 'mobile-header';
+            cardHeader.innerHTML = `
+                <div class="department-name">${entry.department || "普通班"}</div>
+                <div class="school-year">${entry.year}年</div>
+            `;
+            
+            // Card body
+            const cardBody = document.createElement('div');
+            cardBody.className = 'mobile-body';
+            
+            // Scores grid
+            const scoresGrid = document.createElement('div');
+            scoresGrid.className = 'mobile-score-grid';
+            
+            // Add score items
+            const scoreItems = [
+                { label: '國文', score: entry.scores.chinese },
+                { label: '英文', score: entry.scores.english },
+                { label: '數學', score: entry.scores.math },
+                { label: '自然', score: entry.scores.science },
+                { label: '社會', score: entry.scores.social },
+                { label: '作文', score: entry.composition + '級' }
+            ];
+            
+            scoreItems.forEach(item => {
+                const scoreItem = document.createElement('div');
+                scoreItem.className = 'mobile-score-item';
+                scoreItem.innerHTML = `
+                    <div class="mobile-score-label">${item.label}</div>
+                    <div class="mobile-score-value">
+                        <span class="${item.label === '作文' ? 'composition-badge' : 'score-badge'} 
+                               ${item.label === '作文' ? 'composition-' + entry.composition : 'score-' + item.score}">
+                            ${item.score}
+                        </span>
+                    </div>
+                `;
+                scoresGrid.appendChild(scoreItem);
+            });
+            
+            // Total scores
+            const totalBox = document.createElement('div');
+            totalBox.className = 'mobile-total-box';
+            totalBox.innerHTML = `
+                <div class="mobile-total-item">
+                    <div class="mobile-total-label">總積分</div>
+                    <div class="mobile-total-value">${entry.total || "未提供"}</div>
+                </div>
+                <div class="mobile-total-item">
+                    <div class="mobile-total-label">總積點</div>
+                    <div class="mobile-total-value">${entry.totalPoints || "未提供"}</div>
+                </div>
+            `;
+            
+            // Comment if exists
+            let commentHtml = '';
+            if (entry.comment) {
+                commentHtml = `
+                    <div class="mt-3 pt-2 border-top">
+                        <small class="text-muted"><i class="bi bi-chat-text me-1"></i>備註</small>
+                        <div class="mt-1">${entry.comment}</div>
+                    </div>
+                `;
+            }
+            
+            // Assemble card
+            cardBody.appendChild(scoresGrid);
+            cardBody.appendChild(totalBox);
+            if (commentHtml) {
+                const commentDiv = document.createElement('div');
+                commentDiv.innerHTML = commentHtml;
+                cardBody.appendChild(commentDiv);
+            }
+            
+            entryCard.appendChild(cardHeader);
+            entryCard.appendChild(cardBody);
+            entriesContainer.appendChild(entryCard);
+        });
+        
+        container.appendChild(entriesContainer);
     }
-    
-    function sortEntries(entries, sortMethod) {
-        const sorted = [...entries];
-        switch (sortMethod) {
-            case 'highest':
-                return sorted.sort((a, b) => parseFloat(b.total) - parseFloat(a.total));
-            case 'lowest':
-                return sorted.sort((a, b) => parseFloat(a.total) - parseFloat(b.total));
-            case 'newest':
-            default:
-                return sorted;
-        }
+
+    function renderTableView(container, entries) {
+        // Create table as before
+        const tableContainer = document.createElement('div');
+        tableContainer.className = 'table-responsive';
+        
+        const table = document.createElement('table');
+        table.className = 'table table-hover score-table';
+        
+        // Table header
+        const thead = document.createElement('thead');
+        thead.innerHTML = `
+            <tr>
+                <th>年份</th>
+                <th>科系/班別</th>
+                <th>國文</th>
+                <th>英文</th>
+                <th>數學</th>
+                <th>自然</th>
+                <th>社會</th>
+                <th>作文</th>
+                <th>總積分</th>
+                <th>總積點</th>
+                <th>備註</th>
+            </tr>
+        `;
+        table.appendChild(thead);
+        
+        // Table body
+        const tbody = document.createElement('tbody');
+        entries.forEach(entry => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${entry.year}年</td>
+                <td>${entry.department || "普通班"}</td>
+                <td><span class="score-badge score-${entry.scores.chinese}">${entry.scores.chinese}</span></td>
+                <td><span class="score-badge score-${entry.scores.english}">${entry.scores.english}</span></td>
+                <td><span class="score-badge score-${entry.scores.math}">${entry.scores.math}</span></td>
+                <td><span class="score-badge score-${entry.scores.science}">${entry.scores.science}</span></td>
+                <td><span class="score-badge score-${entry.scores.social}">${entry.scores.social}</span></td>
+                <td><span class="composition-badge composition-${entry.composition}">${entry.composition}級</span></td>
+                <td class="text-primary fw-bold">${entry.total || "未提供"}</td>
+                <td>${entry.totalPoints || "未提供"}</td>
+                <td>${entry.comment ? `<i class="bi bi-chat-text me-1"></i>${entry.comment}` : ""}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+        
+        tableContainer.appendChild(table);
+        container.appendChild(tableContainer);
     }
     
     function updateStatistics() {
@@ -592,14 +669,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function setupMobileOptimizations() {
         function checkMobileView() {
-            const tableResponsive = document.querySelector('.table-responsive');
-            if (window.innerWidth < 768) {
-                tableResponsive.classList.add('mobile-card-view');
+            if (window.innerWidth < 576) {
+                document.body.classList.add('mobile-view');
+                // Re-render entries in mobile format
+                displayEntries();
             } else {
-                tableResponsive.classList.remove('mobile-card-view');
+                document.body.classList.remove('mobile-view');
+                // Re-render entries in table format
+                displayEntries();
             }
-            displayEntries();
         }
+        
         checkMobileView();
         window.addEventListener('resize', checkMobileView);
         
@@ -618,7 +698,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 backToTopBtn.classList.remove('visible');
             }
         });
-        window.dispatchEvent(new Event('scroll'));
+        
+        // Add mobile filter toggle button if on mobile
+        if (window.innerWidth < 576) {
+            const filterToggleBtn = document.createElement('button');
+            filterToggleBtn.className = 'mobile-filter-toggle';
+            filterToggleBtn.innerHTML = '<i class="bi bi-funnel"></i>';
+            filterToggleBtn.addEventListener('click', function() {
+                this.classList.toggle('active');
+                const advancedFilters = document.getElementById('advancedFilters');
+                if (advancedFilters) {
+                    if (advancedFilters.classList.contains('show')) {
+                        new bootstrap.Collapse(advancedFilters).hide();
+                    } else {
+                        new bootstrap.Collapse(advancedFilters).show();
+                        advancedFilters.scrollIntoView({behavior: 'smooth'});
+                    }
+                }
+            });
+            document.body.appendChild(filterToggleBtn);
+        }
     }
     
     function setupSidebarMenu() {
@@ -741,8 +840,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const region = button.getAttribute('data-region');
                 document.querySelectorAll('.region-btn').forEach(btn => btn.classList.remove('active'));
                 button.classList.add('active');
-                activeFilters.region = region;
-                applyFilters();
+                filterByRegion(region);
             }
         });
     }
@@ -850,6 +948,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function applyFilters() {
         const searchKeyword = document.getElementById('search-input').value.trim().toLowerCase();
         
+        showLoading();
         let filteredEntries = entries.filter(entry => {
             const matchesKeyword = searchKeyword === '' || 
                                 entry.school.toLowerCase().includes(searchKeyword) || 
@@ -876,34 +975,10 @@ document.addEventListener('DOMContentLoaded', function() {
         displayFilteredEntries(filteredEntries);
         updatePaginationControls();
         updateFilterResultCount(filteredEntries.length);
+        hideLoading();
     }
-    
-    function updateFilterResultCount(count) {
-        const resultCountEl = document.getElementById('filter-result-count');
-        if (resultCountEl) {
-            resultCountEl.textContent = count;
-            if (count < entries.length) {
-                resultCountEl.classList.add('text-primary', 'fw-bold');
-            } else {
-                resultCountEl.classList.remove('text-primary', 'fw-bold');
-            }
-        }
-    }
-    
-    document.getElementById('search-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        applyFilters();
-    });
-    
-    document.getElementById('search-input').addEventListener('input', function() {
-        clearTimeout(this.searchTimeout);
-        this.searchTimeout = setTimeout(() => {
-            applyFilters();
-        }, 300);
-    });
     
     function displayFilteredEntries(filteredEntries) {
-        filteredEntries = sortEntries(filteredEntries, currentSort);
         const resultsContainer = document.getElementById('results-container');
         resultsContainer.innerHTML = '';
         
@@ -941,57 +1016,44 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             schoolSection.appendChild(schoolHeader);
             
-            // Create table
-            const tableContainer = document.createElement('div');
-            tableContainer.className = 'table-responsive';
+            // Check if mobile view is active
+            if (window.innerWidth < 576) {
+                renderMobileView(schoolSection, schoolGroups[schoolName]);
+            } else {
+                renderTableView(schoolSection, schoolGroups[schoolName]);
+            }
             
-            const table = document.createElement('table');
-            table.className = 'table table-hover score-table';
-            
-            // Table header
-            const thead = document.createElement('thead');
-            thead.innerHTML = `
-                <tr>
-                    <th>年份</th>
-                    <th>科系/班別</th>
-                    <th>國文</th>
-                    <th>英文</th>
-                    <th>數學</th>
-                    <th>自然</th>
-                    <th>社會</th>
-                    <th>作文</th>
-                    <th>總積分</th>
-                    <th>總積點</th>
-                    <th>備註</th>
-                </tr>
-            `;
-            table.appendChild(thead);
-            
-            // Table body
-            const tbody = document.createElement('tbody');
-            schoolGroups[schoolName].forEach(entry => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${entry.year}年</td>
-                    <td>${entry.department || "普通班"}</td>
-                    <td><span class="score-badge score-${entry.scores.chinese}">${entry.scores.chinese}</span></td>
-                    <td><span class="score-badge score-${entry.scores.english}">${entry.scores.english}</span></td>
-                    <td><span class="score-badge score-${entry.scores.math}">${entry.scores.math}</span></td>
-                    <td><span class="score-badge score-${entry.scores.science}">${entry.scores.science}</span></td>
-                    <td><span class="score-badge score-${entry.scores.social}">${entry.scores.social}</span></td>
-                    <td><span class="composition-badge composition-${entry.composition}">${entry.composition}級</span></td>
-                    <td class="text-primary fw-bold">${entry.total || "未提供"}</td>
-                    <td>${entry.totalPoints || "未提供"}</td>
-                    <td>${entry.comment ? `<i class="bi bi-chat-text me-1"></i>${entry.comment}` : ""}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-            table.appendChild(tbody);
-            
-            tableContainer.appendChild(table);
-            schoolSection.appendChild(tableContainer);
             resultsContainer.appendChild(schoolSection);
         });
+    }
+    
+    function updateFilterResultCount(count) {
+        const resultCountEl = document.getElementById('filter-result-count');
+        if (resultCountEl) {
+            resultCountEl.textContent = count;
+            if (count < entries.length) {
+                resultCountEl.classList.add('text-primary', 'fw-bold');
+            } else {
+                resultCountEl.classList.remove('text-primary', 'fw-bold');
+            }
+        }
+    }
+    
+    document.getElementById('search-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        applyFilters();
+    });
+    
+    document.getElementById('search-input').addEventListener('input', function() {
+        clearTimeout(this.searchTimeout);
+        this.searchTimeout = setTimeout(() => {
+            applyFilters();
+        }, 300);
+    });
+    
+    function filterByRegion(region) {
+        activeFilters.region = region;
+        applyFilters();
     }
     
     function initializeTooltips() {
@@ -1202,14 +1264,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
     
-    function filterByRegion(region) {
-        const filteredEntries = entries.filter(entry => region === 'all' || entry.region === region);
-        displayedEntries = filteredEntries;
-        displayFilteredEntries(filteredEntries);
-        updateFilterResultCount(filteredEntries.length);
-    }
-});
-    // 填入科系群組資料
     function populateDepartmentGroups() {
         const departmentSelect = document.getElementById('department');
         if (!departmentSelect) return;
@@ -1257,3 +1311,4 @@ document.addEventListener('DOMContentLoaded', function() {
             departmentSelect.appendChild(optgroup);
         }
     }
+});
