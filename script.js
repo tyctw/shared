@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     // 後端 API 網址 (Apps Script 發布的網址)
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwCjELScYntx661Zw_1sV8SzR7XrbS1f2myK0TyTCFxP8IMENAgG68JmOgJ3mFoG9E5/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzfw2lbBojiknx4vSaM73yt_9L9SZPAnyKbrWBowKupAYFV-pfOgaQe4WpjvqrDxzcu/exec';
     
     // 資料儲存
     let entries = [];
@@ -671,12 +671,17 @@ document.addEventListener('DOMContentLoaded', function() {
         function checkMobileView() {
             if (window.innerWidth < 576) {
                 document.body.classList.add('mobile-view');
-                // Re-render entries in mobile format
-                displayEntries();
+                // Prevent full re-rendering when not needed
+                if (!document.body.classList.contains('mobile-rendered')) {
+                    displayEntries();
+                    document.body.classList.add('mobile-rendered');
+                }
             } else {
                 document.body.classList.remove('mobile-view');
-                // Re-render entries in table format
-                displayEntries();
+                if (document.body.classList.contains('mobile-rendered')) {
+                    displayEntries();
+                    document.body.classList.remove('mobile-rendered');
+                }
             }
         }
         
@@ -948,7 +953,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function applyFilters() {
         const searchKeyword = document.getElementById('search-input').value.trim().toLowerCase();
         
-        showLoading();
         let filteredEntries = entries.filter(entry => {
             const matchesKeyword = searchKeyword === '' || 
                                 entry.school.toLowerCase().includes(searchKeyword) || 
@@ -975,7 +979,6 @@ document.addEventListener('DOMContentLoaded', function() {
         displayFilteredEntries(filteredEntries);
         updatePaginationControls();
         updateFilterResultCount(filteredEntries.length);
-        hideLoading();
     }
     
     function displayFilteredEntries(filteredEntries) {
@@ -1268,14 +1271,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const departmentSelect = document.getElementById('department');
         if (!departmentSelect) return;
         
-        // 清空現有選項，保留預設提示選項
-        const defaultOption = departmentSelect.querySelector('option[value=""]');
         departmentSelect.innerHTML = '';
-        if (defaultOption) {
-            departmentSelect.appendChild(defaultOption);
-        }
         
-        // 定義科系群組和科系
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = '請選擇科系';
+        departmentSelect.appendChild(defaultOption);
+        
         const departmentGroups = {
             "普通科": ["普通班"],
             "機械群": ["機械科", "鑄造科", "板金科", "機械木模科", "配管科", "模具科", "機電科", "製圖科", "生物產業機電科", "電腦機械製圖科"],
@@ -1295,12 +1297,10 @@ document.addEventListener('DOMContentLoaded', function() {
             "藝術群": ["戲劇科", "音樂科", "舞蹈科", "美術科", "影劇科", "西樂科", "國樂科", "電影電視科", "表演藝術科", "多媒體動畫科", "時尚工藝科"]
         };
         
-        // 建立群組下拉選單
         for (const group in departmentGroups) {
             const optgroup = document.createElement('optgroup');
             optgroup.label = group;
             
-            // 添加該群組的科系選項
             departmentGroups[group].forEach(dept => {
                 const option = document.createElement('option');
                 option.value = dept;
