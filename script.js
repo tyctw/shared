@@ -1659,6 +1659,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add header row with BOM for proper UTF-8 encoding in Excel
         csvRows.push('\uFEFF' + headers.join(','));
         
+        // Add watermark row
+        csvRows.push('"高中錄取分數分享平台 - 匯出於 ' + new Date().toLocaleString() + ' - 僅供參考使用"');
+        csvRows.push(''); // Empty row after watermark
+        
         // Add data rows
         displayedEntries.forEach(entry => {
             const row = [
@@ -1698,7 +1702,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function exportToJSON() {
-        const data = JSON.stringify(displayedEntries, null, 2);
+        // Add metadata with watermark information
+        const exportData = {
+            metadata: {
+                exportSource: "高中錄取分數分享平台",
+                exportDate: new Date().toLocaleString(),
+                note: "本資料僅供參考，錄取標準依各高中公告為準"
+            },
+            data: displayedEntries
+        };
+        
+        const data = JSON.stringify(exportData, null, 2);
         const blob = new Blob([data], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         
@@ -1728,7 +1742,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <head>
                 <title>高中錄取分數列表</title>
                 <style>
-                    body { font-family: Arial, sans-serif; padding: 20px; max-width: 1200px; margin: 0 auto; }
+                    body { font-family: Arial, sans-serif; padding: 20px; max-width: 1200px; margin: 0 auto; position: relative; }
                     h1 { color: #0d6efd; text-align: center; margin-bottom: 10px; }
                     p { text-align: center; color: #6c757d; margin-bottom: 20px; }
                     table { width: 100%; border-collapse: collapse; margin-bottom: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
@@ -1741,16 +1755,29 @@ document.addEventListener('DOMContentLoaded', function() {
                     .school-group { margin-bottom: 30px; }
                     .school-title { background-color: #e7f1ff; padding: 10px; font-weight: bold; color: #0d6efd; border-left: 4px solid #0d6efd; }
                     .score-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; background-color: #f8f9fa; font-size: 12px; }
+                    .watermark {
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%) rotate(-45deg);
+                        font-size: 80px;
+                        color: rgba(200, 200, 200, 0.2);
+                        pointer-events: none;
+                        z-index: 1000;
+                        white-space: nowrap;
+                    }
                     @media print {
                         table { page-break-inside: auto; }
                         tr { page-break-inside: avoid; page-break-after: auto; }
                         thead { display: table-header-group; }
                         .school-group { page-break-inside: avoid; }
                         body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                        .watermark { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
                     }
                 </style>
             </head>
             <body>
+                <div class="watermark">高中錄取分數分享平台 - 僅供參考</div>
                 <div class="header">
                     <h1>高中錄取分數列表</h1>
                     <p>匯出日期：${new Date().toLocaleDateString()}</p>
