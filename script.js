@@ -158,58 +158,17 @@ document.addEventListener('DOMContentLoaded', function() {
     function showLoading() {
         const loadingOverlay = document.getElementById('loading-overlay');
         loadingOverlay.style.display = 'flex';
-        
-        if (!document.querySelector('#loading-overlay .loading-animation')) {
-            const loadingAnimation = document.createElement('div');
-            loadingAnimation.className = 'loading-animation';
-            loadingAnimation.innerHTML = `
-                <div class="loading-circles">
-                    <div class="circle"></div>
-                    <div class="circle"></div>
-                    <div class="circle"></div>
-                </div>
-                <div class="loading-text">資料載入中</div>
-                <div class="loading-progress glass-effect">
-                    <div class="progress-bar shimmer-effect"></div>
-                </div>
-            `;
-            const spinner = document.querySelector('#loading-overlay .spinner-border');
-            if (spinner) {
-                spinner.parentNode.replaceChild(loadingAnimation, spinner);
-            } else {
-                loadingOverlay.appendChild(loadingAnimation);
-            }
-            simulateProgress();
-        }
     }
     
     function hideLoading() {
         const loadingOverlay = document.getElementById('loading-overlay');
-        const progressBar = document.querySelector('#loading-overlay .progress-bar');
-        if (progressBar) {
-            progressBar.style.width = '100%';
-            setTimeout(() => {
-                const loadingAnimation = document.querySelector('#loading-overlay .loading-animation');
-                if (loadingAnimation) {
-                    loadingAnimation.classList.add('completed');
-                    setTimeout(() => {
-                        loadingOverlay.style.opacity = '0';
-                        setTimeout(() => {
-                            loadingOverlay.style.display = 'none';
-                            loadingOverlay.style.opacity = '1';
-                            setTimeout(() => {
-                                progressBar.style.width = '0%';
-                                loadingAnimation.classList.remove('completed');
-                            }, 500);
-                        }, 600);
-                    }, 300);
-                } else {
-                    loadingOverlay.style.display = 'none';
-                }
-            }, 300);
-        } else {
+        
+        loadingOverlay.classList.add('loading-complete');
+        
+        setTimeout(() => {
             loadingOverlay.style.display = 'none';
-        }
+            loadingOverlay.classList.remove('loading-complete');
+        }, 500);
     }
     
     function simulateProgress() {
