@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 分頁相關變數
     let currentPage = 1;
-    let pageSize = 10;
+    let pageSize = 20;
     let totalPages = 1;
     let displayedEntries = [];
     
