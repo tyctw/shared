@@ -1,7 +1,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { ScoreEntry } from '../types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY || '' });
 
 export const generateMockDataWithAI = async (count: number = 3): Promise<ScoreEntry[]> => {
   const model = 'gemini-2.5-flash';
