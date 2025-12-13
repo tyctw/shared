@@ -4,7 +4,7 @@ import ScoreList from './components/ScoreList';
 import Dashboard from './components/Dashboard';
 import Guide from './components/Guide';
 import { ScoreEntry } from './types';
-import { fetchEntries, submitEntry } from './services/apiService';
+import { fetchEntries, submitEntry, logUserAction } from './services/apiService';
 import { GraduationCap, BarChart3, PlusCircle, BookOpen, CloudOff, Info, Menu, X, ExternalLink, Calculator, Compass } from 'lucide-react';
 
 // New Custom Loader Component
@@ -35,6 +35,9 @@ const App: React.FC = () => {
 
   // Load data from Google Apps Script on mount
   useEffect(() => {
+    // Log App Start
+    logUserAction('app_open', `Initial Load`);
+
     const loadData = async () => {
       setIsLoading(true);
       const data = await fetchEntries();
@@ -50,6 +53,11 @@ const App: React.FC = () => {
     loadData();
   }, []);
 
+  const handleTabChange = (tab: typeof activeTab) => {
+    setActiveTab(tab);
+    logUserAction('tab_change', tab);
+  };
+
   const handleAddEntry = async (newEntry: Omit<ScoreEntry, 'id' | 'timestamp'>) => {
     const entry: ScoreEntry = {
       ...newEntry,
@@ -57,6 +65,7 @@ const App: React.FC = () => {
       timestamp: Date.now(),
     };
 
+    // Optimistic Update
     setEntries(prev => [entry, ...prev]);
     setActiveTab('list');
 
@@ -68,7 +77,7 @@ const App: React.FC = () => {
 
   const NavButton = ({ id, label, icon: Icon }: { id: typeof activeTab, label: string, icon: any }) => (
     <button
-      onClick={() => setActiveTab(id)}
+      onClick={() => handleTabChange(id)}
       className={`relative px-4 sm:px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2.5 overflow-hidden flex-shrink-0 ${
         activeTab === id 
           ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25 scale-100' 
@@ -110,6 +119,7 @@ const App: React.FC = () => {
               href="https://tyctw.github.io/spare/" 
               target="_blank" 
               rel="noopener noreferrer"
+              onClick={() => logUserAction('external_link', 'spare_analysis')}
               className="flex items-center gap-3 p-4 rounded-xl bg-indigo-50/50 hover:bg-indigo-50 border border-indigo-100 text-indigo-700 font-bold transition-all group shadow-sm hover:shadow-md"
             >
               <div className="bg-indigo-100 p-2 rounded-lg group-hover:scale-110 transition-transform text-indigo-600">
@@ -123,6 +133,7 @@ const App: React.FC = () => {
               href="https://tyctw.github.io/Navigation/" 
               target="_blank" 
               rel="noopener noreferrer"
+              onClick={() => logUserAction('external_link', 'navigation_info')}
               className="flex items-center gap-3 p-4 rounded-xl bg-emerald-50/50 hover:bg-emerald-50 border border-emerald-100 text-emerald-700 font-bold transition-all group shadow-sm hover:shadow-md"
             >
               <div className="bg-emerald-100 p-2 rounded-lg group-hover:scale-110 transition-transform text-emerald-600">
@@ -142,7 +153,7 @@ const App: React.FC = () => {
       {/* Header */}
       <header className="fixed top-0 w-full z-40 transition-all duration-300 glass-header shadow-sm">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3.5 cursor-pointer group flex-shrink-0" onClick={() => setActiveTab('list')}>
+          <div className="flex items-center gap-3.5 cursor-pointer group flex-shrink-0" onClick={() => handleTabChange('list')}>
             <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-fuchsia-500 p-2.5 rounded-2xl shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40 transition-all duration-300 group-hover:scale-105 group-hover:rotate-3">
                 <GraduationCap className="w-6 h-6 text-white" />
             </div>
@@ -188,7 +199,7 @@ const App: React.FC = () => {
             )}
 
             {activeTab === 'guide' && (
-                <Guide onNavigate={(tab) => setActiveTab(tab)} />
+                <Guide onNavigate={(tab) => handleTabChange(tab)} />
             )}
 
             {activeTab === 'list' && (
@@ -212,7 +223,7 @@ const App: React.FC = () => {
                           彙整全台各區會考錄取分數，透明公開的分享平台。<br className="hidden sm:block"/>協助你掌握精準落點資訊，規劃完美升學藍圖。
                       </p>
                       <button 
-                         onClick={() => setActiveTab('guide')}
+                         onClick={() => handleTabChange('guide')}
                          className="mt-8 bg-white/10 hover:bg-white/20 border border-white/30 text-white px-6 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 backdrop-blur-md"
                       >
                          <Info className="w-4 h-4" /> 新手指南
