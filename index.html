@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>會考落點分享平台 | CAP Score Sharing</title>
+    
+    <!-- Tailwind CSS (Keep CDN for simplicity in this setup) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Config for Custom Colors/Fonts/Animations -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans TC', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        primary: { 50: '#eef2ff', 100: '#e0e7ff', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' },
+                    },
+                    boxShadow: {
+                        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
+                        'glow': '0 0 15px rgba(99, 102, 241, 0.3)',
+                    },
+                    animation: {
+                        'spin-slow-reverse': 'spin-reverse 3s linear infinite',
+                        'shimmer': 'shimmer 2s infinite linear',
+                    },
+                    keyframes: {
+                        'spin-reverse': {
+                            '0%': { transform: 'rotate(0deg)' },
+                            '100%': { transform: 'rotate(-360deg)' },
+                        },
+                        'shimmer': {
+                            '0%': { transform: 'translateX(-100%)' },
+                            '100%': { transform: 'translateX(100%)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap');
+        
+        body {
+            /* Mesh Gradient Background */
+            background-color: #f8fafc;
+            background-image: 
+                radial-gradient(at 80% 0%, hsla(189,100%,90%,0.4) 0px, transparent 50%),
+                radial-gradient(at 0% 50%, hsla(260,100%,96%,1) 0px, transparent 50%),
+                radial-gradient(at 80% 50%, hsla(340,100%,94%,0.4) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, hsla(200,100%,95%,0.4) 0px, transparent 50%),
+                radial-gradient(at 80% 100%, hsla(240,100%,94%,0.4) 0px, transparent 50%),
+                radial-gradient(at 0% 0%, hsla(330,100%,96%,0.4) 0px, transparent 50%);
+            background-attachment: fixed;
+            background-size: cover;
+        }
+
+        /* Glassmorphism Classes */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+        }
+
+        .glass-header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        /* Input & Scrollbar */
+        .input-modern:focus {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+            border-color: #818cf8;
+        }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; border: 2px solid transparent; background-clip: content-box; }
+        ::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeInUp 0.5s ease; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .bg-grid-pattern {
+            background-image: radial-gradient(#6366f1 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.33.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
+    "recharts": "https://esm.sh/recharts@^3.5.1",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "vite": "https://esm.sh/vite@^7.2.7"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="text-slate-800 antialiased min-h-screen">
+    <div id="root">
+        <!-- Initial Static Loader (Displayed before React mounts) -->
+        <div class="fixed inset-0 flex flex-col items-center justify-center bg-[#f8fafc] z-50">
+            <div class="relative w-24 h-24">
+                <div class="absolute inset-0 rounded-full border-4 border-indigo-100 animate-[spin_3s_linear_infinite]"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-t-indigo-500 animate-[spin_1.5s_linear_infinite]"></div>
+                <div class="absolute inset-4 rounded-full border-4 border-b-purple-500 animate-[spin_2s_linear_infinite_reverse]"></div>
+                <div class="absolute inset-0 flex items-center justify-center">
+                   <div class="w-3 h-3 bg-indigo-600 rounded-full animate-pulse"></div>
+                </div>
+            </div>
+            <p class="mt-6 text-slate-400 font-mono text-sm tracking-widest animate-pulse">SYSTEM INITIALIZING...</p>
+        </div>
+    </div>
+    
+    <!-- Entry Point for Vite -->
+    <script type="module" src="/index.tsx"></script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+{
+  "name": "會考落點分享平台 (CAP Score Sharing)",
+  "description": "一個專為台灣國中會考考生設計的分數分享與落點分析平台。提供歷年錄取分數查詢、成績輸入分享。",
+  "requestFramePermissions": []
+}
