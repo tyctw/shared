@@ -5,7 +5,7 @@ import Dashboard from './components/Dashboard';
 import Guide from './components/Guide';
 import { ScoreEntry } from './types';
 import { fetchEntries, submitEntry, logUserAction } from './services/apiService';
-import { GraduationCap, BarChart3, PlusCircle, BookOpen, CloudOff, Info, Menu, X, ExternalLink, Calculator, Compass, Sparkles, RefreshCw, Home } from 'lucide-react';
+import { GraduationCap, BarChart3, PlusCircle, BookOpen, CloudOff, Info, Menu, X, ExternalLink, Calculator, Compass, Sparkles, RefreshCw, Home, ShieldAlert, Check } from 'lucide-react';
 
 // New Custom Loader Component
 const AppLoader = () => (
@@ -29,6 +29,7 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'list' | 'form' | 'stats' | 'guide'>('list');
   const [isLoading, setIsLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
 
   // Extract data fetching logic to a reusable function
   const loadData = useCallback(async (isManualRefresh = false) => {
@@ -49,9 +50,21 @@ const App: React.FC = () => {
 
   // Initial load
   useEffect(() => {
+    // Check disclaimer status
+    const hasAccepted = localStorage.getItem('cap_disclaimer_accepted');
+    if (!hasAccepted) {
+      setShowDisclaimer(true);
+    }
+
     logUserAction('app_open', `Initial Load`);
     loadData();
   }, [loadData]);
+
+  const handleAcceptDisclaimer = () => {
+    localStorage.setItem('cap_disclaimer_accepted', 'true');
+    setShowDisclaimer(false);
+    logUserAction('accept_disclaimer', 'agreed');
+  };
 
   const handleTabChange = (tab: typeof activeTab) => {
     setActiveTab(tab);
@@ -111,7 +124,65 @@ const App: React.FC = () => {
   );
 
   return (
-    <div className="font-sans text-slate-900 selection:bg-indigo-200 selection:text-indigo-900 overflow-x-hidden min-h-screen">
+    <div className={`font-sans text-slate-900 selection:bg-indigo-200 selection:text-indigo-900 overflow-x-hidden min-h-screen ${showDisclaimer ? 'h-screen overflow-hidden' : ''}`}>
+      
+      {/* Disclaimer Modal */}
+      {showDisclaimer && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
+           {/* Backdrop */}
+           <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm" />
+           
+           {/* Modal Card */}
+           <div className="relative bg-white w-full max-w-lg rounded-[2rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-200">
+              <div className="bg-amber-50 p-6 sm:p-8 text-center border-b border-amber-100">
+                 <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm text-amber-500 ring-4 ring-amber-100">
+                    <ShieldAlert className="w-7 h-7" />
+                 </div>
+                 <h3 className="text-slate-800 text-2xl font-black mb-1">
+                    使用前請詳閱
+                 </h3>
+                 <p className="text-amber-700/80 font-bold text-sm">Disclaimer & Terms of Use</p>
+              </div>
+
+              <div className="p-6 sm:p-8 space-y-6 bg-white">
+                 <div className="space-y-4">
+                    <div className="flex gap-4">
+                        <div className="w-8 h-8 rounded-full bg-slate-100 flex-shrink-0 flex items-center justify-center text-slate-600 font-bold text-sm">1</div>
+                        <div>
+                            <h4 className="font-bold text-slate-800 mb-1">非官方數據</h4>
+                            <p className="text-sm text-slate-500 leading-relaxed">本平台資料皆由考生自由回報，<span className="text-rose-500 font-bold">非官方公佈之錄取標準</span>。資料僅供參考，請勿作為選填志願的唯一依據。</p>
+                        </div>
+                    </div>
+                    <div className="flex gap-4">
+                        <div className="w-8 h-8 rounded-full bg-slate-100 flex-shrink-0 flex items-center justify-center text-slate-600 font-bold text-sm">2</div>
+                        <div>
+                            <h4 className="font-bold text-slate-800 mb-1">準確性風險</h4>
+                            <p className="text-sm text-slate-500 leading-relaxed">雖然我們有過濾機制，但無法保證每一筆數據的真實性。建議多方比對（參考不同年份、不同來源）。</p>
+                        </div>
+                    </div>
+                    <div className="flex gap-4">
+                        <div className="w-8 h-8 rounded-full bg-slate-100 flex-shrink-0 flex items-center justify-center text-slate-600 font-bold text-sm">3</div>
+                        <div>
+                            <h4 className="font-bold text-slate-800 mb-1">匿名與隱私</h4>
+                            <p className="text-sm text-slate-500 leading-relaxed">平台採匿名制，不會蒐集您的個人識別資料。也請勿在備註欄填寫他人個資。</p>
+                        </div>
+                    </div>
+                 </div>
+
+                 <div className="pt-2">
+                    <button
+                        onClick={handleAcceptDisclaimer}
+                        className="w-full bg-slate-900 hover:bg-indigo-600 text-white text-lg font-bold py-4 rounded-xl shadow-lg hover:shadow-xl hover:shadow-indigo-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group"
+                    >
+                        <span>我已閱讀並同意</span>
+                        <Check className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                    </button>
+                 </div>
+              </div>
+           </div>
+        </div>
+      )}
+
       {/* Sidebar Overlay */}
       {isSidebarOpen && (
         <div 
