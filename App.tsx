@@ -4,7 +4,6 @@ import ScoreList from './components/ScoreList';
 import Dashboard from './components/Dashboard';
 import Guide from './components/Guide';
 import { ScoreEntry } from './types';
-import { fetchEntries, submitEntry, logUserAction } from './services/apiService';
 import { GraduationCap, BarChart3, PlusCircle, BookOpen, CloudOff, Info, Menu, X, ExternalLink, Calculator, Compass, Sparkles, RefreshCw, Home, ShieldAlert, Check } from 'lucide-react';
 
 // New Custom Loader Component
