@@ -10,7 +10,7 @@ interface ScoreFormProps {
 
 const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
   const [formData, setFormData] = useState({
-    year: YEARS[1],
+    year: YEARS[0],
     school: '',
     department: '',
     region: REGIONS[0],
