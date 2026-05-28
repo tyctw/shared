@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { ScoreEntry } from '../types';
 import { REGIONS, YEARS } from '../constants';
-import { MapPin, Search, Sparkles, Share2, Check, Calendar, Quote, School, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MapPin, Search, Sparkles, Share2, Check, Calendar, Quote, School, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 
 interface ScoreListProps {
   entries: ScoreEntry[];
   isLoading?: boolean;
+  favoriteIds?: string[];
+  toggleFavorite?: (id: string) => void;
 }
 
 const SUBJECT_LABELS: Record<string, string> = {
@@ -45,7 +47,7 @@ const ScoreSkeleton = () => (
             </div>
             <div className="w-20 h-16 bg-slate-200/60 rounded-2xl"></div>
         </div>
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3 mt-8 sm:mt-12 border-t border-slate-200/50 pt-6">
+        <div className="grid grid-cols-3 gap-2 mt-8 sm:mt-12 border-t border-slate-200/50 pt-6">
             {[...Array(6)].map((_, i) => (
                 <div key={i} className="aspect-square rounded-2xl bg-slate-200/50"></div>
             ))}
@@ -54,7 +56,7 @@ const ScoreSkeleton = () => (
   </div>
 );
 
-const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading }) => {
+const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds = [], toggleFavorite }) => {
   const [filterRegion, setFilterRegion] = useState<string>('All');
   const [filterYear, setFilterYear] = useState<string>('All');
   const [filterSchool, setFilterSchool] = useState<string>('');
@@ -139,7 +141,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading }) => {
          </div>
        </div>
 
-      <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {isLoading ? (
             <>
                 <ScoreSkeleton />
@@ -176,19 +178,30 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading }) => {
                                   <MapPin className="w-3.5 h-3.5 text-slate-400" /> {entry.region}
                               </span>
                           </div>
-                          <button 
-                              onClick={() => handleShare(entry)}
-                              className="p-2.5 rounded-xl bg-white text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border border-slate-200/60 shadow-sm transition-all sm:opacity-0 group-hover:opacity-100 focus:opacity-100"
-                              title="複製分享內容"
-                          >
-                              {copiedId === entry.id ? <Check className="w-4 h-4 text-emerald-500" /> : <Share2 className="w-4 h-4" />}
-                          </button>
+                          <div className="flex items-center gap-2">
+                              {toggleFavorite && (
+                                  <button
+                                      onClick={() => toggleFavorite(entry.id)}
+                                      className={`p-2.5 rounded-xl bg-white border border-slate-200/60 shadow-sm transition-all sm:opacity-0 group-hover:opacity-100 focus:opacity-100 ${favoriteIds?.includes(entry.id) ? 'text-rose-500 hover:bg-rose-50' : 'text-slate-400 hover:text-rose-500 hover:bg-rose-50'}`}
+                                      title={favoriteIds?.includes(entry.id) ? "取消收藏" : "加入收藏"}
+                                  >
+                                      <Heart className={`w-4 h-4 ${favoriteIds?.includes(entry.id) ? 'fill-current' : ''}`} />
+                                  </button>
+                              )}
+                              <button 
+                                  onClick={() => handleShare(entry)}
+                                  className="p-2.5 rounded-xl bg-white text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border border-slate-200/60 shadow-sm transition-all sm:opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                  title="複製分享內容"
+                              >
+                                  {copiedId === entry.id ? <Check className="w-4 h-4 text-emerald-500" /> : <Share2 className="w-4 h-4" />}
+                              </button>
+                          </div>
                       </div>
 
                       {/* Title & Points Row */}
-                      <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
+                      <div className="flex flex-col justify-between items-start gap-4 mb-6">
                           <div className="flex-1">
-                              <h3 className="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight leading-tight mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-600 group-hover:to-purple-600 transition-all duration-300">
+                              <h3 className="text-2xl font-black text-slate-800 tracking-tight leading-tight mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-600 group-hover:to-purple-600 transition-all duration-300">
                                   {entry.school}
                               </h3>
                               <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50/80 text-indigo-700 text-sm font-bold rounded-lg border border-indigo-100">
@@ -197,17 +210,17 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading }) => {
                               </div>
                           </div>
 
-                          <div className="flex gap-2 shrink-0 w-full sm:w-auto">
-                              <div className="flex-1 sm:flex-none flex flex-col justify-center items-center bg-white border border-slate-200 rounded-xl sm:rounded-2xl px-4 sm:px-5 py-2 sm:py-3 shadow-sm min-w-[5rem] sm:min-w-[5.5rem] group-hover:border-indigo-200 group-hover:shadow-md transition-all duration-300">
+                          <div className="flex gap-2 shrink-0 w-full">
+                              <div className="flex-1 flex flex-col justify-center items-center bg-white border border-slate-200 rounded-xl px-4 py-2 shadow-sm min-w-[5rem] group-hover:border-indigo-200 group-hover:shadow-md transition-all duration-300">
                                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">總積分</span>
-                                  <span className="text-2xl sm:text-3xl font-black text-slate-800 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-600 group-hover:to-purple-600 transition-all leading-none tracking-tighter">
+                                  <span className="text-2xl font-black text-slate-800 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-600 group-hover:to-purple-600 transition-all leading-none tracking-tighter">
                                       {entry.totalPoints}
                                   </span>
                               </div>
                               {entry.totalCredits && (
-                                  <div className="flex-1 sm:flex-none flex flex-col justify-center items-center bg-gradient-to-b from-amber-50 to-orange-50 border border-amber-200 rounded-xl sm:rounded-2xl px-4 sm:px-5 py-2 sm:py-3 shadow-sm min-w-[5rem] sm:min-w-[5.5rem] group-hover:border-amber-300 group-hover:shadow-md transition-all duration-300">
+                                  <div className="flex-1 flex flex-col justify-center items-center bg-gradient-to-b from-amber-50 to-orange-50 border border-amber-200 rounded-xl px-4 py-2 shadow-sm min-w-[5rem] group-hover:border-amber-300 group-hover:shadow-md transition-all duration-300">
                                       <span className="text-[10px] font-bold text-amber-600/70 uppercase tracking-widest mb-1 flex items-center gap-0.5"><Sparkles className="w-2.5 h-2.5" />總積點</span>
-                                      <span className="text-2xl sm:text-3xl font-black text-amber-600 leading-none tracking-tighter">
+                                      <span className="text-2xl font-black text-amber-600 leading-none tracking-tighter">
                                           {entry.totalCredits}
                                       </span>
                                   </div>
@@ -229,28 +242,28 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading }) => {
 
                       {/* Subject Scores Grid */}
                       <div className="mt-auto">
-                          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3">
+                          <div className="grid grid-cols-3 gap-2">
                               {(['chinese', 'english', 'math', 'nature', 'social'] as const).map(sub => (
                                   <div 
                                       key={sub} 
-                                      className={`flex flex-col items-center justify-center rounded-2xl p-2.5 sm:p-4 border border-x-b-t transition-transform hover:-translate-y-1 ${getGradeStyle(entry.scores[sub])}`}
+                                      className={`flex flex-col items-center justify-center rounded-2xl p-2.5 border transition-transform hover:-translate-y-1 ${getGradeStyle(entry.scores[sub])}`}
                                   >
-                                      <span className="text-[10px] font-bold opacity-70 uppercase tracking-wider mb-1 sm:mb-1.5">
+                                      <span className="text-[10px] font-bold opacity-70 uppercase tracking-wider mb-1">
                                           {SUBJECT_LABELS[sub]}
                                       </span>
-                                      <span className="text-lg sm:text-2xl font-black font-mono leading-none">
+                                      <span className="text-lg font-black font-mono leading-none">
                                           {entry.scores[sub]}
                                       </span>
                                   </div>
                               ))}
                               <div 
-                                  className={`flex flex-col items-center justify-center rounded-2xl p-2.5 sm:p-4 border transition-transform hover:-translate-y-1 ${getWritingStyle(entry.scores.writing)}`}
+                                  className={`flex flex-col items-center justify-center rounded-2xl p-2.5 border transition-transform hover:-translate-y-1 ${getWritingStyle(entry.scores.writing)}`}
                               >
-                                  <span className="text-[10px] font-bold opacity-70 uppercase tracking-wider mb-1 sm:mb-1.5">
+                                  <span className="text-[10px] font-bold opacity-70 uppercase tracking-wider mb-1">
                                       作文
                                   </span>
-                                  <span className="text-lg sm:text-2xl font-black font-mono leading-none">
-                                      {entry.scores.writing}<span className="text-xs sm:text-sm ml-0.5 opacity-60">級</span>
+                                  <span className="text-lg font-black font-mono leading-none">
+                                      {entry.scores.writing}<span className="text-xs ml-0.5 opacity-60">級</span>
                                   </span>
                               </div>
                           </div>

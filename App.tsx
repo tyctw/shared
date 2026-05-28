@@ -3,33 +3,56 @@ import ScoreForm from './components/ScoreForm';
 import ScoreList from './components/ScoreList';
 import Dashboard from './components/Dashboard';
 import Guide from './components/Guide';
+import ScoreCompare from './components/ScoreCompare';
 import { ScoreEntry } from './types';
 import { fetchEntries, submitEntry, logUserAction } from './services/apiService';
-import { GraduationCap, BarChart3, PlusCircle, BookOpen, CloudOff, Info, Menu, X, ExternalLink, Calculator, Compass, Sparkles, RefreshCw, Home, ShieldAlert, Check } from 'lucide-react';
+import { GraduationCap, BarChart3, PlusCircle, BookOpen, CloudOff, Info, Menu, X, ExternalLink, Calculator, Compass, Sparkles, RefreshCw, Home, ShieldAlert, Check, Heart } from 'lucide-react';
 
 // New Custom Loader Component
 const AppLoader = () => (
-  <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-8 animate-in fade-in duration-500">
-    <div className="relative">
-      <div className="w-24 h-24 rounded-full border-4 border-indigo-100 border-t-indigo-500 animate-spin"></div>
-      <div className="absolute inset-0 m-auto w-16 h-16 rounded-full border-4 border-purple-50 border-b-purple-500 animate-spin-slow-reverse"></div>
-      <div className="absolute inset-0 m-auto flex items-center justify-center w-10 h-10 bg-white rounded-full shadow-lg text-indigo-600">
-        <GraduationCap className="w-5 h-5 animate-pulse" />
-      </div>
-    </div>
-    <div className="text-center space-y-2">
-      <h3 className="text-lg font-bold text-slate-700">正在同步全台數據</h3>
-      <p className="text-sm text-slate-400 font-medium animate-pulse">Connecting to CAP Database...</p>
-    </div>
+  <div className="flex flex-col items-center justify-center min-h-[50vh] animate-in fade-in duration-700">
+     <div className="relative w-32 h-32 mb-10">
+        <div className="absolute inset-0 bg-indigo-500 rounded-full blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute inset-4 rounded-[2rem] border-2 border-indigo-100 rotate-12 animate-[spin_3s_linear_infinite]"></div>
+        <div className="absolute inset-4 rounded-[2rem] border-2 border-purple-100 -rotate-12 animate-[spin_4s_linear_infinite_reverse]"></div>
+        
+        <div className="absolute inset-0 m-auto w-16 h-16 bg-gradient-to-tr from-indigo-500 to-purple-600 rounded-2xl shadow-xl shadow-indigo-200/50 flex items-center justify-center z-10 hover:scale-105 transition-transform">
+            <GraduationCap className="w-8 h-8 text-white animate-[bounce_2s_infinite]" />
+        </div>
+     </div>
+     <div className="flex flex-col items-center gap-4">
+        <h3 className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
+            正在載入落點數據
+        </h3>
+        <div className="flex gap-2.5">
+           <div className="w-2.5 h-2.5 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '0s' }}></div>
+           <div className="w-2.5 h-2.5 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: '0.15s' }}></div>
+           <div className="w-2.5 h-2.5 rounded-full bg-rose-400 animate-bounce" style={{ animationDelay: '0.3s' }}></div>
+        </div>
+     </div>
   </div>
 );
 
 const App: React.FC = () => {
   const [entries, setEntries] = useState<ScoreEntry[]>([]);
-  const [activeTab, setActiveTab] = useState<'list' | 'form' | 'stats' | 'guide'>('list');
+  const [activeTab, setActiveTab] = useState<'list' | 'form' | 'stats' | 'guide' | 'compare'>('list');
+  const [favoriteIds, setFavoriteIds] = useState<string[]>(() => {
+      const saved = localStorage.getItem('cap_favorites');
+      return saved ? JSON.parse(saved) : [];
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
+
+  useEffect(() => {
+      localStorage.setItem('cap_favorites', JSON.stringify(favoriteIds));
+  }, [favoriteIds]);
+
+  const toggleFavorite = (id: string) => {
+      setFavoriteIds(prev => 
+          prev.includes(id) ? prev.filter(fid => fid !== id) : [...prev, id]
+      );
+  };
 
   // Extract data fetching logic to a reusable function
   const loadData = useCallback(async (isManualRefresh = false) => {
@@ -89,17 +112,17 @@ const App: React.FC = () => {
   const NavButton = ({ id, label, icon: Icon }: { id: typeof activeTab, label: string, icon: any }) => (
     <button
       onClick={() => handleTabChange(id)}
-      className={`relative px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-300 flex items-center gap-2 group ${
+      className={`relative px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 group ${
         activeTab === id 
-          ? 'bg-slate-800 text-white shadow-lg shadow-slate-500/30 scale-100 ring-2 ring-white ring-offset-2 ring-offset-slate-100' 
-          : 'text-slate-500 hover:text-slate-900 hover:bg-white hover:shadow-sm'
+          ? 'bg-white text-indigo-700 shadow-sm border border-slate-200/60 scale-100' 
+          : 'text-slate-500 hover:text-indigo-600 hover:bg-slate-100/50 scale-95 hover:scale-100 border border-transparent'
       }`}
     >
-        <Icon className={`w-4 h-4 transition-transform duration-300 ${activeTab === id ? 'scale-110' : 'group-hover:scale-110'}`} />
-        <span className={id === 'form' ? '' : 'hidden xl:inline'}>{label}</span>
-        {activeTab === id && (
-            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-white rounded-full mb-1.5 opacity-0 md:opacity-100"></span>
-        )}
+      <Icon className={`w-4 h-4 ${activeTab === id ? 'text-indigo-600' : 'group-hover:text-indigo-500 text-slate-400'}`} />
+      <span>{label}</span>
+      {activeTab === id && (
+          <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-indigo-500 rounded-full md:opacity-100 opacity-0 hidden"></span>
+      )}
     </button>
   );
 
@@ -257,68 +280,66 @@ const App: React.FC = () => {
 
       {/* Floating Header (Top) */}
       <header className="fixed top-0 w-full z-40 transition-all duration-300 pt-3 px-3 sm:pt-4 sm:px-6">
-        <div className="max-w-4xl mx-auto h-14 sm:h-20 flex items-center justify-between px-3 sm:px-6 rounded-full glass-header shadow-[0_8px_32px_rgba(0,0,0,0.04)] ring-1 ring-white/60">
+        <div className="max-w-5xl mx-auto h-16 sm:h-20 flex items-center justify-between px-4 sm:px-6 bg-white/80 backdrop-blur-2xl rounded-3xl shadow-[0_4px_40px_-10px_rgba(0,0,0,0.1)] border border-white/60">
           
           {/* Left: Logo */}
-          <div className="flex items-center gap-2 sm:gap-3 cursor-pointer group flex-shrink-0" onClick={() => handleTabChange('list')}>
-            <div className="relative">
-                <div className="absolute inset-0 bg-indigo-500 blur-lg opacity-20 group-hover:opacity-40 transition-opacity rounded-full"></div>
-                <div className="bg-white p-1.5 sm:p-2 rounded-full shadow-sm border border-indigo-50 relative">
-                    <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 group-hover:rotate-12 transition-transform" />
-                </div>
+          <div className="flex items-center gap-3 cursor-pointer group flex-shrink-0" onClick={() => handleTabChange('list')}>
+            <div className="relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-xl sm:rounded-2xl shadow-md group-hover:shadow-indigo-500/30 transition-all duration-300 group-hover:scale-[1.02]">
+                <div className="absolute inset-[2px] bg-white rounded-[10px] sm:rounded-[14px] z-0"></div>
+                <GraduationCap className="relative z-10 w-5 h-5 sm:w-6 sm:h-6 text-indigo-600 group-hover:rotate-12 transition-transform duration-500" />
             </div>
-            <h1 className="text-base sm:text-lg font-black text-slate-800 tracking-tight leading-tight">
-              會考落點<span className="text-indigo-600 hidden sm:inline">分享</span>
-            </h1>
+            <div className="flex flex-col">
+                <h1 className="text-lg sm:text-xl font-black text-slate-800 tracking-tight leading-none mb-0.5">
+                  會考落點<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">導航</span>
+                </h1>
+                <p className="text-[10px] sm:text-xs font-bold text-slate-400 tracking-widest uppercase origin-left scale-90">CAP Score Sharing</p>
+            </div>
           </div>
 
+          {/* Center: Desktop Navigation (Hidden on Mobile) */}
+          <nav className="hidden md:flex items-center bg-slate-50/80 p-1.5 rounded-2xl border border-slate-100/50 shadow-[inset_0_1px_4px_rgba(0,0,0,0.02)] gap-1">
+             <NavButton id="list" label="瀏覽" icon={BookOpen} />
+             <NavButton id="compare" label="收藏" icon={Heart} />
+             <NavButton id="stats" label="統計" icon={BarChart3} />
+             <NavButton id="guide" label="說明" icon={Info} />
+          </nav>
+
           {/* Right: Actions & Desktop Nav */}
-          <div className="flex items-center gap-2 sm:gap-4 flex-1 justify-end min-w-0">
+          <div className="flex items-center gap-2 sm:gap-4 flex-1 md:flex-none justify-end min-w-0">
             
-            {/* PROMINENT SHARE CTA - Visible everywhere */}
-            <button
-                onClick={() => handleTabChange('form')}
-                className={`
-                    flex items-center gap-1.5 px-3 py-1.5 sm:px-5 sm:py-2.5 rounded-full 
-                    font-bold text-xs sm:text-sm transition-all duration-300 transform active:scale-95
-                    shadow-md hover:shadow-lg
-                    ${activeTab === 'form' 
-                        ? 'bg-slate-800 text-white ring-2 ring-slate-200 ring-offset-2' 
-                        : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-500/30'
-                    }
-                `}
-            >
-                <PlusCircle className="w-4 h-4" />
-                <span>分享<span className="hidden sm:inline">分數</span></span>
-            </button>
-
-            {/* Desktop Navigation (Hidden on Mobile) */}
-            <nav className="hidden md:flex items-center gap-1 sm:gap-2">
-                <NavButton id="list" label="瀏覽分數" icon={BookOpen} />
-                <NavButton id="stats" label="統計數據" icon={BarChart3} />
-                {/* 'Share' is handled by the prominent button above */}
-                <NavButton id="guide" label="使用說明" icon={Info} />
-            </nav>
-
-            <div className="h-6 sm:h-8 w-px bg-slate-200 mx-1 hidden md:block"></div>
-
             {/* Refresh Button */}
             <button
                 onClick={() => loadData(true)}
                 disabled={isLoading}
-                className="p-2 sm:p-2.5 rounded-full hover:bg-slate-100 text-slate-500 hover:text-indigo-600 transition-colors flex-shrink-0 relative group disabled:opacity-50"
+                className="hidden sm:flex bg-slate-50/80 hover:bg-white p-2.5 rounded-xl border border-slate-100 hover:border-slate-200 text-slate-500 hover:text-indigo-600 shadow-sm transition-all relative group disabled:opacity-50"
                 title="重新讀取資料"
             >
-                <RefreshCw className={`w-4 h-4 sm:w-5 sm:h-5 ${isLoading ? 'animate-spin text-indigo-500' : ''}`} />
+                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-indigo-500' : ''}`} />
+            </button>
+
+            {/* PROMINENT SHARE CTA - Visible everywhere */}
+            <button
+                onClick={() => handleTabChange('form')}
+                className={`
+                    flex items-center gap-1.5 px-3 py-1.5 sm:px-5 sm:py-2.5 rounded-xl
+                    font-bold text-xs sm:text-sm transition-all duration-300 transform active:scale-95
+                    ${activeTab === 'form' 
+                        ? 'bg-slate-800 text-white shadow-xl shadow-slate-200 border border-slate-700' 
+                        : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg shadow-indigo-200 border border-indigo-500/50'
+                    }
+                `}
+            >
+                <PlusCircle className="w-4 h-4" />
+                <span><span className="hidden sm:inline">新增</span>分享</span>
             </button>
 
             {/* Menu Button */}
             <button 
                 onClick={() => setIsSidebarOpen(true)}
-                className="p-2 sm:p-2.5 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors flex-shrink-0"
+                className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors md:hidden"
                 title="更多功能"
             >
-                <Menu className="w-4 h-4 sm:w-5 sm:h-5" />
+                <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
           </div>
         </div>
@@ -328,10 +349,10 @@ const App: React.FC = () => {
       <nav className="fixed bottom-5 left-4 right-4 z-50 md:hidden animate-in slide-in-from-bottom-6 duration-500">
          <div className="bg-white/80 backdrop-blur-2xl border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.12)] rounded-[2rem] p-2 flex justify-between items-center max-w-sm mx-auto ring-1 ring-white/60">
             <MobileNavButton id="list" label="瀏覽" icon={BookOpen} />
+            <MobileNavButton id="compare" label="收藏" icon={Heart} />
             <MobileNavButton id="stats" label="統計" icon={BarChart3} />
             <div className="w-px h-8 bg-slate-200/60 mx-1"></div>
             <MobileNavButton id="form" label="分享" icon={PlusCircle} />
-            <MobileNavButton id="guide" label="說明" icon={Info} />
          </div>
       </nav>
 
@@ -406,18 +427,28 @@ const App: React.FC = () => {
                  </div>
 
                 {isLoading ? (
-                    <div className="grid grid-cols-1 gap-6">
-                       <ScoreList entries={[]} isLoading={true} />
-                    </div>
+                    <AppLoader />
                 ) : (
                     <ScoreList 
                         entries={entries} 
                         isLoading={false}
+                        favoriteIds={favoriteIds}
+                        toggleFavorite={toggleFavorite}
                     />
                 )}
             </div>
             )}
             
+            {activeTab === 'compare' && (
+                <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500">
+                    <ScoreCompare 
+                        entries={entries}
+                        favoriteIds={favoriteIds}
+                        toggleFavorite={toggleFavorite}
+                    />
+                </div>
+            )}
+
             {activeTab === 'stats' && (
                 <div className="space-y-8 max-w-5xl mx-auto">
                     <div className="flex items-center gap-4 mb-2">

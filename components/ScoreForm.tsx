@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ScoreEntry, Region, Grade, WritingGrade } from '../types';
 import { YEARS, GRADES, WRITING_GRADES, REGIONS, DEPARTMENT_GROUPS, SCHOOLS_BY_REGION } from '../constants';
+import { calculateRegionalScore } from '../utils/scoreCalculator';
 import { Send, Loader2, Info, ChevronDown, User, PenTool, Search, ShieldCheck, MapPin, School, GraduationCap, Trophy, FileText, Sparkles } from 'lucide-react';
 
 interface ScoreFormProps {
@@ -37,6 +38,16 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
   const [groupSearchTerm, setGroupSearchTerm] = useState('');
   const [isDeptModalOpen, setIsDeptModalOpen] = useState(false);
   const [deptSearchTerm, setDeptSearchTerm] = useState('');
+
+  // Auto-calculate total points & credits based on region
+  useEffect(() => {
+    const { points, credits } = calculateRegionalScore(formData.region, formData.scores);
+    setFormData(prev => ({
+      ...prev,
+      totalPoints: points,
+      totalCredits: credits
+    }));
+  }, [formData.region, formData.scores]);
 
   useEffect(() => {
     if (selectedGroup && !isManualDept) {
