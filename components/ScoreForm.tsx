@@ -30,10 +30,13 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
   const [isManualDept, setIsManualDept] = useState(false);
   const [isManualSchool, setIsManualSchool] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-  
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [isSchoolModalOpen, setIsSchoolModalOpen] = useState(false);
+  const [searchSchoolTerm, setSearchSchoolTerm] = useState('');
+  const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
+  const [groupSearchTerm, setGroupSearchTerm] = useState('');
+  const [isDeptModalOpen, setIsDeptModalOpen] = useState(false);
+  const [deptSearchTerm, setDeptSearchTerm] = useState('');
 
   useEffect(() => {
     if (selectedGroup && !isManualDept) {
@@ -50,17 +53,6 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
       setFormData(prev => ({ ...prev, school: '' }));
     }
   }, [formData.region, isManualSchool]);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-        if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-            setIsDropdownOpen(false);
-        }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   // Dirty Check
   useEffect(() => {
@@ -125,10 +117,29 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
   };
 
   const availableSchools = SCHOOLS_BY_REGION[formData.region] || [];
-  const filteredSchools = availableSchools.filter(s => s.includes(formData.school));
+  const filteredSchools = availableSchools.filter(s => s.includes(searchSchoolTerm));
+  const availableGroups = Object.keys(DEPARTMENT_GROUPS);
+  const filteredGroups = availableGroups.filter(g => g.includes(groupSearchTerm));
+  const availableDepts = DEPARTMENT_GROUPS[selectedGroup] || [];
+  const filteredDepts = availableDepts.filter(d => d.includes(deptSearchTerm));
 
   // Style Constants
   const sectionClass = "bg-white/40 backdrop-blur-md rounded-[2rem] p-6 sm:p-8 border border-white/60 shadow-sm relative overflow-hidden group hover:shadow-md transition-all duration-500";
+
+  const getGradeSelectStyle = (grade: string) => {
+    if (grade === 'A++') return 'border-amber-200 text-amber-600 bg-gradient-to-b from-amber-50 to-orange-50';
+    if (grade === 'A+') return 'border-emerald-200 text-emerald-600 bg-gradient-to-b from-emerald-50 to-teal-50';
+    if (grade === 'A') return 'border-indigo-200 text-indigo-600 bg-gradient-to-b from-indigo-50 to-blue-50';
+    if (grade.startsWith('B')) return 'border-slate-200 text-slate-700 bg-slate-50';
+    return 'border-gray-100 text-gray-500 bg-gray-50';
+  };
+
+  const getWritingSelectStyle = (grade: number) => {
+    if (grade === 6) return 'border-rose-200 text-rose-600 bg-gradient-to-b from-rose-50 to-pink-50';
+    if (grade === 5) return 'border-fuchsia-200 text-fuchsia-600 bg-gradient-to-b from-fuchsia-50 to-purple-50';
+    return 'border-slate-200 text-slate-700 bg-slate-50';
+  };
+
   const labelClass = "block text-sm font-bold text-slate-600 mb-2 flex items-center gap-1.5";
   const inputClass = "w-full bg-white/70 hover:bg-white focus:bg-white border border-slate-200/80 focus:border-indigo-400 rounded-xl py-3 px-4 text-slate-700 outline-none focus:ring-4 focus:ring-indigo-100 transition-all duration-300 placeholder:text-slate-400 font-medium appearance-none shadow-sm";
   const selectWrapperClass = "relative";
@@ -199,69 +210,40 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                     {isManualSchool ? (
                          <input type="text" value={formData.school} onChange={(e) => handleChange('school', e.target.value)} placeholder="例：建國中學" className={inputClass} autoFocus />
                     ) : (
-                        <div className="relative" ref={dropdownRef}>
-                            <input
-                                type="text"
-                                value={formData.school}
-                                onChange={(e) => {
-                                    handleChange('school', e.target.value);
-                                    setIsDropdownOpen(true);
-                                }}
-                                onFocus={() => setIsDropdownOpen(true)}
-                                placeholder="搜尋學校..."
-                                className={`${inputClass} pl-10`}
-                            />
-                            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                                <Search className="w-4 h-4" />
-                            </div>
-                            
-                            {isDropdownOpen && (
-                                <div className="absolute z-30 w-full mt-2 bg-white/95 backdrop-blur-xl border border-slate-100 rounded-xl shadow-xl max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-indigo-200">
-                                    {filteredSchools.length > 0 ? (
-                                        filteredSchools.map(school => (
-                                            <button
-                                                key={school}
-                                                type="button"
-                                                onClick={() => {
-                                                    handleChange('school', school);
-                                                    setIsDropdownOpen(false);
-                                                }}
-                                                className="w-full text-left px-4 py-2.5 hover:bg-indigo-50 text-slate-700 text-sm font-medium transition-colors border-b border-slate-50 last:border-0 flex items-center gap-2"
-                                            >
-                                                <School className="w-3.5 h-3.5 text-indigo-400" />
-                                                {school}
-                                            </button>
-                                        ))
-                                    ) : (
-                                        <div className="px-4 py-3 text-slate-400 text-sm flex flex-col items-center gap-2 text-center">
-                                            <span>找不到符合的學校</span>
-                                            <button 
-                                                type="button" 
-                                                onClick={() => { setIsManualSchool(true); setIsDropdownOpen(false); }}
-                                                className="text-indigo-600 hover:text-indigo-800 font-bold text-xs bg-indigo-50 px-3 py-1.5 rounded-full"
-                                            >
-                                                切換為手動輸入
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setSearchSchoolTerm('');
+                                setIsSchoolModalOpen(true);
+                            }}
+                            className={`${inputClass} text-left flex items-center justify-between group/btn`}
+                        >
+                            <span className={formData.school ? 'text-slate-700' : 'text-slate-400'}>
+                                {formData.school || '點擊選擇學校...'}
+                            </span>
+                            <Search className="w-4 h-4 text-slate-400 group-hover/btn:text-indigo-400 transition-colors" />
+                        </button>
                     )}
                 </div>
                 
                 {/* Department Row */}
                 <div className="md:col-span-12 grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 border-t border-slate-100/50 mt-2">
-                     {/* Group */}
+                    {/* Group */}
                      <div className="space-y-1">
                         <label className={labelClass}>群別分類</label>
-                        <div className={selectWrapperClass}>
-                            <select value={selectedGroup} onChange={(e) => { setSelectedGroup(e.target.value); if (e.target.value !== 'custom') setIsManualDept(false); }} className={`${inputClass} cursor-pointer`}>
-                                {Object.keys(DEPARTMENT_GROUPS).map(group => <option key={group} value={group}>{group}</option>)}
-                                <option value="custom">其他 / 自行輸入</option>
-                            </select>
-                            <ChevronDown className={selectArrowClass} />
-                        </div>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setGroupSearchTerm('');
+                                setIsGroupModalOpen(true);
+                            }}
+                            className={`${inputClass} text-left flex items-center justify-between group/btn`}
+                        >
+                            <span className={selectedGroup ? 'text-slate-700' : 'text-slate-400'}>
+                                {selectedGroup || '點擊選擇群別...'}
+                            </span>
+                            <Search className="w-4 h-4 text-slate-400 group-hover/btn:text-indigo-400 transition-colors" />
+                        </button>
                      </div>
 
                      {/* Department */}
@@ -279,12 +261,19 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                         {selectedGroup === 'custom' || isManualDept ? (
                             <input type="text" value={formData.department} onChange={(e) => handleChange('department', e.target.value)} placeholder="輸入科系名稱" className={inputClass} />
                         ) : (
-                            <div className={selectWrapperClass}>
-                                <select value={formData.department} onChange={(e) => handleChange('department', e.target.value)} className={`${inputClass} cursor-pointer`}>
-                                    {DEPARTMENT_GROUPS[selectedGroup]?.map(dept => <option key={dept} value={dept}>{dept}</option>)}
-                                </select>
-                                <ChevronDown className={selectArrowClass} />
-                            </div>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setDeptSearchTerm('');
+                                    setIsDeptModalOpen(true);
+                                }}
+                                className={`${inputClass} text-left flex items-center justify-between group/btn`}
+                            >
+                                <span className={formData.department ? 'text-slate-700' : 'text-slate-400'}>
+                                    {formData.department || '點擊選擇科系...'}
+                                </span>
+                                <Search className="w-4 h-4 text-slate-400 group-hover/btn:text-indigo-400 transition-colors" />
+                            </button>
                         )}
                      </div>
                 </div>
@@ -303,7 +292,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
             </h3>
 
             <div className="bg-white/50 rounded-2xl p-4 border border-slate-100 mb-6 relative z-10">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-4">
                     {(['chinese', 'english', 'math', 'nature', 'social'] as const).map(subject => (
                     <div key={subject} className="flex flex-col gap-1.5">
                         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">
@@ -313,7 +302,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                             <select 
                                 value={formData.scores[subject]} 
                                 onChange={(e) => handleScoreChange(subject, e.target.value)} 
-                                className="w-full h-14 rounded-xl border-2 border-slate-100 hover:border-indigo-300 focus:border-indigo-500 text-center font-mono font-black text-xl text-slate-700 bg-white shadow-sm appearance-none cursor-pointer transition-all outline-none"
+                                className={`w-full h-14 rounded-xl border-2 text-center font-mono font-black text-xl shadow-sm appearance-none cursor-pointer transition-all outline-none focus:ring-4 focus:ring-indigo-100 ${getGradeSelectStyle(formData.scores[subject])}`}
                             >
                                 {GRADES.map(g => <option key={g} value={g}>{g}</option>)}
                             </select>
@@ -329,7 +318,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                             <select 
                                 value={formData.scores.writing} 
                                 onChange={(e) => handleScoreChange('writing', Number(e.target.value))} 
-                                className="w-full h-14 rounded-xl border-2 border-rose-100 hover:border-rose-300 focus:border-rose-500 text-center font-mono font-black text-xl text-rose-500 bg-white shadow-sm appearance-none cursor-pointer transition-all outline-none"
+                                className={`w-full h-14 rounded-xl border-2 text-center font-mono font-black text-xl shadow-sm appearance-none cursor-pointer transition-all outline-none focus:ring-4 focus:ring-rose-100 ${getWritingSelectStyle(formData.scores.writing)}`}
                             >
                                 {WRITING_GRADES.map(g => <option key={g} value={g}>{g} 級</option>)}
                             </select>
@@ -433,16 +422,30 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
 
                  {/* Mini Score Grid */}
                  <div className="grid grid-cols-6 gap-1 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                    {Object.entries(formData.scores).map(([key, value]) => (
-                        <div key={key} className="text-center">
-                            <div className="text-[10px] text-slate-400 uppercase font-bold mb-0.5">
-                                {key === 'chinese' ? '國' : key === 'english' ? '英' : key === 'math' ? '數' : key === 'nature' ? '自' : key === 'social' ? '社' : '作'}
+                    {(['chinese', 'english', 'math', 'nature', 'social', 'writing'] as const).map((key) => {
+                        const isWriting = key === 'writing';
+                        const val = formData.scores[key] as any;
+                        let textClass = 'text-slate-700';
+                        if (isWriting) {
+                            if (val === 6) textClass = 'text-rose-500';
+                            else if (val === 5) textClass = 'text-fuchsia-500';
+                        } else {
+                            if (val === 'A++') textClass = 'text-amber-500';
+                            else if (val === 'A+') textClass = 'text-emerald-500';
+                            else if (val === 'A') textClass = 'text-indigo-500';
+                        }
+                        
+                        return (
+                            <div key={key} className="text-center">
+                                <div className="text-[10px] text-slate-400 uppercase font-bold mb-0.5">
+                                    {key === 'chinese' ? '國' : key === 'english' ? '英' : key === 'math' ? '數' : key === 'nature' ? '自' : key === 'social' ? '社' : '作'}
+                                </div>
+                                <div className={`font-mono font-black text-lg ${textClass}`}>
+                                    {val}{isWriting ? '級' : ''}
+                                </div>
                             </div>
-                            <div className={`font-mono font-black text-lg ${key === 'writing' ? 'text-rose-500' : 'text-slate-700'}`}>
-                                {value}{key === 'writing' ? '級' : ''}
-                            </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                  </div>
 
                  <div className="flex gap-4">
@@ -480,6 +483,238 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                  >
                     確認送出 <Send className="w-4 h-4" />
                  </button>
+              </div>
+           </div>
+        </div>
+      )}
+
+      {/* School Selection Modal */}
+      {isSchoolModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
+           {/* Backdrop */}
+           <div 
+             className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+             onClick={() => setIsSchoolModalOpen(false)}
+           />
+           
+           {/* Modal Card */}
+           <div className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[80vh]">
+              <div className="bg-slate-50 p-4 border-b border-slate-100 flex items-center gap-3">
+                 <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <input
+                        type="text"
+                        value={searchSchoolTerm}
+                        onChange={(e) => setSearchSchoolTerm(e.target.value)}
+                        placeholder={`搜尋 ${formData.region} 的學校...`}
+                        className="w-full bg-white border border-slate-200 focus:border-indigo-400 rounded-xl py-3 pl-10 pr-4 text-slate-700 outline-none focus:ring-4 focus:ring-indigo-100 transition-all font-medium placeholder:text-slate-400"
+                        autoFocus
+                    />
+                 </div>
+                 <button 
+                    type="button"
+                    onClick={() => setIsSchoolModalOpen(false)}
+                    className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors shrink-0 font-medium"
+                 >
+                    取消
+                 </button>
+              </div>
+
+              <div className="overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-indigo-200 flex-1">
+                 {filteredSchools.length > 0 ? (
+                     filteredSchools.map(school => (
+                         <button
+                             key={school}
+                             type="button"
+                             onClick={() => {
+                                 handleChange('school', school);
+                                 setIsSchoolModalOpen(false);
+                             }}
+                             className="w-full text-left px-4 py-3 hover:bg-indigo-50 text-slate-700 font-medium transition-colors border-b border-slate-50 last:border-0 flex items-center justify-between group"
+                         >
+                             <div className="flex items-center gap-3">
+                                 <div className="p-2 bg-slate-100 rounded-lg group-hover:bg-indigo-100 transition-colors">
+                                    <School className="w-4 h-4 text-slate-500 group-hover:text-indigo-600" />
+                                 </div>
+                                 <span className="group-hover:text-indigo-700">{school}</span>
+                             </div>
+                         </button>
+                     ))
+                 ) : (
+                     <div className="px-4 py-12 text-slate-400 text-sm flex flex-col items-center gap-3 text-center">
+                         <div className="p-4 bg-slate-50 rounded-full">
+                            <Search className="w-6 h-6 text-slate-300" />
+                         </div>
+                         <p>找不到符合「{searchSchoolTerm}」的學校</p>
+                         <button 
+                             type="button" 
+                             onClick={() => { 
+                                 setIsManualSchool(true);
+                                 handleChange('school', searchSchoolTerm);
+                                 setIsSchoolModalOpen(false); 
+                             }}
+                             className="mt-2 text-white font-bold text-sm bg-indigo-500 hover:bg-indigo-600 px-5 py-2.5 rounded-xl shadow-sm transition-colors"
+                         >
+                             手動輸入「{searchSchoolTerm}」
+                         </button>
+                     </div>
+                 )}
+              </div>
+           </div>
+        </div>
+      )}
+      
+      {/* Group Selection Modal */}
+      {isGroupModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
+           <div 
+             className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+             onClick={() => setIsGroupModalOpen(false)}
+           />
+           <div className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[80vh]">
+              <div className="bg-slate-50 p-4 border-b border-slate-100 flex items-center gap-3">
+                 <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <input
+                        type="text"
+                        value={groupSearchTerm}
+                        onChange={(e) => setGroupSearchTerm(e.target.value)}
+                        placeholder="搜尋群別..."
+                        className="w-full bg-white border border-slate-200 focus:border-indigo-400 rounded-xl py-3 pl-10 pr-4 text-slate-700 outline-none focus:ring-4 focus:ring-indigo-100 transition-all font-medium placeholder:text-slate-400"
+                        autoFocus
+                    />
+                 </div>
+                 <button 
+                    type="button"
+                    onClick={() => setIsGroupModalOpen(false)}
+                    className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors shrink-0 font-medium"
+                 >
+                    取消
+                 </button>
+              </div>
+
+              <div className="overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-indigo-200 flex-1">
+                 {filteredGroups.length > 0 ? (
+                     <>
+                     {filteredGroups.map(group => (
+                         <button
+                             key={group}
+                             type="button"
+                             onClick={() => {
+                                 setSelectedGroup(group);
+                                 if (group !== 'custom') setIsManualDept(false);
+                                 setIsGroupModalOpen(false);
+                             }}
+                             className="w-full text-left px-4 py-3 hover:bg-indigo-50 text-slate-700 font-medium transition-colors border-b border-slate-50 last:border-0 flex items-center justify-between group"
+                         >
+                             <div className="flex items-center gap-3">
+                                 <span className="group-hover:text-indigo-700">{group}</span>
+                             </div>
+                         </button>
+                     ))}
+                     <button
+                         type="button"
+                         onClick={() => {
+                             setSelectedGroup('custom');
+                             setIsGroupModalOpen(false);
+                         }}
+                         className="w-full text-left px-4 py-3 hover:bg-indigo-50 text-slate-700 font-medium transition-colors border-b border-slate-50 last:border-0 flex items-center justify-between group"
+                     >
+                         <div className="flex items-center gap-3">
+                             <span className="group-hover:text-indigo-700 text-slate-500">其他 / 自行輸入</span>
+                         </div>
+                     </button>
+                     </>
+                 ) : (
+                     <div className="px-4 py-12 text-slate-400 text-sm flex flex-col items-center gap-3 text-center">
+                         <div className="p-4 bg-slate-50 rounded-full">
+                            <Search className="w-6 h-6 text-slate-300" />
+                         </div>
+                         <p>找不到符合「{groupSearchTerm}」的群別</p>
+                         <button 
+                             type="button" 
+                             onClick={() => { 
+                                 setSelectedGroup('custom');
+                                 setIsManualDept(true);
+                                 setIsGroupModalOpen(false); 
+                             }}
+                             className="mt-2 text-white font-bold text-sm bg-indigo-500 hover:bg-indigo-600 px-5 py-2.5 rounded-xl shadow-sm transition-colors"
+                         >
+                             手動輸入
+                         </button>
+                     </div>
+                 )}
+              </div>
+           </div>
+        </div>
+      )}
+      {/* Dept Selection Modal */}
+      {isDeptModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
+           <div 
+             className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+             onClick={() => setIsDeptModalOpen(false)}
+           />
+           <div className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[80vh]">
+              <div className="bg-slate-50 p-4 border-b border-slate-100 flex items-center gap-3">
+                 <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <input
+                        type="text"
+                        value={deptSearchTerm}
+                        onChange={(e) => setDeptSearchTerm(e.target.value)}
+                        placeholder="搜尋科系..."
+                        className="w-full bg-white border border-slate-200 focus:border-indigo-400 rounded-xl py-3 pl-10 pr-4 text-slate-700 outline-none focus:ring-4 focus:ring-indigo-100 transition-all font-medium placeholder:text-slate-400"
+                        autoFocus
+                    />
+                 </div>
+                 <button 
+                    type="button"
+                    onClick={() => setIsDeptModalOpen(false)}
+                    className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors shrink-0 font-medium"
+                 >
+                    取消
+                 </button>
+              </div>
+
+              <div className="overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-indigo-200 flex-1">
+                 {filteredDepts.length > 0 ? (
+                     <>
+                     {filteredDepts.map(dept => (
+                         <button
+                             key={dept}
+                             type="button"
+                             onClick={() => {
+                                 handleChange('department', dept);
+                                 setIsDeptModalOpen(false);
+                             }}
+                             className="w-full text-left px-4 py-3 hover:bg-indigo-50 text-slate-700 font-medium transition-colors border-b border-slate-50 last:border-0 flex items-center justify-between group"
+                         >
+                             <div className="flex items-center gap-3">
+                                 <span className="group-hover:text-indigo-700">{dept}</span>
+                             </div>
+                         </button>
+                     ))}
+                     </>
+                 ) : (
+                     <div className="px-4 py-12 text-slate-400 text-sm flex flex-col items-center gap-3 text-center">
+                         <div className="p-4 bg-slate-50 rounded-full">
+                            <Search className="w-6 h-6 text-slate-300" />
+                         </div>
+                         <p>找不到符合「{deptSearchTerm}」的科系</p>
+                         <button 
+                             type="button" 
+                             onClick={() => { 
+                                 setIsManualDept(true);
+                                 handleChange('department', deptSearchTerm);
+                                 setIsDeptModalOpen(false); 
+                             }}
+                             className="mt-2 text-white font-bold text-sm bg-indigo-500 hover:bg-indigo-600 px-5 py-2.5 rounded-xl shadow-sm transition-colors"
+                         >
+                             手動輸入「{deptSearchTerm}」
+                         </button>
+                     </div>
+                 )}
               </div>
            </div>
         </div>

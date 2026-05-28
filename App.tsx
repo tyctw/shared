@@ -336,7 +336,7 @@ const App: React.FC = () => {
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-28 sm:pt-32 pb-24 sm:pb-16">
+      <main className="max-w-5xl mx-auto px-3 sm:px-6 pt-24 sm:pt-32 pb-28 sm:pb-16">
         <div className="animate-in fade-in duration-700 slide-in-from-bottom-6">
             
             {!isLoading && entries.length === 0 && activeTab !== 'guide' && (
@@ -442,7 +442,7 @@ const App: React.FC = () => {
         </div>
       </main>
       
-      <footer className="py-12 mt-12 border-t border-slate-200/60 bg-white/40 backdrop-blur-sm">
+      <footer className="py-12 pb-36 md:pb-12 mt-12 border-t border-slate-200/60 bg-white/40 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-4 flex flex-col items-center gap-6 text-center">
             <div className="flex items-center gap-3 opacity-50 grayscale hover:grayscale-0 transition-all duration-500 cursor-default group">
                 <div className="bg-indigo-100 p-2 rounded-xl group-hover:bg-indigo-600 transition-colors">
