@@ -1,6 +1,6 @@
 import { Region, Grade, WritingGrade } from './types';
 
-export const YEARS = Array.from({ length: 5 }, (_, i) => 114 - i); // 114, 113, 112, 111, 110
+export const YEARS = Array.from({ length: 6 }, (_, i) => 115 - i); // 115, 114, 113, 112, 111, 110
 
 export const GRADES: Grade[] = ['A++', 'A+', 'A', 'B++', 'B+', 'B', 'C'];
 export const WRITING_GRADES: WritingGrade[] = [6, 5, 4, 3, 2, 1, 0];
