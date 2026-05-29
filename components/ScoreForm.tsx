@@ -38,6 +38,8 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
   const [groupSearchTerm, setGroupSearchTerm] = useState('');
   const [isDeptModalOpen, setIsDeptModalOpen] = useState(false);
   const [deptSearchTerm, setDeptSearchTerm] = useState('');
+  const [isRegionModalOpen, setIsRegionModalOpen] = useState(false);
+  const [regionSearchTerm, setRegionSearchTerm] = useState('');
 
   // Auto-calculate total points & credits based on region
   useEffect(() => {
@@ -133,6 +135,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
   const filteredGroups = availableGroups.filter(g => g.includes(groupSearchTerm));
   const availableDepts = DEPARTMENT_GROUPS[selectedGroup] || [];
   const filteredDepts = availableDepts.filter(d => d.includes(deptSearchTerm));
+  const filteredRegions = REGIONS.filter(r => r.includes(regionSearchTerm));
 
   // Style Constants
   const sectionClass = "bg-white/40 backdrop-blur-md rounded-[2rem] p-6 sm:p-8 border border-white/60 shadow-sm relative overflow-hidden group hover:shadow-md transition-all duration-500";
@@ -201,12 +204,19 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                 {/* Region */}
                 <div className="md:col-span-4 space-y-1">
                     <label className={labelClass}>所屬區域</label>
-                    <div className={selectWrapperClass}>
-                        <select value={formData.region} onChange={(e) => handleChange('region', e.target.value)} className={`${inputClass} cursor-pointer`}>
-                            {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
-                        </select>
-                        <ChevronDown className={selectArrowClass} />
-                    </div>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setRegionSearchTerm('');
+                            setIsRegionModalOpen(true);
+                        }}
+                        className={`${inputClass} text-left flex items-center justify-between group/btn`}
+                    >
+                        <span className={formData.region ? 'text-slate-700' : 'text-slate-400'}>
+                            {formData.region || '點擊選擇區域...'}
+                        </span>
+                        <Search className="w-4 h-4 text-slate-400 group-hover/btn:text-indigo-400 transition-colors" />
+                    </button>
                 </div>
 
                 {/* School */}
@@ -724,6 +734,67 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                          >
                              手動輸入「{deptSearchTerm}」
                          </button>
+                     </div>
+                 )}
+              </div>
+           </div>
+        </div>
+      )}
+
+      {/* Region Selection Modal */}
+      {isRegionModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
+           <div 
+             className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+             onClick={() => setIsRegionModalOpen(false)}
+           />
+           <div className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[80vh]">
+              <div className="bg-slate-50 p-4 border-b border-slate-100 flex items-center gap-3">
+                 <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <input
+                        type="text"
+                        value={regionSearchTerm}
+                        onChange={(e) => setRegionSearchTerm(e.target.value)}
+                        placeholder="搜尋區域..."
+                        className="w-full bg-white border border-slate-200 focus:border-indigo-400 rounded-xl py-3 pl-10 pr-4 text-slate-700 outline-none focus:ring-4 focus:ring-indigo-100 transition-all font-medium placeholder:text-slate-400"
+                        autoFocus
+                    />
+                 </div>
+                 <button 
+                    type="button"
+                    onClick={() => setIsRegionModalOpen(false)}
+                    className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors shrink-0 font-medium"
+                 >
+                    取消
+                 </button>
+              </div>
+
+              <div className="overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-indigo-200 flex-1">
+                 {filteredRegions.length > 0 ? (
+                     <>
+                     {filteredRegions.map(region => (
+                         <button
+                             key={region}
+                             type="button"
+                             onClick={() => {
+                                 handleChange('region', region);
+                                 setIsRegionModalOpen(false);
+                             }}
+                             className="w-full text-left px-4 py-3 hover:bg-indigo-50 text-slate-700 font-medium transition-colors border-b border-slate-50 last:border-0 flex items-center justify-between group"
+                         >
+                             <div className="flex items-center gap-3">
+                                 <span className="group-hover:text-indigo-700">{region}</span>
+                             </div>
+                         </button>
+                     ))}
+                     </>
+                 ) : (
+                     <div className="px-4 py-12 text-slate-400 text-sm flex flex-col items-center gap-3 text-center">
+                         <div className="p-4 bg-slate-50 rounded-full">
+                            <Search className="w-6 h-6 text-slate-300" />
+                         </div>
+                         <p>找不到符合「{regionSearchTerm}」的區域</p>
                      </div>
                  )}
               </div>
