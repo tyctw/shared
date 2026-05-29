@@ -64,6 +64,9 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
+  const [isRegionModalOpen, setIsRegionModalOpen] = useState(false);
+  const [regionSearchTerm, setRegionSearchTerm] = useState('');
+
   useEffect(() => {
     setCurrentPage(1);
   }, [filterRegion, filterYear, filterSchool, itemsPerPage]);
@@ -127,16 +130,13 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
                          <option key={year} value={year}>{year}年</option>
                      ))}
                  </select>
-                 <select 
-                     value={filterRegion}
-                     onChange={(e) => setFilterRegion(e.target.value)}
-                     className="flex-1 sm:flex-none bg-white/70 backdrop-blur-sm border border-slate-200 rounded-full py-1.5 px-3 text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all shadow-sm cursor-pointer min-w-[6.5rem]"
+                 <button 
+                     onClick={() => setIsRegionModalOpen(true)}
+                     className="flex-1 sm:flex-none flex items-center justify-between gap-2 bg-white/70 backdrop-blur-sm border border-slate-200 rounded-full py-1.5 px-3 text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all shadow-sm cursor-pointer min-w-[6.5rem] whitespace-nowrap text-slate-700 hover:bg-white"
                  >
-                     <option value="All">所有區域</option>
-                     {REGIONS.map(region => (
-                         <option key={region} value={region}>{region}</option>
-                     ))}
-                 </select>
+                     <span className="truncate">{filterRegion === 'All' ? '所有區域' : filterRegion}</span>
+                     <Search className="w-3.5 h-3.5 text-slate-400" />
+                 </button>
              </div>
          </div>
        </div>
@@ -316,6 +316,77 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
                   </button>
               </div>
           </div>
+      )}
+
+      {/* Region Selection Modal */}
+      {isRegionModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
+           <div 
+             className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+             onClick={() => setIsRegionModalOpen(false)}
+           />
+           <div className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[80vh]">
+              <div className="bg-slate-50 p-4 border-b border-slate-100 flex items-center gap-3">
+                 <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <input
+                        type="text"
+                        value={regionSearchTerm}
+                        onChange={(e) => setRegionSearchTerm(e.target.value)}
+                        placeholder="搜尋區域..."
+                        className="w-full bg-white border border-slate-200 focus:border-indigo-400 rounded-xl py-3 pl-10 pr-4 text-slate-700 outline-none focus:ring-4 focus:ring-indigo-100 transition-all font-medium placeholder:text-slate-400"
+                        autoFocus
+                    />
+                 </div>
+                 <button 
+                    type="button"
+                    onClick={() => setIsRegionModalOpen(false)}
+                    className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors shrink-0 font-medium"
+                 >
+                    取消
+                 </button>
+              </div>
+
+              <div className="overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-indigo-200 flex-1">
+                 <button
+                     type="button"
+                     onClick={() => {
+                         setFilterRegion('All');
+                         setIsRegionModalOpen(false);
+                     }}
+                     className="w-full text-left px-4 py-3 hover:bg-indigo-50 text-slate-700 font-medium transition-colors border-b border-slate-50 last:border-0 flex items-center justify-between group"
+                 >
+                     <div className="flex items-center gap-3">
+                         <span className="group-hover:text-indigo-700">所有區域</span>
+                     </div>
+                 </button>
+                 {REGIONS.filter(r => r.includes(regionSearchTerm)).length > 0 ? (
+                     REGIONS.filter(r => r.includes(regionSearchTerm)).map(region => (
+                         <button
+                             key={region}
+                             type="button"
+                             onClick={() => {
+                                 setFilterRegion(region);
+                                 setIsRegionModalOpen(false);
+                             }}
+                             className="w-full text-left px-4 py-3 hover:bg-indigo-50 text-slate-700 font-medium transition-colors border-b border-slate-50 last:border-0 flex items-center justify-between group"
+                         >
+                             <div className="flex items-center gap-3">
+                                 <span className="group-hover:text-indigo-700">{region}</span>
+                             </div>
+                         </button>
+                     ))
+                 ) : (
+                     <div className="px-4 py-12 text-slate-400 text-sm flex flex-col items-center gap-3 text-center">
+                         <div className="p-4 bg-slate-50 rounded-full">
+                            <Search className="w-6 h-6 text-slate-300" />
+                         </div>
+                         <p>找不到符合「{regionSearchTerm}」的區域</p>
+                     </div>
+                 )}
+              </div>
+           </div>
+        </div>
       )}
     </div>
   );
