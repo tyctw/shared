@@ -1,119 +1,192 @@
 <!DOCTYPE html>
-<html lang="zh-Hant-TW">
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>會考落點分享平台 | CAP Score Sharing</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Inter"', '"Noto Sans TC"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                        display: ['"Noto Sans TC"', 'sans-serif'],
+                    },
+                    colors: {
+                        indigo: { 50: '#eef2ff', 100: '#e0e7ff', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 900: '#312e81' },
+                        slate: { 850: '#1e293b' }, // Darker slate for strong text
+                    },
+                    boxShadow: {
+                        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
+                        'glow': '0 0 20px rgba(99, 102, 241, 0.4)',
+                        'float': '0 10px 40px -10px rgba(0,0,0,0.08)',
+                    },
+                    animation: {
+                        'spin-slow-reverse': 'spin-reverse 6s linear infinite',
+                        'shimmer': 'shimmer 2s infinite linear',
+                        'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        'spin-reverse': {
+                            '0%': { transform: 'rotate(0deg)' },
+                            '100%': { transform: 'rotate(-360deg)' },
+                        },
+                        'shimmer': {
+                            '0%': { transform: 'translateX(-100%)' },
+                            '100%': { transform: 'translateX(100%)' },
+                        },
+                        'fadeInUp': {
+                            '0%': { opacity: '0', transform: 'translateY(24px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        'float': {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 
-  <!-- Responsive -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap');
+        
+        body {
+            background-color: #f3f4f6;
+            min-height: 100vh;
+        }
 
-  <!-- Basic SEO -->
-  <title>會考落點分享平台｜CAP Score Sharing</title>
+        /* Ambient Background with Noise */
+        .ambient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,0) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,0) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,0) 0, transparent 50%);
+            background-size: 100% 100%;
+        }
 
-  <meta
-    name="description"
-    content="分享會考成績、錄取學校與落點分析，快速查看桃聯區、基北區、中投區等各區錄取資訊。"
-  />
+        .ambient-orbs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background: #f8fafc;
+        }
 
-  <meta
-    name="keywords"
-    content="會考,會考落點分析,國中會考,高中落點,高職落點,桃聯區,基北區,免試入學,會考分數"
-  />
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+        }
 
-  <meta name="author" content="CAP Score Sharing" />
+        .orb-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #e0e7ff; animation: float 10s infinite alternate; }
+        .orb-2 { bottom: -10%; right: -10%; width: 50vw; height: 50vw; background: #fce7f3; animation: float 12s infinite alternate-reverse; }
+        .orb-3 { top: 40%; left: 40%; width: 30vw; height: 30vw; background: #fae8ff; opacity: 0.4; animation: float 15s infinite alternate; }
 
-  <meta name="robots" content="index, follow" />
+        /* Noise Texture */
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.035;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
 
-  <!-- Theme -->
-  <meta name="theme-color" content="#6366f1" />
+        /* Glassmorphism Classes */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
+        }
 
-  <!-- Canonical -->
-  <link rel="canonical" href="https://tyctw.github.io/shared/" />
+        .glass-header {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+        }
 
-  <!-- Favicon -->
-  <link rel="icon" href="/favicon.ico" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-
-  <!-- PWA -->
-  <link rel="manifest" href="/manifest.json" />
-
-  <!-- Open Graph -->
-  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="會考落點分享平台" />
-  <meta property="og:title" content="會考落點分享平台｜CAP Score Sharing" />
-  <meta
-    property="og:description"
-    content="分享會考成績與錄取學校，快速查看各區高中職落點資訊。"
-  />
-  <meta property="og:url" content="https://tyctw.github.io/shared/" />
-  <meta property="og:image" content="https://tyctw.github.io/og-image.jpg" />
-
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="會考落點分享平台" />
-  <meta
-    name="twitter:description"
-    content="分享會考成績與錄取學校資訊"
-  />
-  <meta
-    name="twitter:image"
-    content="https://tyctw.github.io/og-image.jpg"
-  />
-
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap"
-    rel="stylesheet"
-  />
-
-  <!-- Structured Data -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "會考落點分享平台",
-    "url": "https://tyctw.github.io/shared/",
-    "description": "分享會考成績與高中職錄取資訊的平台",
-    "inLanguage": "zh-TW",
-    "publisher": {
-      "@type": "Organization",
-      "name": "CAP Score Sharing"
-    }
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.33.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
+    "recharts": "https://esm.sh/recharts@^3.5.1",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "vite": "https://esm.sh/vite@^7.2.7"
   }
-  </script>
-
-  <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-H9X7EC127P"></script>
-
-  <script>
-    window.dataLayer = window.dataLayer || [];
-
-    function gtag() {
-      dataLayer.push(arguments);
-    }
-
-    gtag('js', new Date());
-
-    gtag('config', 'G-H9X7EC127P');
-  </script>
-
-  <!-- Adsense -->
-  <script
-    async
-    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6966991656561179"
-    crossorigin="anonymous"
-  ></script>
+}
+</script>
+<link rel="stylesheet" href="/index.css">
 </head>
+<body class="text-slate-800 antialiased min-h-screen">
+    <div class="ambient-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+    <div class="noise-overlay"></div>
+    
+    <div id="root">
+        <!-- Loader -->
+        <div class="fixed inset-0 flex flex-col items-center justify-center bg-[#f8fafc] z-50">
+            <div class="relative w-24 h-24">
+                <div class="absolute inset-0 rounded-full border-4 border-indigo-100 animate-[spin_3s_linear_infinite]"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-t-indigo-500 animate-[spin_1.5s_linear_infinite]"></div>
+                <div class="absolute inset-4 rounded-full border-4 border-b-purple-500 animate-[spin_2s_linear_infinite_reverse]"></div>
+                <div class="absolute inset-0 flex items-center justify-center">
+                   <div class="w-3 h-3 bg-indigo-600 rounded-full animate-pulse"></div>
+                </div>
+            </div>
+            <p class="mt-6 text-slate-400 font-mono text-sm tracking-widest animate-pulse">SYSTEM INITIALIZING...</p>
+        </div>
+    </div>
+    
+    <script type="module" src="/index.tsx"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6966991656561179"
+     crossorigin="anonymous"></script>
+                    <script async src="https://www.googletagmanager.com/gtag/js?id=G-H9X7EC127P"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 
-<body>
-  <div id="root"></div>
-
-  <noscript>
-    請開啟 JavaScript 以使用本網站。
-  </noscript>
-
-<script type="module" src="/index.tsx"></script>
+  gtag('config', 'G-H9X7EC127P');
+</script>
 </body>
 </html>
+檢查程式碼
