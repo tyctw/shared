@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ScoreEntry, Region, Grade, WritingGrade } from '../types';
 import { YEARS, GRADES, WRITING_GRADES, REGIONS, DEPARTMENT_GROUPS, SCHOOLS_BY_REGION } from '../constants';
 import { calculateRegionalScore } from '../utils/scoreCalculator';
-import { Send, Loader2, Info, ChevronDown, User, PenTool, Search, ShieldCheck, MapPin, School, GraduationCap, Trophy, FileText, Sparkles } from 'lucide-react';
+import { Send, Loader2, Info, ChevronDown, User, PenTool, Search, ShieldCheck, MapPin, School, GraduationCap, Trophy, FileText, Sparkles, Lock } from 'lucide-react';
 
 interface ScoreFormProps {
   onSubmit: (entry: Omit<ScoreEntry, 'id' | 'timestamp'>) => void;
@@ -40,6 +40,15 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
   const [deptSearchTerm, setDeptSearchTerm] = useState('');
   const [isRegionModalOpen, setIsRegionModalOpen] = useState(false);
   const [regionSearchTerm, setRegionSearchTerm] = useState('');
+
+  // Lock 115 year logic
+  const is115Locked = () => {
+    const now = new Date();
+    // 115/07/07 08:00 Taiwan time (2026)
+    const unlockDate = new Date('2026-07-07T08:00:00+08:00');
+    return now < unlockDate;
+  };
+  const showLockState = formData.year === 115 && is115Locked();
 
   // Auto-calculate total points & credits based on region
   useEffect(() => {
@@ -201,6 +210,14 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                     </div>
                 </div>
 
+                {showLockState ? (
+                    <div className="md:col-span-9 flex flex-col items-center justify-center p-6 bg-slate-50 rounded-2xl border border-slate-200 text-center animate-in fade-in duration-500">
+                        <Lock className="w-8 h-8 text-slate-400 mb-3" />
+                        <h4 className="text-lg font-bold text-slate-800 mb-1">115年分享尚未開放</h4>
+                        <p className="text-sm text-slate-500 font-medium">將於 115/07/07 08:00 準時開放，敬請期待！</p>
+                    </div>
+                ) : (
+                <>
                 {/* Region */}
                 <div className="md:col-span-4 space-y-1">
                     <label className={labelClass}>所屬區域</label>
@@ -298,9 +315,13 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                         )}
                      </div>
                 </div>
+                </>
+                )}
             </div>
         </section>
 
+        {!showLockState && (
+        <>
         {/* Section 2: Scores */}
         <section className={sectionClass}>
              <div className="absolute top-0 right-0 p-4 opacity-10">
@@ -410,6 +431,8 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                 </div>
             </div>
         </section>
+        </>
+        )}
 
       </form>
 

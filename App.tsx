@@ -4,9 +4,10 @@ import ScoreList from './components/ScoreList';
 import Dashboard from './components/Dashboard';
 import Guide from './components/Guide';
 import ScoreCompare from './components/ScoreCompare';
+import ShareModal from './components/ShareModal';
 import { ScoreEntry } from './types';
 import { fetchEntries, submitEntry, logUserAction } from './services/apiService';
-import { GraduationCap, BarChart3, PlusCircle, BookOpen, CloudOff, Info, Menu, X, ExternalLink, Calculator, Compass, Sparkles, RefreshCw, Home, ShieldAlert, Check, Heart } from 'lucide-react';
+import { GraduationCap, BarChart3, PlusCircle, BookOpen, CloudOff, Info, Menu, X, ExternalLink, Calculator, Compass, Sparkles, RefreshCw, Home, ShieldAlert, Check, Heart, Shield, Share2 } from 'lucide-react';
 
 // New Custom Loader Component
 const AppLoader = () => (
@@ -43,6 +44,8 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   useEffect(() => {
       localStorage.setItem('cap_favorites', JSON.stringify(favoriteIds));
@@ -206,6 +209,12 @@ const App: React.FC = () => {
         </div>
       )}
 
+      {/* Share Modal */}
+      <ShareModal 
+        isOpen={showShareModal} 
+        onClose={() => setShowShareModal(false)} 
+      />
+
       {/* Sidebar Overlay */}
       {isSidebarOpen && (
         <div 
@@ -302,35 +311,40 @@ const App: React.FC = () => {
              <NavButton id="compare" label="收藏" icon={Heart} />
              <NavButton id="stats" label="統計" icon={BarChart3} />
              <NavButton id="guide" label="說明" icon={Info} />
+             <div className="w-px h-6 bg-slate-200 mx-1"></div>
+             <button
+                 onClick={() => setShowShareModal(true)}
+                 className="relative px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 group text-slate-500 hover:text-indigo-600 hover:bg-slate-100/50 scale-95 hover:scale-100 border border-transparent"
+             >
+                 <Share2 className="w-4 h-4 group-hover:text-indigo-500 text-slate-400" />
+                 <span>分享</span>
+             </button>
           </nav>
 
           {/* Right: Actions & Desktop Nav */}
           <div className="flex items-center gap-2 sm:gap-4 flex-1 md:flex-none justify-end min-w-0">
             
-            {/* Refresh Button */}
-            <button
-                onClick={() => loadData(true)}
-                disabled={isLoading}
-                className="hidden sm:flex bg-slate-50/80 hover:bg-white p-2.5 rounded-xl border border-slate-100 hover:border-slate-200 text-slate-500 hover:text-indigo-600 shadow-sm transition-all relative group disabled:opacity-50"
-                title="重新讀取資料"
-            >
-                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-indigo-500' : ''}`} />
-            </button>
-
             {/* PROMINENT SHARE CTA - Visible everywhere */}
             <button
                 onClick={() => handleTabChange('form')}
                 className={`
-                    flex items-center gap-1.5 px-3 py-1.5 sm:px-5 sm:py-2.5 rounded-xl
-                    font-bold text-xs sm:text-sm transition-all duration-300 transform active:scale-95
+                    relative group flex items-center justify-center gap-1.5 sm:gap-2 
+                    overflow-hidden rounded-full
+                    px-4 py-2 sm:px-6 sm:py-2.5
+                    font-black text-xs sm:text-sm tracking-wide transition-all duration-300 active:scale-95
                     ${activeTab === 'form' 
-                        ? 'bg-slate-800 text-white shadow-xl shadow-slate-200 border border-slate-700' 
-                        : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg shadow-indigo-200 border border-indigo-500/50'
+                        ? 'bg-slate-800 text-white shadow-md' 
+                        : 'bg-gradient-to-tr from-indigo-600 to-purple-600 text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:-translate-y-0.5 border border-white/20'
                     }
                 `}
             >
-                <PlusCircle className="w-4 h-4" />
-                <span><span className="hidden sm:inline">新增</span>分享</span>
+                {/* Shiny hover effect */}
+                {activeTab !== 'form' && (
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                )}
+                
+                <PlusCircle className={`w-4 h-4 sm:w-5 sm:h-5 relative z-10 ${activeTab !== 'form' ? 'group-hover:rotate-180 transition-transform duration-700' : ''}`} />
+                <span className="relative z-10"><span className="hidden sm:inline">新增</span>分享</span>
             </button>
 
             {/* Menu Button */}
@@ -469,6 +483,8 @@ const App: React.FC = () => {
                         isLoading={false}
                         favoriteIds={favoriteIds}
                         toggleFavorite={toggleFavorite}
+                        onRefresh={() => loadData(true)}
+                        isRefreshing={isLoading}
                     />
                 )}
             </div>
@@ -508,20 +524,125 @@ const App: React.FC = () => {
         </div>
       </main>
       
-      <footer className="py-12 pb-36 md:pb-12 mt-12 border-t border-slate-200/60 bg-white/40 backdrop-blur-sm">
-        <div className="max-w-6xl mx-auto px-4 flex flex-col items-center gap-6 text-center">
-            <div className="flex items-center gap-3 opacity-50 grayscale hover:grayscale-0 transition-all duration-500 cursor-default group">
-                <div className="bg-indigo-100 p-2 rounded-xl group-hover:bg-indigo-600 transition-colors">
-                    <GraduationCap className="w-5 h-5 text-indigo-600 group-hover:text-white transition-colors" />
+      <footer className="py-12 pb-36 md:pb-12 mt-12 bg-white/60 border-t border-slate-200/60 backdrop-blur-md">
+        <div className="max-w-6xl mx-auto px-4 md:px-8">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-12 text-center md:text-left">
+                <div className="flex flex-col items-center md:items-start gap-3">
+                    <div className="flex items-center gap-3 opacity-80 hover:opacity-100 transition-opacity duration-300">
+                        <div className="bg-gradient-to-tr from-indigo-100 to-purple-100 p-2.5 rounded-xl border border-white shadow-sm">
+                            <GraduationCap className="w-6 h-6 text-indigo-600" />
+                        </div>
+                        <span className="font-black text-slate-800 tracking-tight text-xl">CAP Score Sharing</span>
+                    </div>
+                    <p className="text-slate-500 text-sm font-medium">
+                        台灣國中會考落點分享平台，由學生自發維護。<br className="hidden md:block" />
+                        Made for Students, by Students.
+                    </p>
                 </div>
-                <span className="font-bold text-slate-700 tracking-wide text-lg">會考落點分享平台</span>
+
+                <div className="flex gap-4 sm:gap-6">
+                    <button 
+                         onClick={() => setShowDisclaimer(true)}
+                         className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors"
+                    >
+                        <ShieldAlert className="w-4 h-4" />
+                        <span>免責聲明</span>
+                    </button>
+                    <button 
+                         onClick={() => setShowPrivacyPolicy(true)}
+                         className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors"
+                    >
+                        <Shield className="w-4 h-4" />
+                        <span>隱私權與版權聲明</span>
+                    </button>
+                </div>
             </div>
-            <p className="text-slate-400 text-sm font-medium">
-                Made for Students, by Students. <br/>
-                © {new Date().getFullYear()} TYCTW會考落點. Powered by Google Sheets & Gemini.
-            </p>
+
+            <div className="mt-8 pt-8 border-t border-slate-200 flex flex-col items-center gap-4 text-xs font-semibold text-slate-400">
+                <p>
+                    Copyright © 2024-{new Date().getFullYear()} TYCTW會考落點. All rights reserved.
+                </p>
+            </div>
         </div>
       </footer>
+
+      {/* Privacy Policy Modal */}
+      {showPrivacyPolicy && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
+           {/* Backdrop */}
+           <div 
+             className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" 
+             onClick={() => setShowPrivacyPolicy(false)}
+           />
+           
+           {/* Modal Card */}
+           <div className="relative bg-white w-full max-w-2xl max-h-[85vh] flex flex-col rounded-[2rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-200">
+              {/* Header */}
+              <div className="bg-slate-50 p-6 sm:p-8 flex items-start justify-between border-b border-slate-100 flex-shrink-0">
+                 <div>
+                    <div className="flex items-center gap-3 mb-2">
+                       <div className="p-2 bg-indigo-100 text-indigo-600 rounded-xl">
+                          <Shield className="w-6 h-6" />
+                       </div>
+                       <h3 className="text-slate-800 text-2xl font-black">
+                          隱私權與版權聲明
+                       </h3>
+                    </div>
+                    <p className="text-slate-500 font-medium text-sm">Privacy Policy & Copyright Declaration</p>
+                 </div>
+                 <button 
+                    onClick={() => setShowPrivacyPolicy(false)}
+                    className="p-2.5 bg-white hover:bg-slate-200 text-slate-500 rounded-full transition-colors border border-slate-200"
+                 >
+                    <X className="w-5 h-5" />
+                 </button>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 sm:p-8 space-y-8 bg-white overflow-y-auto">
+                 <section className="space-y-3">
+                    <h4 className="font-black text-lg text-slate-800 border-l-4 border-indigo-500 pl-3">1. 資料蒐集與使用</h4>
+                    <p className="text-sm text-slate-500 leading-relaxed pl-4">
+                        本平台（CAP Score Sharing）為匿名性質的資料分享平台。當您填寫並送出分數分享表單時，我們僅蒐集您自願提供的考試成績、錄取學校、就讀區域及經驗分享等資訊。
+                        我們<span className="font-bold text-rose-500">不會蒐集</span>您的姓名、身分證字號、聯絡方式或任何可直接識別您身分的個人資料。
+                    </p>
+                 </section>
+                 
+                 <section className="space-y-3">
+                    <h4 className="font-black text-lg text-slate-800 border-l-4 border-indigo-500 pl-3">2. Cookie 及網頁儲存區 (Local Storage)</h4>
+                    <p className="text-sm text-slate-500 leading-relaxed pl-4">
+                        為了提供更好的使用者體驗，本網站會使用 Local Storage 來儲存您的「收藏名單」以及「已閱讀免責聲明」之狀態。這些資料僅存放於您的瀏覽器中，本平台伺服器不會主動獲取此資料。
+                    </p>
+                 </section>
+
+                 <section className="space-y-3">
+                    <h4 className="font-black text-lg text-slate-800 border-l-4 border-rose-500 pl-3">3. 數據準確性與風險承擔</h4>
+                    <p className="text-sm text-slate-500 leading-relaxed pl-4">
+                        本平台展示之歷年落點數據均來自熱心考生的自主回報，<span className="font-bold text-rose-500">並非官方正式公告</span>。我們無法保證每一筆數據的絕對準確性與最新狀態。
+                        使用者在選填志願或進行升學決策時，請務必多方查證、參考各校官方網站，並承擔使用本平台資訊的相關風險。本平台對因使用數據而造成的任何直接或間接損失概不負責。
+                    </p>
+                 </section>
+
+                 <section className="space-y-3">
+                    <h4 className="font-black text-lg text-slate-800 border-l-4 border-indigo-500 pl-3">4. 版權聲明 (Copyright)</h4>
+                    <p className="text-sm text-slate-500 leading-relaxed pl-4">
+                        本網站的原始程式碼、介面設計、網站架構皆受相關智慧財產權保護。如需引用、修改或二次發布，請註明資料來源「TYCTW會考落點分享平台」。
+                    </p>
+                 </section>
+              </div>
+
+              {/* Footer */}
+              <div className="p-6 bg-slate-50 border-t border-slate-100 flex-shrink-0">
+                 <button
+                     onClick={() => setShowPrivacyPolicy(false)}
+                     className="w-full sm:w-auto sm:ml-auto block px-8 py-3 bg-slate-900 hover:bg-indigo-600 text-white font-bold rounded-xl transition-colors text-center"
+                 >
+                     我了解了
+                 </button>
+              </div>
+           </div>
+        </div>
+      )}
     </div>
   );
 };

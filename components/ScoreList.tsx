@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { ScoreEntry } from '../types';
 import { REGIONS, YEARS } from '../constants';
-import { MapPin, Search, Sparkles, Share2, Check, Calendar, Quote, School, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
+import { MapPin, Search, Sparkles, Share2, Check, Calendar, Quote, School, ChevronLeft, ChevronRight, Heart, Filter, ChevronDown, RefreshCw } from 'lucide-react';
 
 interface ScoreListProps {
   entries: ScoreEntry[];
   isLoading?: boolean;
   favoriteIds?: string[];
   toggleFavorite?: (id: string) => void;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
 const SUBJECT_LABELS: Record<string, string> = {
@@ -56,20 +58,60 @@ const ScoreSkeleton = () => (
   </div>
 );
 
-const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds = [], toggleFavorite }) => {
+const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds = [], toggleFavorite, onRefresh, isRefreshing }) => {
   const [filterRegion, setFilterRegion] = useState<string>('All');
   const [filterYear, setFilterYear] = useState<string>('All');
   const [filterSchool, setFilterSchool] = useState<string>('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [groupBySchool, setGroupBySchool] = useState<boolean>(false);
+  const [cooldown, setCooldown] = useState<number>(0);
+
+  useEffect(() => {
+    let timer: number;
+    if (cooldown > 0) {
+      timer = window.setTimeout(() => setCooldown(c => c - 1), 1000);
+    }
+    return () => window.clearTimeout(timer);
+  }, [cooldown]);
+
+  const handleRefresh = () => {
+    if (cooldown === 0 && onRefresh) {
+      onRefresh();
+      setCooldown(20);
+    }
+  };
 
   const [isRegionModalOpen, setIsRegionModalOpen] = useState(false);
   const [regionSearchTerm, setRegionSearchTerm] = useState('');
+  
+  const listTopRef = React.useRef<HTMLDivElement>(null);
+
+  const minPointsMap = React.useMemo(() => {
+    const map = new Map<string, number>();
+    entries.forEach(entry => {
+      const key = `${entry.year}-${entry.school}-${entry.department}`;
+      if (!map.has(key) || entry.totalPoints < map.get(key)!) {
+        map.set(key, entry.totalPoints);
+      }
+    });
+    return map;
+  }, [entries]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filterRegion, filterYear, filterSchool, itemsPerPage]);
+  }, [filterRegion, filterYear, filterSchool, itemsPerPage, groupBySchool]);
+
+  const handlePageChange = (newPage: number) => {
+      setCurrentPage(newPage);
+      if (listTopRef.current) {
+          // Adjust offset to not hide behind fixed header if there's any, minus some padding
+          const yOffset = -20; 
+          const y = listTopRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+  };
 
   const filteredEntries = entries.filter(entry => {
     const matchRegion = filterRegion === 'All' || entry.region === filterRegion;
@@ -78,9 +120,19 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
     return matchRegion && matchYear && matchSchool;
   });
 
-  const totalPages = Math.max(1, Math.ceil(filteredEntries.length / itemsPerPage));
+  const sortedEntries = [...filteredEntries];
+  if (groupBySchool) {
+      sortedEntries.sort((a, b) => {
+          if (a.school !== b.school) {
+              return a.school.localeCompare(b.school, 'zh-TW');
+          }
+          return b.timestamp - a.timestamp;
+      });
+  }
+
+  const totalPages = Math.max(1, Math.ceil(sortedEntries.length / itemsPerPage));
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedEntries = filteredEntries.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedEntries = sortedEntries.slice(startIndex, startIndex + itemsPerPage);
 
   const handleShare = async (entry: ScoreEntry) => {
     const shareText = `【會考落點分享】\n🏫 ${entry.school} (${entry.department})\n📅 ${entry.year}年 | 📍 ${entry.region}\n🏆 總積分：${entry.totalPoints}\n\n📝 科目成績：\n國${entry.scores.chinese} 英${entry.scores.english} 數${entry.scores.math} 自${entry.scores.nature} 社${entry.scores.social} 作${entry.scores.writing}`;
@@ -95,47 +147,95 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
   };
 
   return (
-    <div className="space-y-8">
-       {/* Search Bar / Filter Area */}
-       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-2 gap-4">
-         <h3 className="font-bold text-slate-700 flex items-center gap-2 shrink-0">
-             最新回報
-             {!isLoading && (
-               <span className="bg-white border border-indigo-100 text-indigo-600 text-[10px] px-2.5 py-0.5 rounded-full font-mono font-bold shadow-sm">
-                   {filteredEntries.length} 筆
-               </span>
-             )}
-         </h3>
+    <div className="space-y-6" ref={listTopRef}>
+       {/* Filter Area Container */}
+       <div className="bg-white/80 backdrop-blur-xl border border-slate-200/60 shadow-sm rounded-2xl p-4 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
          
-         {/* Filter Area */}
-         <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
-             <div className="relative flex-1 sm:flex-none sm:w-48">
-                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+         {/* Title & Count */}
+         <div className="flex items-center gap-3 shrink-0">
+             <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-2.5 rounded-xl border border-indigo-100/50 shadow-sm">
+                 <Filter className="w-5 h-5 text-indigo-600" />
+             </div>
+             <div className="flex items-center gap-4">
+                 <div>
+                     <h3 className="font-black text-slate-800 text-lg leading-none tracking-tight mb-1">
+                         最新分享
+                     </h3>
+                     <p className="text-xs text-slate-500 font-bold tracking-wide">
+                         {!isLoading ? `找到 ${filteredEntries.length} 筆資料` : '載入中...'}
+                     </p>
+                 </div>
+                 {onRefresh && (
+                     <button
+                         onClick={handleRefresh}
+                         disabled={isRefreshing || cooldown > 0}
+                         className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50/50 hover:bg-slate-100 border border-indigo-100/50 text-indigo-600 rounded-lg text-xs font-bold transition-all disabled:opacity-50 group hover:shadow-sm"
+                         title="重新整理"
+                     >
+                         <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
+                         <span className="hidden sm:inline">
+                             {cooldown > 0 ? `冷卻中 ${cooldown}s` : '重整'}
+                         </span>
+                     </button>
+                 )}
+             </div>
+         </div>
+         
+         {/* Controls */}
+         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full xl:w-auto">
+             
+             {/* Group by School Toggle */}
+             <label className="flex items-center justify-center sm:justify-start gap-2 text-sm text-slate-700 font-bold cursor-pointer hover:text-indigo-600 transition-colors bg-slate-50 sm:bg-transparent px-4 py-2.5 sm:p-0 rounded-xl sm:rounded-none border border-slate-200 sm:border-none group">
+                 <div className="relative flex items-center justify-center">
+                     <input 
+                         type="checkbox"
+                         checked={groupBySchool}
+                         onChange={(e) => setGroupBySchool(e.target.checked)}
+                         className="peer sr-only"
+                     />
+                     <div className="w-5 h-5 border-2 border-slate-300 rounded bg-white peer-checked:bg-indigo-500 peer-checked:border-indigo-500 transition-all flex items-center justify-center">
+                         <Check className="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 scale-50 peer-checked:scale-100 transition-all" strokeWidth={3} />
+                     </div>
+                 </div>
+                 <span>同校排在一起</span>
+             </label>
+
+             <div className="h-6 w-px bg-slate-200 hidden sm:block mx-1"></div>
+             
+             {/* Search Input */}
+             <div className="relative flex-1 sm:w-56 group">
+                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
                  <input 
                      type="text" 
                      placeholder="搜尋學校..." 
                      value={filterSchool}
                      onChange={(e) => setFilterSchool(e.target.value)}
-                     className="w-full bg-white/70 backdrop-blur-sm border border-slate-200 rounded-full py-1.5 pl-9 pr-4 text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all shadow-sm"
+                     className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium text-slate-800 outline-none focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-400 transition-all placeholder:text-slate-400"
                  />
              </div>
-             <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-                 <select
-                     value={filterYear}
-                     onChange={(e) => setFilterYear(e.target.value)}
-                     className="flex-1 sm:flex-none bg-white/70 backdrop-blur-sm border border-slate-200 rounded-full py-1.5 px-3 text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all shadow-sm cursor-pointer min-w-[5rem]"
-                 >
-                     <option value="All">所有年份</option>
-                     {YEARS.map(year => (
-                         <option key={year} value={year}>{year}年</option>
-                     ))}
-                 </select>
+
+             {/* Selectors */}
+             <div className="flex gap-2 w-full sm:w-auto">
+                 <div className="relative flex-1 sm:flex-none">
+                     <select
+                         value={filterYear}
+                         onChange={(e) => setFilterYear(e.target.value)}
+                         className="w-full sm:w-auto appearance-none bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-4 pr-10 text-sm font-bold text-slate-700 outline-none focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-400 transition-all cursor-pointer min-w-[7rem]"
+                     >
+                         <option value="All">所有年份</option>
+                         {YEARS.map(year => (
+                             <option key={year} value={year}>{year}年</option>
+                         ))}
+                     </select>
+                     <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                 </div>
+
                  <button 
                      onClick={() => setIsRegionModalOpen(true)}
-                     className="flex-1 sm:flex-none flex items-center justify-between gap-2 bg-white/70 backdrop-blur-sm border border-slate-200 rounded-full py-1.5 px-3 text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all shadow-sm cursor-pointer min-w-[6.5rem] whitespace-nowrap text-slate-700 hover:bg-white"
+                     className="flex-1 sm:flex-none flex items-center justify-between gap-3 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-sm font-bold outline-none focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-400 transition-all cursor-pointer min-w-[8rem] text-slate-700 active:scale-95"
                  >
                      <span className="truncate">{filterRegion === 'All' ? '所有區域' : filterRegion}</span>
-                     <Search className="w-3.5 h-3.5 text-slate-400" />
+                     <Search className="w-4 h-4 text-slate-400 shrink-0" />
                  </button>
              </div>
          </div>
@@ -200,13 +300,21 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
 
                       {/* Title & Points Row */}
                       <div className="flex flex-col justify-between items-start gap-4 mb-6">
-                          <div className="flex-1">
+                          <div className="flex-1 w-full relative">
                               <h3 className="text-2xl font-black text-slate-800 tracking-tight leading-tight mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-600 group-hover:to-purple-600 transition-all duration-300">
                                   {entry.school}
                               </h3>
-                              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50/80 text-indigo-700 text-sm font-bold rounded-lg border border-indigo-100">
-                                  <School className="w-4 h-4 text-indigo-400" />
-                                  {entry.department}
+                              <div className="flex flex-wrap items-center gap-2">
+                                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50/80 text-indigo-700 text-sm font-bold rounded-lg border border-indigo-100">
+                                      <School className="w-4 h-4 text-indigo-400" />
+                                      {entry.department}
+                                  </div>
+                                  {minPointsMap.get(`${entry.year}-${entry.school}-${entry.department}`) === entry.totalPoints && (
+                                      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-50/80 text-rose-600 text-sm font-bold rounded-lg border border-rose-100">
+                                          <Sparkles className="w-4 h-4 text-rose-400" />
+                                          同校科最低分
+                                      </div>
+                                  )}
                               </div>
                           </div>
 
@@ -294,7 +402,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
               
               <div className="flex items-center gap-2">
                   <button 
-                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                       disabled={currentPage === 1}
                       className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-all"
                   >
@@ -308,7 +416,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
                   </div>
 
                   <button 
-                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                       disabled={currentPage === totalPages}
                       className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-all"
                   >
