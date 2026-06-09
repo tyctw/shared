@@ -1,78 +1,66 @@
-/* =========================
-   Tailwind Core (v3 正確寫法)
-========================= */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/* =========================
-   Fonts
-========================= */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap');
-
-/* =========================
-   Design Tokens (取代 @theme)
-========================= */
-:root {
+@theme {
   --font-sans: "Inter", "Noto Sans TC", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
   --font-display: "Noto Sans TC", sans-serif;
-
   --color-slate-850: #1e293b;
-
+  
   --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
   --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.4);
   --shadow-float: 0 10px 40px -10px rgba(0,0,0,0.08);
+
+  --animate-spin-slow-reverse: spin-reverse 6s linear infinite;
+  --animate-shimmer: shimmer 2s infinite linear;
+  --animate-fade-in-up: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-float: float 6s ease-in-out infinite;
+
+  @keyframes spin-reverse {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(-360deg); }
+  }
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  @keyframes fadeInUp {
+    0% { opacity: 0; transform: translateY(24px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
 }
 
-/* =========================
-   Base Styles
-========================= */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap');
+
 body {
   background-color: #f3f4f6;
   min-height: 100vh;
-  font-family: var(--font-sans);
 }
 
-/* =========================
-   Animations
-========================= */
-@keyframes spin-reverse {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(-360deg); }
-}
-
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-@keyframes fadeInUp {
-  0% { opacity: 0; transform: translateY(24px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-/* =========================
-   Ambient Background
-========================= */
+/* Ambient Background with Noise */
 .ambient-bg {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   z-index: -1;
-  background:
-    radial-gradient(at 0% 0%, hsla(253,16%,7%,0) 0, transparent 50%),
-    radial-gradient(at 50% 0%, hsla(225,39%,30%,0) 0, transparent 50%),
+  background: 
+    radial-gradient(at 0% 0%, hsla(253,16%,7%,0) 0, transparent 50%), 
+    radial-gradient(at 50% 0%, hsla(225,39%,30%,0) 0, transparent 50%), 
     radial-gradient(at 100% 0%, hsla(339,49%,30%,0) 0, transparent 50%);
+  background-size: 100% 100%;
 }
 
 .ambient-orbs {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   z-index: -1;
   overflow: hidden;
   background: #f8fafc;
@@ -85,55 +73,30 @@ body {
   opacity: 0.6;
 }
 
-.orb-1 {
-  top: -10%;
-  left: -10%;
-  width: 50vw;
-  height: 50vw;
-  background: #e0e7ff;
-  animation: float 10s infinite alternate;
-}
+.orb-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #e0e7ff; animation: float 10s infinite alternate; }
+.orb-2 { bottom: -10%; right: -10%; width: 50vw; height: 50vw; background: #fce7f3; animation: float 12s infinite alternate-reverse; }
+.orb-3 { top: 40%; left: 40%; width: 30vw; height: 30vw; background: #fae8ff; opacity: 0.4; animation: float 15s infinite alternate; }
 
-.orb-2 {
-  bottom: -10%;
-  right: -10%;
-  width: 50vw;
-  height: 50vw;
-  background: #fce7f3;
-  animation: float 12s infinite alternate-reverse;
-}
-
-.orb-3 {
-  top: 40%;
-  left: 40%;
-  width: 30vw;
-  height: 30vw;
-  background: #fae8ff;
-  opacity: 0.4;
-  animation: float 15s infinite alternate;
-}
-
-/* =========================
-   Noise Texture
-========================= */
+/* Noise Texture */
 .noise-overlay {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   z-index: -1;
   opacity: 0.035;
   pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 }
 
-/* =========================
-   Glassmorphism
-========================= */
+/* Glassmorphism Classes */
 .glass-panel {
   background: rgba(255, 255, 255, 0.65);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: var(--shadow-glass);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
 }
 
 .glass-header {
@@ -144,22 +107,8 @@ body {
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
 }
 
-/* =========================
-   Scrollbar
-========================= */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background-color: #94a3b8;
-}
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
