@@ -18,9 +18,8 @@ export function calculateRegionalScore(region: Region, scores: SubjectScores): {
     };
 
     const get30Point = (g: Grade) => {
-        if (!g) return 2;
-        if (g.startsWith && g.startsWith('A')) return 6;
-        if (g.startsWith && g.startsWith('B')) return 4;
+        if (g.startsWith('A')) return 6;
+        if (g.startsWith('B')) return 4;
         return 2;
     };
 
