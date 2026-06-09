@@ -1,86 +1,59 @@
-import { ScoreEntry } from '../types';
-
-// ===============================
-// API URL（Proxy Server）
-// ===============================
-const API_URL = '/api';
+import { ScoreEntry } from '../types'
+import { supabase } from '../lib/supabase'
 
 // ===============================
 // Fetch Entries（讀取資料）
 // ===============================
 export const fetchEntries = async (): Promise<ScoreEntry[]> => {
   try {
-    const response = await fetch(`${API_URL}/entries`);
+    const { data, error } = await supabase
+      .from('entries')
+      .select('*')
 
-    if (!response.ok) {
-      throw new Error(`HTTP error: ${response.status}`);
+    if (error) {
+      console.error('Supabase error:', error)
+      return []
     }
 
-    const data = await response.json();
-
-    if (data.error) {
-       console.error('API Error:', data.error);
-       return [];
-    }
-
-    // Map DB fields back to frontend fields
-    return data.map((item: any) => ({
+    return (data || []).map((item: any) => ({
       ...item,
       totalPoints: item.total_points ?? item.totalPoints,
       totalCredits: item.total_credits ?? item.totalCredits,
-    })) as ScoreEntry[];
+    }))
   } catch (error) {
-    console.error('Error fetching entries:', error);
-    return [];
+    console.error('Error fetching entries:', error)
+    return []
   }
-};
+}
 
 // ===============================
 // Submit Entry（寫入資料）
 // ===============================
 export const submitEntry = async (entry: ScoreEntry): Promise<boolean> => {
   try {
-    const response = await fetch(`${API_URL}/entries`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ entry }),
-    });
+    const { error } = await supabase
+      .from('entries')
+      .insert([entry])
 
-    const data = await response.json();
-
-    if (data.status === 'error') {
-      console.error('API Error:', data.message || data.error);
-      return false;
+    if (error) {
+      console.error('Insert error:', error)
+      return false
     }
 
-    return true;
+    return true
   } catch (error) {
-    console.error('Submit error:', error);
-    return false;
+    console.error('Submit error:', error)
+    return false
   }
-};
+}
 
 // ===============================
-// Log User Action（你缺的就是這個）
+// Log User Action
 // ===============================
-export const logUserAction = (
-  action: string,
-  detail?: string
-): void => {
-  try {
-    console.log('[USER_ACTION]', {
-      action,
-      detail: detail ?? '',
-      timestamp: Date.now(),
-    });
-
-    // 👉 如果你未來要接 analytics（GA / PostHog），可以在這裡加
-    // example:
-    // analytics.track(action, { detail });
-
-  } catch (error) {
-    console.warn('logUserAction failed:', error);
-  }
-};
+export const logUserAction = (action: string, detail?: string): void => {
+  console.log('[USER_ACTION]', {
+    action,
+    detail: detail ?? '',
+    timestamp: Date.now(),
+  })
+}
