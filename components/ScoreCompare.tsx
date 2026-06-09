@@ -16,11 +16,12 @@ interface ScoreCompareProps {
   toggleFavorite: (id: string) => void;
 }
 
-const getGradeStyle = (grade: string) => {
+const getGradeStyle = (grade?: string) => {
+    if (!grade) return 'bg-gray-50 border-gray-100 text-gray-400';
     if (grade === 'A++') return 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 text-amber-600 shadow-sm shadow-amber-100';
     if (grade === 'A+') return 'bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200 text-emerald-600 shadow-sm shadow-emerald-100';
     if (grade === 'A') return 'bg-gradient-to-br from-indigo-50 to-blue-50 border-indigo-200 text-indigo-600 shadow-sm shadow-indigo-100';
-    if (grade.startsWith('B')) return 'bg-slate-50 border-slate-200 text-slate-600 shadow-sm';
+    if (grade.startsWith && grade.startsWith('B')) return 'bg-slate-50 border-slate-200 text-slate-600 shadow-sm';
     return 'bg-gray-50 border-gray-100 text-gray-400';
 };
   
