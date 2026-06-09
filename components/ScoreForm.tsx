@@ -149,11 +149,12 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
   // Style Constants
   const sectionClass = "bg-white/40 backdrop-blur-md rounded-[2rem] p-6 sm:p-8 border border-white/60 shadow-sm relative overflow-hidden group hover:shadow-md transition-all duration-500";
 
-  const getGradeSelectStyle = (grade: string) => {
+  const getGradeSelectStyle = (grade?: string) => {
+    if (!grade) return 'border-gray-100 text-gray-500 bg-gray-50';
     if (grade === 'A++') return 'border-amber-200 text-amber-600 bg-gradient-to-b from-amber-50 to-orange-50';
     if (grade === 'A+') return 'border-emerald-200 text-emerald-600 bg-gradient-to-b from-emerald-50 to-teal-50';
     if (grade === 'A') return 'border-indigo-200 text-indigo-600 bg-gradient-to-b from-indigo-50 to-blue-50';
-    if (grade.startsWith('B')) return 'border-slate-200 text-slate-700 bg-slate-50';
+    if (grade.startsWith && grade.startsWith('B')) return 'border-slate-200 text-slate-700 bg-slate-50';
     return 'border-gray-100 text-gray-500 bg-gray-50';
   };
 
