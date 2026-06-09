@@ -55,7 +55,7 @@ export default function GreetingModal() {
 
             <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-700 text-xs font-bold rounded-full mb-5 border border-indigo-200/50 shadow-inner">
                 <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
-                <span>115 國中教育會考</span>
+                <span>114 國中教育會考</span>
             </div>
             
             <h2 className="text-3xl font-black text-slate-800 tracking-tight leading-tight mb-4">
