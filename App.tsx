@@ -400,46 +400,53 @@ const App: React.FC = () => {
 
             {activeTab === 'list' && (
             <div className="space-y-12">
-                 {/* Modern Hero Section */}
-                 <div className="relative overflow-hidden rounded-[2.5rem] bg-slate-900 text-white shadow-2xl shadow-indigo-900/20 isolate">
-                    {/* Dynamic Background */}
-                    <div className="absolute inset-0">
-                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-purple-700 to-slate-900 opacity-90"></div>
-                        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-fuchsia-500/30 rounded-full blur-[100px] -mr-32 -mt-32 animate-pulse duration-[5s]"></div>
-                        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-500/30 rounded-full blur-[80px] -ml-20 -mb-20"></div>
-                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20 mix-blend-overlay"></div>
+                 {/* Modern Light Hero Section */}
+                 <div className="relative overflow-hidden rounded-[2.5rem] bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] isolate px-6 pt-16 pb-20 sm:px-16 sm:pt-24 sm:pb-28">
+                    {/* Decorative Background Elements */}
+                    <div className="absolute inset-0 pointer-events-none">
+                        <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-indigo-100/80 to-purple-100/80 blur-[80px] opacity-70"></div>
+                        <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] rounded-full bg-gradient-to-tr from-pink-100/80 to-rose-100/80 blur-[80px] opacity-70 animate-pulse duration-[4s]"></div>
+                        <div className="absolute top-[20%] left-[10%] w-[300px] h-[300px] rounded-full bg-gradient-to-br from-blue-100/80 to-indigo-100/80 blur-[80px] opacity-60"></div>
+                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-[0.03] mix-blend-multiply"></div>
                     </div>
                     
-                    <div className="relative z-10 p-8 sm:p-16 text-center sm:text-left">
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-indigo-100 text-xs font-bold mb-8 backdrop-blur-md shadow-lg animate-fade-in-up">
-                            <Sparkles className="w-3 h-3 text-amber-300" />
-                            <span>114會考 數據即時更新</span>
+                    <div className="relative z-10 flex flex-col items-center text-center max-w-4xl mx-auto">
+                        {/* Status Badge */}
+                        <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-white/80 backdrop-blur-md border border-indigo-100 shadow-sm text-indigo-700 text-sm font-bold mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            <span className="relative flex h-2.5 w-2.5">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-500"></span>
+                            </span>
+                            <span>115會考 數據即時更新</span>
                         </div>
                         
-                        <h2 className="text-4xl sm:text-6xl font-black mb-6 tracking-tight leading-[1.1] animate-fade-in-up" style={{animationDelay: '100ms'}}>
-                            精準落點，<br/>
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-200 via-white to-indigo-200">
+                        {/* Headline */}
+                        <h2 className="text-4xl sm:text-6xl md:text-[4.5rem] font-black text-slate-800 mb-6 tracking-[-0.02em] leading-[1.1] animate-in fade-in slide-in-from-bottom-6 duration-700" style={{animationFillMode: 'both', animationDelay: '100ms'}}>
+                            精準落點，<br className="hidden sm:block"/>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">
                                 預見你的未來
                             </span>
                         </h2>
                         
-                        <p className="text-indigo-100/80 text-lg sm:text-xl leading-relaxed max-w-2xl font-medium mb-10 animate-fade-in-up" style={{animationDelay: '200ms'}}>
-                            彙整全台各區真實錄取分數，透明公開。<br className="hidden sm:block"/>
+                        {/* Subtitle */}
+                        <p className="text-slate-500 text-lg sm:text-xl md:text-2xl leading-relaxed max-w-2xl font-medium mb-12 animate-in fade-in slide-in-from-bottom-6 duration-700" style={{animationFillMode: 'both', animationDelay: '200ms'}}>
+                            彙整全台各區真實錄取分數，透明公開。<br className="hidden md:block"/>
                             拒絕資訊焦慮，用數據規劃最適合的升學藍圖。
                         </p>
                         
-                        <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-up" style={{animationDelay: '300ms'}}>
+                        {/* CTAs */}
+                        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto animate-in fade-in slide-in-from-bottom-6 duration-700" style={{animationFillMode: 'both', animationDelay: '300ms'}}>
                              <button 
                                 onClick={() => handleTabChange('form')}
-                                className="bg-white text-indigo-700 hover:bg-indigo-50 px-8 py-3.5 rounded-xl font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 flex items-center justify-center gap-2"
+                                className="w-full sm:w-auto bg-slate-900 text-white hover:bg-slate-800 px-8 py-4 rounded-2xl font-bold transition-all shadow-xl shadow-slate-900/10 hover:shadow-2xl hover:shadow-slate-900/20 hover:-translate-y-1 flex items-center justify-center gap-2.5 text-lg active:scale-95"
                              >
                                 <PlusCircle className="w-5 h-5" /> 我要分享分數
                              </button>
                              <button 
                                 onClick={() => handleTabChange('guide')}
-                                className="bg-white/10 hover:bg-white/20 border border-white/30 text-white px-8 py-3.5 rounded-xl font-bold transition-all backdrop-blur-md flex items-center justify-center gap-2"
+                                className="w-full sm:w-auto bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 px-8 py-4 rounded-2xl font-bold transition-all shadow-sm hover:shadow hover:border-slate-300 flex items-center justify-center gap-2.5 text-lg active:scale-95"
                              >
-                                <Info className="w-5 h-5" /> 新手指南
+                                <Info className="w-5 h-5 text-slate-400" /> 新手指南
                              </button>
                         </div>
                     </div>
