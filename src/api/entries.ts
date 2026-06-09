@@ -7,7 +7,7 @@ import { supabase } from '../lib/supabase'
 export const fetchEntries = async (): Promise<ScoreEntry[]> => {
   try {
     const { data, error } = await supabase
-      .from('entries')
+      .from('score_entries')
       .select('*')
 
     if (error) {
