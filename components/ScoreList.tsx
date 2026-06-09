@@ -148,96 +148,104 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
 
   return (
     <div className="space-y-6" ref={listTopRef}>
-       {/* Filter Area Container */}
-       <div className="bg-white/80 backdrop-blur-xl border border-slate-200/60 shadow-sm rounded-2xl p-4 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
-         
-         {/* Title & Count */}
-         <div className="flex items-center gap-3 shrink-0">
-             <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-2.5 rounded-xl border border-indigo-100/50 shadow-sm">
-                 <Filter className="w-5 h-5 text-indigo-600" />
-             </div>
-             <div className="flex items-center gap-4">
-                 <div>
-                     <h3 className="font-black text-slate-800 text-lg leading-none tracking-tight mb-1">
-                         最新分享
-                     </h3>
-                     <p className="text-xs text-slate-500 font-bold tracking-wide">
-                         {!isLoading ? `找到 ${filteredEntries.length} 筆資料` : '載入中...'}
-                     </p>
-                 </div>
-                 {onRefresh && (
+       {/* Filter Area Container - Redesigned */}
+       <div className="bg-white rounded-[2rem] border border-slate-100 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.05)] p-5 sm:p-6 mb-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+         <div className="flex flex-col gap-6">
+            
+            {/* Top Row: Title & Actions */}
+            <div className="flex justify-between items-center bg-slate-50/80 -mx-5 -mt-5 px-5 py-4 sm:-mx-6 sm:-mt-6 sm:px-6 sm:py-5 border-b border-slate-100 rounded-t-[2rem]">
+                <div className="flex items-center gap-3.5">
+                    <div className="bg-indigo-600 p-2 rounded-xl shadow-md shadow-indigo-200">
+                        <Filter className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                        <h3 className="font-black text-slate-800 text-lg sm:text-xl tracking-tight mb-0.5">
+                            最新分享
+                        </h3>
+                        <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                            <p className="text-xs text-slate-500 font-bold">
+                                {!isLoading ? `找到 ${filteredEntries.length} 筆資料` : '載入中...'}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {onRefresh && (
                      <button
                          onClick={handleRefresh}
                          disabled={isRefreshing || cooldown > 0}
-                         className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50/50 hover:bg-slate-100 border border-indigo-100/50 text-indigo-600 rounded-lg text-xs font-bold transition-all disabled:opacity-50 group hover:shadow-sm"
+                         className="flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 bg-white border border-slate-200 shadow-sm text-slate-600 rounded-xl text-sm font-bold transition-all disabled:opacity-50 hover:border-indigo-300 hover:text-indigo-600 hover:shadow active:scale-95 group"
                          title="重新整理"
                      >
-                         <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
+                         <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-indigo-500' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
                          <span className="hidden sm:inline">
-                             {cooldown > 0 ? `冷卻中 ${cooldown}s` : '重整'}
+                             {cooldown > 0 ? `冷卻中 ${cooldown}s` : '重新載入'}
                          </span>
                      </button>
                  )}
-             </div>
-         </div>
-         
-         {/* Controls */}
-         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full xl:w-auto">
-             
-             {/* Group by School Toggle */}
-             <label className="flex items-center justify-center sm:justify-start gap-2 text-sm text-slate-700 font-bold cursor-pointer hover:text-indigo-600 transition-colors bg-slate-50 sm:bg-transparent px-4 py-2.5 sm:p-0 rounded-xl sm:rounded-none border border-slate-200 sm:border-none group">
-                 <div className="relative flex items-center justify-center">
-                     <input 
-                         type="checkbox"
-                         checked={groupBySchool}
-                         onChange={(e) => setGroupBySchool(e.target.checked)}
-                         className="peer sr-only"
-                     />
-                     <div className="w-5 h-5 border-2 border-slate-300 rounded bg-white peer-checked:bg-indigo-500 peer-checked:border-indigo-500 transition-all flex items-center justify-center">
-                         <Check className="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 scale-50 peer-checked:scale-100 transition-all" strokeWidth={3} />
-                     </div>
-                 </div>
-                 <span>同校排在一起</span>
-             </label>
+            </div>
 
-             <div className="h-6 w-px bg-slate-200 hidden sm:block mx-1"></div>
-             
-             {/* Search Input */}
-             <div className="relative flex-1 sm:w-56 group">
-                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
-                 <input 
-                     type="text" 
-                     placeholder="搜尋學校..." 
-                     value={filterSchool}
-                     onChange={(e) => setFilterSchool(e.target.value)}
-                     className="w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-10 pr-4 text-sm font-medium text-slate-800 outline-none focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-400 transition-all placeholder:text-slate-400"
-                 />
-             </div>
+            {/* Bottom Row: Controls */}
+            <div className="flex flex-col lg:flex-row items-center gap-4">
+                
+                {/* Search Bar - Prominent */}
+                <div className="relative w-full lg:max-w-md group">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+                    <input 
+                        type="text" 
+                        placeholder="想找哪間學校？" 
+                        value={filterSchool}
+                        onChange={(e) => setFilterSchool(e.target.value)}
+                        className="w-full bg-slate-50/50 hover:bg-slate-50 border-2 border-slate-100 rounded-2xl py-3.5 pl-12 pr-4 text-base font-semibold text-slate-800 outline-none focus:bg-white focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-slate-400 placeholder:font-medium"
+                    />
+                </div>
 
-             {/* Selectors */}
-             <div className="flex gap-2 w-full sm:w-auto">
-                 <div className="relative flex-1 sm:flex-none">
-                     <select
-                         value={filterYear}
-                         onChange={(e) => setFilterYear(e.target.value)}
-                         className="w-full sm:w-auto appearance-none bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-4 pr-10 text-sm font-bold text-slate-700 outline-none focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-400 transition-all cursor-pointer min-w-[7rem]"
-                     >
-                         <option value="All">所有年份</option>
-                         {YEARS.map(year => (
-                             <option key={year} value={year}>{year}年</option>
-                         ))}
-                     </select>
-                     <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                 </div>
+                {/* Filters */}
+                <div className="flex flex-wrap lg:flex-nowrap items-center w-full lg:w-auto gap-3 flex-1 justify-end">
+                    
+                    <div className="relative flex-1 lg:flex-none">
+                        <select
+                            value={filterYear}
+                            onChange={(e) => setFilterYear(e.target.value)}
+                            className="w-full appearance-none bg-white border border-slate-200 rounded-2xl py-3 pl-4 pr-10 text-sm font-bold text-slate-700 outline-none hover:border-indigo-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all cursor-pointer shadow-sm"
+                        >
+                            <option value="All">所有年份</option>
+                            {YEARS.map(year => (
+                                <option key={year} value={year}>{year}年</option>
+                            ))}
+                        </select>
+                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    </div>
 
-                 <button 
-                     onClick={() => setIsRegionModalOpen(true)}
-                     className="flex-1 sm:flex-none flex items-center justify-between gap-3 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 text-sm font-bold outline-none focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-400 transition-all cursor-pointer min-w-[8rem] text-slate-700 active:scale-95"
-                 >
-                     <span className="truncate">{filterRegion === 'All' ? '所有區域' : filterRegion}</span>
-                     <Search className="w-4 h-4 text-slate-400 shrink-0" />
-                 </button>
-             </div>
+                    <button 
+                        onClick={() => setIsRegionModalOpen(true)}
+                        className="flex-1 lg:flex-none flex items-center justify-between gap-3 bg-white border border-slate-200 rounded-2xl py-3 px-4 text-sm font-bold outline-none hover:border-indigo-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all cursor-pointer text-slate-700 shadow-sm active:scale-95 group"
+                    >
+                        <span className="truncate">{filterRegion === 'All' ? '所有區域' : filterRegion}</span>
+                        <MapPin className="w-4 h-4 text-slate-400 group-hover:text-indigo-500 transition-colors shrink-0" />
+                    </button>
+
+                    <div className="h-8 w-px bg-slate-200 hidden lg:block mx-1"></div>
+
+                    {/* Group by School Toggle */}
+                    <label className="flex-1 lg:flex-none flex items-center justify-center lg:justify-start gap-2.5 text-sm text-slate-700 font-bold cursor-pointer hover:text-indigo-600 transition-colors bg-slate-50 lg:bg-transparent px-4 py-3 lg:p-0 rounded-2xl lg:rounded-none border border-slate-100 lg:border-none group">
+                        <div className="relative flex items-center justify-center">
+                            <input 
+                                type="checkbox"
+                                checked={groupBySchool}
+                                onChange={(e) => setGroupBySchool(e.target.checked)}
+                                className="peer sr-only"
+                            />
+                            <div className="w-5 h-5 border-2 border-slate-300 rounded-md bg-white peer-checked:bg-indigo-600 peer-checked:border-indigo-600 transition-all flex items-center justify-center shadow-sm">
+                                <Check className="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 scale-50 peer-checked:scale-100 transition-all" strokeWidth={3} />
+                            </div>
+                        </div>
+                        <span>同校排在一起</span>
+                    </label>
+
+                </div>
+            </div>
          </div>
        </div>
 

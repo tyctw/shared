@@ -5,6 +5,7 @@ import Dashboard from './components/Dashboard';
 import Guide from './components/Guide';
 import ScoreCompare from './components/ScoreCompare';
 import ShareModal from './components/ShareModal';
+import GreetingModal from './components/GreetingModal';
 import { ScoreEntry } from './types';
 import { fetchEntries, submitEntry, logUserAction } from './services/apiService';
 import { GraduationCap, BarChart3, PlusCircle, BookOpen, CloudOff, Info, Menu, X, ExternalLink, Calculator, Compass, Sparkles, RefreshCw, Home, ShieldAlert, Check, Heart, Shield, Share2 } from 'lucide-react';
@@ -215,6 +216,9 @@ const App: React.FC = () => {
         onClose={() => setShowShareModal(false)} 
       />
 
+      {/* Greeting Modal */}
+      <GreetingModal />
+
       {/* Sidebar Overlay */}
       {isSidebarOpen && (
         <div 
@@ -373,40 +377,6 @@ const App: React.FC = () => {
       {/* Main Content */}
       <main className="max-w-5xl mx-auto px-3 sm:px-6 pt-24 sm:pt-32 pb-28 sm:pb-16">
         
-        {/* Blessing Banner */}
-        {activeTab === 'list' && (
-            <div className="mb-8 rounded-3xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-[2px] shadow-lg shadow-indigo-200/50 hover:shadow-indigo-300/50 transition-all duration-500 overflow-hidden animate-in fade-in slide-in-from-bottom-4">
-                <div className="bg-white/95 backdrop-blur-3xl rounded-[22px] px-6 py-6 sm:px-10 sm:py-8 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
-                    {/* Decorative Background Elements */}
-                    <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-gradient-to-br from-indigo-200 to-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-pulse"></div>
-                    <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-48 h-48 bg-gradient-to-tr from-pink-200 to-rose-200 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-pulse" style={{ animationDelay: '1s' }}></div>
-                    
-                    <div className="relative z-10 text-center md:text-left flex-1">
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-700 text-xs font-bold rounded-full mb-3 border border-indigo-200/50 shadow-inner">
-                            <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
-                            <span>115 國中教育會考</span>
-                        </div>
-                        <h2 className="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight leading-tight mb-2">
-                            祝各位考生 <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">金榜題名</span>
-                        </h2>
-                        <p className="text-slate-500 font-medium text-sm sm:text-base max-w-lg mx-auto md:mx-0">
-                            邁向高中的全新旅程！願你順利錄取心目中的理想校系，在未來閃耀自己的光芒。
-                        </p>
-                    </div>
-
-                    <div className="relative z-10 shrink-0">
-                        <div className="w-24 h-24 sm:w-28 sm:h-28 bg-gradient-to-tr from-indigo-100 to-pink-100 rounded-full flex items-center justify-center border-4 border-white shadow-xl rotate-3 hover:rotate-6 transition-transform duration-300">
-                            <GraduationCap className="w-12 h-12 sm:w-14 sm:h-14 text-indigo-600" />
-                        </div>
-                        {/* Confetti dots */}
-                        <div className="absolute -top-4 -left-4 w-3 h-3 bg-pink-400 rounded-full animate-bounce"></div>
-                        <div className="absolute top-1/2 -right-6 w-2 h-2 bg-purple-400 rounded-full animate-ping"></div>
-                        <div className="absolute -bottom-2 lg:bottom-4 left-0 w-2.5 h-2.5 bg-indigo-400 rounded-full animate-pulse"></div>
-                    </div>
-                </div>
-            </div>
-        )}
-
         <div className="animate-in fade-in duration-700 slide-in-from-bottom-6">
             
             {!isLoading && entries.length === 0 && activeTab !== 'guide' && (
@@ -648,4 +618,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-

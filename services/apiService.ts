@@ -1,17 +1,16 @@
 import { ScoreEntry } from '../types';
 
 // ===============================
-// API URL（Google Apps Script）
+// API URL（Proxy Server）
 // ===============================
-const API_URL =
-  'https://script.google.com/macros/s/AKfycbxRCOjCYMjeAIMT14A1kAIxXiKxt011y7Ctw_0fo_EO_PgUV_Es16uKdE_gG64GNUqh/exec';
+const API_URL = '/api';
 
 // ===============================
 // Fetch Entries（讀取資料）
 // ===============================
 export const fetchEntries = async (): Promise<ScoreEntry[]> => {
   try {
-    const response = await fetch(`${API_URL}?t=${Date.now()}`);
+    const response = await fetch(`${API_URL}/entries`);
 
     if (!response.ok) {
       throw new Error(`HTTP error: ${response.status}`);
@@ -19,7 +18,17 @@ export const fetchEntries = async (): Promise<ScoreEntry[]> => {
 
     const data = await response.json();
 
-    return Array.isArray(data) ? (data as ScoreEntry[]) : [];
+    if (data.error) {
+       console.error('API Error:', data.error);
+       return [];
+    }
+
+    // Map DB fields back to frontend fields
+    return data.map((item: any) => ({
+      ...item,
+      totalPoints: item.total_points ?? item.totalPoints,
+      totalCredits: item.total_credits ?? item.totalCredits,
+    })) as ScoreEntry[];
   } catch (error) {
     console.error('Error fetching entries:', error);
     return [];
@@ -31,38 +40,22 @@ export const fetchEntries = async (): Promise<ScoreEntry[]> => {
 // ===============================
 export const submitEntry = async (entry: ScoreEntry): Promise<boolean> => {
   try {
-    const formData = new URLSearchParams();
-
-    formData.append(
-      'data',
-      JSON.stringify({
-        entry,
-      })
-    );
-
-    const response = await fetch(API_URL, {
+    const response = await fetch(`${API_URL}/entries`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
       },
-      body: formData,
+      body: JSON.stringify({ entry }),
     });
 
-    const text = await response.text();
+    const data = await response.json();
 
-    try {
-      const json = JSON.parse(text);
-
-      if (json?.status === 'error') {
-        console.error('GAS Error:', json.message);
-        return false;
-      }
-
-      return true;
-    } catch {
-      console.error('Invalid JSON response:', text);
+    if (data.status === 'error') {
+      console.error('API Error:', data.message || data.error);
       return false;
     }
+
+    return true;
   } catch (error) {
     console.error('Submit error:', error);
     return false;
