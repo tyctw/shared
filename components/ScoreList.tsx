@@ -64,7 +64,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
   const [filterSchool, setFilterSchool] = useState<string>('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(24);
   const [groupBySchool, setGroupBySchool] = useState<boolean>(false);
   const [cooldown, setCooldown] = useState<number>(0);
 
