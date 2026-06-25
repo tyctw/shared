@@ -410,10 +410,10 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
               onChange={(e) => setItemsPerPage(Number(e.target.value))}
               className="bg-white/70 backdrop-blur-sm border border-slate-200 rounded-xl py-1.5 px-3 text-sm font-bold text-slate-600 outline-none focus:ring-2 focus:ring-indigo-100 transition-all shadow-sm cursor-pointer"
             >
-              <option value={5}>5 筆</option>
-              <option value={10}>10 筆</option>
-              <option value={20}>20 筆</option>
-              <option value={50}>50 筆</option>
+              <option value={12}>12 筆</option>
+              <option value={24}>24 筆</option>
+              <option value={48}>48 筆</option>
+              <option value={66}>66 筆</option>
             </select>
           </div>
 
