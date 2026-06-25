@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ScoreEntry, Region, Grade, WritingGrade } from '../types';
 import { YEARS, GRADES, WRITING_GRADES, REGIONS, DEPARTMENT_GROUPS, SCHOOLS_BY_REGION } from '../constants';
 import { calculateRegionalScore } from '../utils/scoreCalculator';
-import { Send, Loader2, Info, ChevronDown, User, PenTool, Search, ShieldCheck, MapPin, School, GraduationCap, Trophy, FileText, Sparkles, Lock } from 'lucide-react';
+import { Send, Loader2, ChevronDown, User, PenTool, Search, ShieldCheck, MapPin, School, GraduationCap, Trophy, FileText, Sparkles, Lock } from 'lucide-react';
 
 interface ScoreFormProps {
   onSubmit: (entry: Omit<ScoreEntry, 'id' | 'timestamp'>) => void;
@@ -15,12 +15,12 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
     department: '',
     region: REGIONS[0],
     scores: {
-      chinese: 'A' as Grade,
-      english: 'A' as Grade,
-      math: 'A' as Grade,
-      nature: 'A' as Grade,
-      social: 'A' as Grade,
-      writing: 4 as WritingGrade,
+      chinese: '' as Grade,
+      english: '' as Grade,
+      math: '' as Grade,
+      nature: '' as Grade,
+      social: '' as Grade,
+      writing: '' as unknown as WritingGrade,
     },
     totalPoints: '',
     totalCredits: '',
@@ -52,6 +52,20 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
 
   // Auto-calculate total points & credits based on region
   useEffect(() => {
+    const { chinese, english, math, nature, social, writing } = formData.scores;
+    const hasCompleteScores =
+      [chinese, english, math, nature, social].every(Boolean) &&
+      writing !== ('' as unknown as WritingGrade);
+
+    if (!hasCompleteScores) {
+      setFormData(prev => ({
+        ...prev,
+        totalPoints: '',
+        totalCredits: ''
+      }));
+      return;
+    }
+
     const { points, credits } = calculateRegionalScore(formData.region, formData.scores);
     setFormData(prev => ({
       ...prev,
@@ -105,6 +119,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
       const errors: string[] = [];
       if (!formData.school.trim()) errors.push("錄取學校");
       if (!formData.department.trim()) errors.push("科系/班別");
+      if (Object.values(formData.scores).some(score => score === '')) errors.push("完整會考成績");
       if (!formData.totalPoints) errors.push("總積分");
       return errors;
   };
@@ -147,7 +162,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
   const filteredRegions = REGIONS.filter(r => r.includes(regionSearchTerm));
 
   // Style Constants
-  const sectionClass = "bg-white/40 backdrop-blur-md rounded-[2rem] p-6 sm:p-8 border border-white/60 shadow-sm relative overflow-hidden group hover:shadow-md transition-all duration-500";
+  const sectionClass = "bg-white rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-8 border border-slate-100 shadow-[0_16px_50px_-28px_rgba(15,23,42,0.3)] relative overflow-hidden transition-all duration-500 hover:shadow-[0_24px_60px_-30px_rgba(79,70,229,0.28)]";
 
   const getGradeSelectStyle = (grade: string) => {
     if (grade === 'A++') return 'border-amber-200 text-amber-600 bg-gradient-to-b from-amber-50 to-orange-50';
@@ -163,40 +178,66 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
     return 'border-slate-200 text-slate-700 bg-slate-50';
   };
 
-  const labelClass = "block text-sm font-bold text-slate-600 mb-2 flex items-center gap-1.5";
-  const inputClass = "w-full bg-white/70 hover:bg-white focus:bg-white border border-slate-200/80 focus:border-indigo-400 rounded-xl py-3 px-4 text-slate-700 outline-none focus:ring-4 focus:ring-indigo-100 transition-all duration-300 placeholder:text-slate-400 font-medium appearance-none shadow-sm";
+  const labelClass = "block text-[13px] font-black text-slate-600 mb-2 flex items-center gap-1.5";
+  const inputClass = "w-full bg-slate-50/80 hover:bg-white focus:bg-white border-2 border-slate-100 focus:border-indigo-400 rounded-2xl py-3.5 px-4 text-slate-700 outline-none focus:ring-4 focus:ring-indigo-100/70 transition-all duration-300 placeholder:text-slate-400 font-semibold appearance-none";
   const selectWrapperClass = "relative";
   const selectArrowClass = "absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 w-4 h-4";
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in slide-in-from-bottom-8 duration-700">
+    <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8 animate-in slide-in-from-bottom-8 duration-700">
       
       {/* Header */}
-      <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/50 border border-white/60 text-indigo-600 text-sm font-bold shadow-sm mb-4 backdrop-blur-sm">
-             <Sparkles className="w-4 h-4" />
-             <span>Help Others Succeed</span>
+      <div className="relative overflow-hidden rounded-[2rem] bg-[#11132b] px-6 py-8 text-white shadow-[0_24px_70px_-30px_rgba(49,46,129,0.8)] sm:rounded-[2.5rem] sm:px-10 sm:py-10">
+          <div className="pointer-events-none absolute -right-16 -top-24 h-64 w-64 rounded-full bg-fuchsia-500/30 blur-[70px]"></div>
+          <div className="pointer-events-none absolute -bottom-28 left-1/4 h-64 w-64 rounded-full bg-indigo-500/30 blur-[80px]"></div>
+          <div className="pointer-events-none absolute inset-0 opacity-[0.06] [background-image:linear-gradient(rgba(255,255,255,.7)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.7)_1px,transparent_1px)] [background-size:36px_36px]"></div>
+
+          <div className="relative z-10 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.08] px-3.5 py-2 text-xs font-bold text-indigo-100 backdrop-blur-md">
+                 <Sparkles className="h-3.5 w-3.5 text-amber-200" />
+                 <span>你的經驗，會成為別人的方向</span>
+              </div>
+              <h2 className="text-3xl font-black tracking-[-0.035em] sm:text-5xl">
+                 分享你的
+                 <span className="bg-gradient-to-r from-indigo-300 via-fuchsia-300 to-amber-200 bg-clip-text text-transparent">錄取數據</span>
+              </h2>
+              <p className="mt-3 max-w-xl text-sm font-medium leading-7 text-slate-300 sm:text-base">
+                 匿名分享會考成績與錄取結果，讓學弟妹少一點資訊焦慮，多一份選擇的底氣。
+              </p>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 sm:min-w-[310px]">
+              {[
+                ['01', '考生背景'],
+                ['02', '會考成績'],
+                ['03', '經驗分享'],
+              ].map(([step, label]) => (
+                <div key={step} className="rounded-2xl border border-white/10 bg-white/[0.07] px-3 py-3 backdrop-blur-md">
+                  <span className="block text-[10px] font-black tracking-widest text-indigo-300">{step}</span>
+                  <span className="mt-1 block whitespace-nowrap text-xs font-bold text-white/85">{label}</span>
+                </div>
+              ))}
+            </div>
           </div>
-          <h2 className="text-4xl font-black text-slate-800 tracking-tight mb-3">
-             分享你的錄取數據
-          </h2>
-          <p className="text-slate-500 text-lg">
-             你的每一個數據，都是學弟妹升學路上的重要指引。
-          </p>
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         
         {/* Section 1: Background Info */}
         <section className={sectionClass}>
-            <div className="absolute top-0 right-0 p-4 opacity-10">
-                <User className="w-24 h-24 text-slate-900" />
+            <div className="absolute -right-8 -top-8 h-36 w-36 rounded-full bg-indigo-50"></div>
+            <div className="absolute top-5 right-6 opacity-[0.08]">
+                <User className="w-20 h-20 text-indigo-900" />
             </div>
             
-            <h3 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2 relative z-10">
-                <span className="bg-indigo-100 p-2 rounded-lg text-indigo-600"><MapPin className="w-5 h-5"/></span>
-                考生背景
-            </h3>
+            <div className="relative z-10 mb-7 flex items-center gap-3">
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-200"><MapPin className="h-5 w-5"/></span>
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-[0.18em] text-indigo-500">Step 01</span>
+                  <h3 className="text-xl font-black text-slate-800">考生背景</h3>
+                </div>
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 relative z-10">
                 {/* Year */}
@@ -211,10 +252,24 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                 </div>
 
                 {showLockState ? (
-                    <div className="md:col-span-9 flex flex-col items-center justify-center p-6 bg-slate-50 rounded-2xl border border-slate-200 text-center animate-in fade-in duration-500">
-                        <Lock className="w-8 h-8 text-slate-400 mb-3" />
-                        <h4 className="text-lg font-bold text-slate-800 mb-1">115年分享尚未開放</h4>
-                        <p className="text-sm text-slate-500 font-medium">將於 115/07/07 08:00 準時開放，敬請期待！</p>
+                    <div className="md:col-span-9 relative overflow-hidden rounded-[1.75rem] border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-6 animate-in fade-in duration-500">
+                        <div className="pointer-events-none absolute -right-10 -top-12 h-36 w-36 rounded-full border-[22px] border-indigo-100/60"></div>
+                        <div className="relative z-10 flex flex-col items-center gap-5 text-center sm:flex-row sm:text-left">
+                            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-200">
+                                <Lock className="h-7 w-7" />
+                            </div>
+                            <div className="flex-1">
+                                <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-indigo-100 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-indigo-600">
+                                    Coming soon
+                                </div>
+                                <h4 className="text-xl font-black tracking-tight text-slate-900">115 年分享尚未開放</h4>
+                                <p className="mt-1 text-sm font-medium text-slate-500">會考放榜後即可回來分享你的錄取結果。</p>
+                            </div>
+                            <div className="shrink-0 rounded-2xl border border-indigo-100 bg-white/90 px-5 py-3 shadow-sm">
+                                <span className="block text-[10px] font-black uppercase tracking-widest text-indigo-400">開放時間</span>
+                                <strong className="mt-1 block whitespace-nowrap text-base font-black text-indigo-700">115/07/07 08:00</strong>
+                            </div>
+                        </div>
                     </div>
                 ) : (
                 <>
@@ -266,9 +321,11 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                 
                 {/* Department Row */}
                 <div className="md:col-span-12 grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 border-t border-slate-100/50 mt-2">
-                    {/* Group */}
+                     {/* Group */}
                      <div className="space-y-1">
-                        <label className={labelClass}>群別分類</label>
+                        <div className="mb-2 flex min-h-[20px] items-center justify-between">
+                            <label className="flex items-center gap-1.5 text-[13px] font-black text-slate-600">群別分類</label>
+                        </div>
                         <button
                             type="button"
                             onClick={() => {
@@ -286,8 +343,8 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
 
                      {/* Department */}
                      <div className="space-y-1">
-                        <div className="flex justify-between items-center mb-2">
-                             <label className={labelClass}>科系/班別 <span className="text-rose-500">*</span></label>
+                        <div className="mb-2 flex min-h-[20px] items-center justify-between">
+                             <label className="flex items-center gap-1.5 text-[13px] font-black text-slate-600">科系/班別 <span className="text-rose-500">*</span></label>
                              {selectedGroup !== 'custom' && !isManualDept && (
                                 <button type="button" onClick={() => { setIsManualDept(true); setFormData(prev => ({...prev, department: ''})) }} className="text-[11px] text-indigo-500 hover:text-indigo-700 font-semibold underline">自行輸入</button>
                             )}
@@ -324,16 +381,20 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
         <>
         {/* Section 2: Scores */}
         <section className={sectionClass}>
-             <div className="absolute top-0 right-0 p-4 opacity-10">
-                <Trophy className="w-24 h-24 text-amber-500" />
+             <div className="absolute -right-8 -top-8 h-36 w-36 rounded-full bg-amber-50"></div>
+             <div className="absolute top-5 right-6 opacity-[0.1]">
+                <Trophy className="w-20 h-20 text-amber-600" />
+             </div>
+
+            <div className="relative z-10 mb-7 flex items-center gap-3">
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-lg shadow-amber-200"><GraduationCap className="h-5 w-5"/></span>
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-500">Step 02</span>
+                  <h3 className="text-xl font-black text-slate-800">會考成績</h3>
+                </div>
             </div>
 
-            <h3 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2 relative z-10">
-                <span className="bg-amber-100 p-2 rounded-lg text-amber-600"><GraduationCap className="w-5 h-5"/></span>
-                會考成績
-            </h3>
-
-            <div className="bg-white/50 rounded-2xl p-4 border border-slate-100 mb-6 relative z-10">
+            <div className="relative z-10 mb-6 rounded-[1.5rem] border border-slate-100 bg-slate-50/70 p-3 sm:p-5">
                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-4">
                     {(['chinese', 'english', 'math', 'nature', 'social'] as const).map(subject => (
                     <div key={subject} className="flex flex-col gap-1.5">
@@ -346,6 +407,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                                 onChange={(e) => handleScoreChange(subject, e.target.value)} 
                                 className={`w-full h-14 rounded-xl border-2 text-center font-mono font-black text-xl shadow-sm appearance-none cursor-pointer transition-all outline-none focus:ring-4 focus:ring-indigo-100 ${getGradeSelectStyle(formData.scores[subject])}`}
                             >
+                                <option value="" disabled>請選擇</option>
                                 {GRADES.map(g => <option key={g} value={g}>{g}</option>)}
                             </select>
                             <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-10 transition-opacity bg-indigo-500 rounded-xl"></div>
@@ -362,6 +424,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                                 onChange={(e) => handleScoreChange('writing', Number(e.target.value))} 
                                 className={`w-full h-14 rounded-xl border-2 text-center font-mono font-black text-xl shadow-sm appearance-none cursor-pointer transition-all outline-none focus:ring-4 focus:ring-rose-100 ${getWritingSelectStyle(formData.scores.writing)}`}
                             >
+                                <option value="" disabled>請選擇</option>
                                 {WRITING_GRADES.map(g => <option key={g} value={g}>{g} 級</option>)}
                             </select>
                         </div>
@@ -369,39 +432,57 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                 </div>
             </div>
 
+            <div className="relative z-10 mb-3 flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
+                系統會依各區計分方式自動帶入，亦可依成績單自行修改
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
-                <div className="bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100">
+                <div className="rounded-[1.5rem] border border-indigo-100 bg-gradient-to-br from-indigo-50 to-white p-4">
                     <label className={labelClass}>
-                        總積分 <span className="text-rose-500">*</span>
-                        <div className="group relative ml-auto">
-                            <Info className="w-3.5 h-3.5 text-indigo-400 cursor-help" />
-                            <div className="absolute bottom-full right-0 mb-2 w-48 p-2 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                                請依照各就學區的積分計算方式填寫 (例如基北區滿分36)
-                            </div>
-                        </div>
+                        總積分
                     </label>
-                    <input type="number" step="0.1" value={formData.totalPoints} onChange={(e) => handleChange('totalPoints', e.target.value)} placeholder="例：97.5" className="w-full bg-white border-2 border-indigo-200 focus:border-indigo-500 rounded-xl py-3 px-4 text-2xl font-black text-indigo-600 outline-none placeholder:text-indigo-200 transition-all text-center" />
+                    <input
+                        type="number"
+                        step="0.1"
+                        value={formData.totalPoints}
+                        onChange={(e) => handleChange('totalPoints', e.target.value)}
+                        aria-label="總積分"
+                        className="w-full bg-white border-2 border-indigo-200 focus:border-indigo-500 rounded-xl py-3 px-4 text-2xl font-black text-indigo-600 outline-none focus:ring-4 focus:ring-indigo-100 transition-all text-center"
+                    />
                 </div>
                 
-                <div className="bg-amber-50/50 p-4 rounded-2xl border border-amber-100">
+                <div className="rounded-[1.5rem] border border-amber-100 bg-gradient-to-br from-amber-50 to-white p-4">
                      <label className={labelClass}>
-                        總積點 <span className="text-slate-400 font-normal text-xs ml-auto">(選填)</span>
-                    </label>
-                    <input type="number" step="0.1" value={formData.totalCredits} onChange={(e) => handleChange('totalCredits', e.target.value)} placeholder="例：28" className="w-full bg-white border-2 border-amber-200 focus:border-amber-500 rounded-xl py-3 px-4 text-2xl font-black text-amber-600 outline-none placeholder:text-amber-200 transition-all text-center" />
+                        總積點
+                     </label>
+                    <input
+                        type="number"
+                        step="0.1"
+                        value={formData.totalCredits}
+                        onChange={(e) => handleChange('totalCredits', e.target.value)}
+                        aria-label="總積點"
+                        placeholder="此區不使用積點"
+                        className="w-full bg-white border-2 border-amber-200 focus:border-amber-500 rounded-xl py-3 px-4 text-2xl font-black text-amber-600 outline-none focus:ring-4 focus:ring-amber-100 transition-all placeholder:text-sm placeholder:font-medium placeholder:text-amber-300 text-center"
+                    />
                 </div>
             </div>
         </section>
 
         {/* Section 3: Notes & Verify */}
         <section className={sectionClass}>
-             <div className="absolute top-0 right-0 p-4 opacity-10">
-                <FileText className="w-24 h-24 text-slate-900" />
-            </div>
+             <div className="absolute -right-8 -top-8 h-36 w-36 rounded-full bg-emerald-50"></div>
+             <div className="absolute top-5 right-6 opacity-[0.08]">
+                <FileText className="w-20 h-20 text-emerald-700" />
+             </div>
 
-            <h3 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2 relative z-10">
-                <span className="bg-emerald-100 p-2 rounded-lg text-emerald-600"><PenTool className="w-5 h-5"/></span>
-                經驗傳承
-            </h3>
+            <div className="relative z-10 mb-7 flex items-center gap-3">
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-500 text-white shadow-lg shadow-emerald-200"><PenTool className="h-5 w-5"/></span>
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-500">Step 03</span>
+                  <h3 className="text-xl font-black text-slate-800">經驗傳承</h3>
+                </div>
+            </div>
 
             <div className="relative z-10 space-y-6">
                 <div>
@@ -416,12 +497,12 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                 </div>
 
                 <div className="pt-2">
-                    <button 
+                    <button
                         type="submit" 
                         disabled={isSubmitting} 
-                        className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 transform active:scale-[0.99] flex justify-center items-center gap-3 shadow-lg shadow-slate-900/20 disabled:opacity-70 disabled:cursor-not-allowed group relative overflow-hidden"
+                        className="group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl bg-[#11132b] px-6 py-4 font-black text-white shadow-xl shadow-indigo-200/60 transition-all duration-300 hover:-translate-y-0.5 hover:bg-indigo-600 hover:shadow-indigo-300/50 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
                     >
-                        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-0 group-hover:opacity-10 transition-opacity"></div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-0 transition-opacity group-hover:opacity-20"></div>
                         {isSubmitting ? (
                             <><Loader2 className="w-5 h-5 animate-spin" /> 正在上傳數據...</>
                         ) : (

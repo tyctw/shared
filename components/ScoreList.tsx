@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ScoreEntry } from '../types';
 import { REGIONS, YEARS } from '../constants';
-import { MapPin, Search, Sparkles, Share2, Check, Calendar, Quote, School, ChevronLeft, ChevronRight, Heart, Filter, ChevronDown, RefreshCw } from 'lucide-react';
+import { MapPin, Search, Sparkles, Share2, Check, Calendar, Quote, School, ChevronLeft, ChevronRight, Heart, Filter, ChevronDown, RefreshCw, RotateCcw } from 'lucide-react';
 
 interface ScoreListProps {
   entries: ScoreEntry[];
@@ -83,6 +83,14 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
     }
   };
 
+  const clearFilters = () => {
+    setFilterRegion('All');
+    setFilterYear('All');
+    setFilterSchool('');
+    setGroupBySchool(false);
+    setCurrentPage(1);
+  };
+
   const [isRegionModalOpen, setIsRegionModalOpen] = useState(false);
   const [regionSearchTerm, setRegionSearchTerm] = useState('');
   
@@ -91,7 +99,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
   const minPointsMap = React.useMemo(() => {
     const map = new Map<string, number>();
     entries.forEach(entry => {
-      const key = `${entry.year}-${entry.school}-${entry.department}`;
+      const key = `${entry.year}-${entry.school}`;
       if (!map.has(key) || entry.totalPoints < map.get(key)!) {
         map.set(key, entry.totalPoints);
       }
@@ -257,136 +265,138 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
                 <ScoreSkeleton />
             </>
         ) : filteredEntries.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-slate-500 bg-white/40 backdrop-blur-md rounded-[2.5rem] border border-dashed border-slate-300 mx-4 sm:mx-0">
-             <div className="bg-white p-5 rounded-full mb-4 shadow-sm ring-8 ring-slate-50">
-                <Search className="w-10 h-10 text-slate-300" />
+          <div className="relative col-span-full mx-1 overflow-hidden rounded-[2.5rem] border border-slate-200 bg-white px-6 py-16 text-center shadow-[0_18px_60px_-35px_rgba(15,23,42,0.35)] sm:mx-0 sm:px-10">
+             <div className="pointer-events-none absolute -left-24 -top-28 h-64 w-64 rounded-full bg-indigo-100/70 blur-[70px]"></div>
+             <div className="pointer-events-none absolute -bottom-28 -right-20 h-64 w-64 rounded-full bg-fuchsia-100/70 blur-[70px]"></div>
+             <div className="pointer-events-none absolute inset-0 opacity-[0.035] [background-image:linear-gradient(rgba(79,70,229,.8)_1px,transparent_1px),linear-gradient(90deg,rgba(79,70,229,.8)_1px,transparent_1px)] [background-size:32px_32px]"></div>
+
+             <div className="relative z-10 mx-auto flex max-w-md flex-col items-center">
+                <div className="relative mb-7">
+                   <div className="absolute inset-0 scale-150 rounded-full bg-indigo-200/50 blur-2xl"></div>
+                   <div className="relative flex h-20 w-20 items-center justify-center rounded-[1.75rem] border border-indigo-100 bg-gradient-to-br from-white to-indigo-50 text-indigo-500 shadow-xl shadow-indigo-100/70">
+                      <Search className="h-9 w-9" />
+                   </div>
+                   <span className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-amber-400 text-white shadow-md">
+                      <Sparkles className="h-3.5 w-3.5" />
+                   </span>
+                </div>
+
+                <span className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500">No results found</span>
+                <h3 className="text-2xl font-black tracking-tight text-slate-800">找不到符合的資料</h3>
+                <p className="mt-3 text-sm font-medium leading-6 text-slate-500">
+                   目前的搜尋條件沒有相符結果，試著更換年份、區域，<br className="hidden sm:block" />
+                   或使用其他學校關鍵字搜尋。
+                </p>
+
+                {(filterRegion !== 'All' || filterYear !== 'All' || filterSchool || groupBySchool) && (
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="group mt-7 inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-6 py-3.5 text-sm font-black text-white shadow-lg shadow-slate-200 transition-all hover:-translate-y-0.5 hover:bg-indigo-600 hover:shadow-indigo-200 active:scale-95"
+                  >
+                    <RotateCcw className="h-4 w-4 transition-transform duration-500 group-hover:-rotate-180" />
+                    清除所有篩選
+                  </button>
+                )}
              </div>
-             <p className="font-bold text-slate-600 text-lg">找不到符合的資料</p>
-             <p className="text-sm text-slate-400 mt-1">試試看切換區域或使用關鍵字搜尋</p>
           </div>
         ) : (
           paginatedEntries.map((entry) => (
-            <div 
-                key={entry.id} 
-                className="group relative bg-white rounded-[2rem] p-1.5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_40px_-8px_rgba(99,102,241,0.2)] transition-all duration-500 ease-out border border-slate-100"
+            <article
+              key={entry.id}
+              className="group relative flex h-full flex-col overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white shadow-[0_12px_40px_-24px_rgba(15,23,42,0.3)] transition-all duration-500 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-[0_24px_60px_-28px_rgba(79,70,229,0.38)]"
             >
-              <div className="bg-slate-50/40 rounded-[1.6rem] p-6 sm:p-7 relative overflow-hidden h-full flex flex-col">
-                  {/* Glowing Ambient Corners */}
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-[4rem] -mr-20 -mt-20 group-hover:bg-indigo-500/20 transition-all duration-700 pointer-events-none"></div>
-                  <div className="absolute bottom-0 left-0 w-64 h-64 bg-fuchsia-500/10 rounded-full blur-[4rem] -ml-20 -mb-20 group-hover:bg-fuchsia-500/20 transition-all duration-700 pointer-events-none"></div>
+              <div className="relative overflow-hidden bg-gradient-to-br from-[#14162f] via-[#20234b] to-indigo-800 px-5 pb-7 pt-5 text-white sm:px-6">
+                <div className="pointer-events-none absolute -right-12 -top-16 h-44 w-44 rounded-full border-[28px] border-white/[0.06]"></div>
+                <div className="pointer-events-none absolute -bottom-20 left-1/4 h-40 w-40 rounded-full bg-fuchsia-500/20 blur-[55px]"></div>
 
-                  <div className="relative z-10 flex flex-col h-full">
-                      {/* Top Meta Row */}
-                      <div className="flex justify-between items-center mb-5">
-                          <div className="flex gap-2">
-                              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white text-[11px] font-bold text-slate-500 shadow-sm border border-slate-200/60">
-                                  <Calendar className="w-3.5 h-3.5 text-slate-400" /> {entry.year} 年
-                              </span>
-                              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white text-[11px] font-bold text-slate-500 shadow-sm border border-slate-200/60">
-                                  <MapPin className="w-3.5 h-3.5 text-slate-400" /> {entry.region}
-                              </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                              {toggleFavorite && (
-                                  <button
-                                      onClick={() => toggleFavorite(entry.id)}
-                                      className={`p-2.5 rounded-xl bg-white border border-slate-200/60 shadow-sm transition-all sm:opacity-0 group-hover:opacity-100 focus:opacity-100 ${favoriteIds?.includes(entry.id) ? 'text-rose-500 hover:bg-rose-50' : 'text-slate-400 hover:text-rose-500 hover:bg-rose-50'}`}
-                                      title={favoriteIds?.includes(entry.id) ? "取消收藏" : "加入收藏"}
-                                  >
-                                      <Heart className={`w-4 h-4 ${favoriteIds?.includes(entry.id) ? 'fill-current' : ''}`} />
-                                  </button>
-                              )}
-                              <button 
-                                  onClick={() => handleShare(entry)}
-                                  className="p-2.5 rounded-xl bg-white text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border border-slate-200/60 shadow-sm transition-all sm:opacity-0 group-hover:opacity-100 focus:opacity-100"
-                                  title="複製分享內容"
-                              >
-                                  {copiedId === entry.id ? <Check className="w-4 h-4 text-emerald-500" /> : <Share2 className="w-4 h-4" />}
-                              </button>
-                          </div>
-                      </div>
-
-                      {/* Title & Points Row */}
-                      <div className="flex flex-col justify-between items-start gap-4 mb-6">
-                          <div className="flex-1 w-full relative">
-                              <h3 className="text-2xl font-black text-slate-800 tracking-tight leading-tight mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-600 group-hover:to-purple-600 transition-all duration-300">
-                                  {entry.school}
-                              </h3>
-                              <div className="flex flex-wrap items-center gap-2">
-                                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50/80 text-indigo-700 text-sm font-bold rounded-lg border border-indigo-100">
-                                      <School className="w-4 h-4 text-indigo-400" />
-                                      {entry.department}
-                                  </div>
-                                  {minPointsMap.get(`${entry.year}-${entry.school}-${entry.department}`) === entry.totalPoints && (
-                                      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-50/80 text-rose-600 text-sm font-bold rounded-lg border border-rose-100">
-                                          <Sparkles className="w-4 h-4 text-rose-400" />
-                                          同校科最低分
-                                      </div>
-                                  )}
-                              </div>
-                          </div>
-
-                          <div className="flex gap-2 shrink-0 w-full">
-                              <div className="flex-1 flex flex-col justify-center items-center bg-white border border-slate-200 rounded-xl px-4 py-2 shadow-sm min-w-[5rem] group-hover:border-indigo-200 group-hover:shadow-md transition-all duration-300">
-                                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">總積分</span>
-                                  <span className="text-2xl font-black text-slate-800 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-600 group-hover:to-purple-600 transition-all leading-none tracking-tighter">
-                                      {entry.totalPoints}
-                                  </span>
-                              </div>
-                              {entry.totalCredits && (
-                                  <div className="flex-1 flex flex-col justify-center items-center bg-gradient-to-b from-amber-50 to-orange-50 border border-amber-200 rounded-xl px-4 py-2 shadow-sm min-w-[5rem] group-hover:border-amber-300 group-hover:shadow-md transition-all duration-300">
-                                      <span className="text-[10px] font-bold text-amber-600/70 uppercase tracking-widest mb-1 flex items-center gap-0.5"><Sparkles className="w-2.5 h-2.5" />總積點</span>
-                                      <span className="text-2xl font-black text-amber-600 leading-none tracking-tighter">
-                                          {entry.totalCredits}
-                                      </span>
-                                  </div>
-                              )}
-                          </div>
-                      </div>
-
-                      {/* Notes Bubble */}
-                      {entry.notes && (
-                          <div className="mb-6">
-                              <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-sm relative">
-                                  <Quote className="absolute top-4 left-4 w-5 h-5 text-indigo-100 rotate-180" />
-                                  <p className="text-sm text-slate-600 leading-relaxed font-medium pl-8 pr-2">
-                                      {entry.notes}
-                                  </p>
-                              </div>
-                          </div>
-                      )}
-
-                      {/* Subject Scores Grid */}
-                      <div className="mt-auto">
-                          <div className="grid grid-cols-3 gap-2">
-                              {(['chinese', 'english', 'math', 'nature', 'social'] as const).map(sub => (
-                                  <div 
-                                      key={sub} 
-                                      className={`flex flex-col items-center justify-center rounded-2xl p-2.5 border transition-transform hover:-translate-y-1 ${getGradeStyle(entry.scores[sub])}`}
-                                  >
-                                      <span className="text-[10px] font-bold opacity-70 uppercase tracking-wider mb-1">
-                                          {SUBJECT_LABELS[sub]}
-                                      </span>
-                                      <span className="text-lg font-black font-mono leading-none">
-                                          {entry.scores[sub]}
-                                      </span>
-                                  </div>
-                              ))}
-                              <div 
-                                  className={`flex flex-col items-center justify-center rounded-2xl p-2.5 border transition-transform hover:-translate-y-1 ${getWritingStyle(entry.scores.writing)}`}
-                              >
-                                  <span className="text-[10px] font-bold opacity-70 uppercase tracking-wider mb-1">
-                                      作文
-                                  </span>
-                                  <span className="text-lg font-black font-mono leading-none">
-                                      {entry.scores.writing}<span className="text-xs ml-0.5 opacity-60">級</span>
-                                  </span>
-                              </div>
-                          </div>
-                      </div>
+                <div className="relative z-10 flex items-center justify-between gap-3">
+                  <div className="flex flex-wrap gap-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-[10px] font-black text-indigo-100 backdrop-blur-md">
+                      <Calendar className="h-3 w-3" /> {entry.year} 年
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-[10px] font-black text-indigo-100 backdrop-blur-md">
+                      <MapPin className="h-3 w-3" /> {entry.region}
+                    </span>
                   </div>
+                  <div className="flex shrink-0 gap-1.5">
+                    {toggleFavorite && (
+                      <button
+                        onClick={() => toggleFavorite(entry.id)}
+                        className={`flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/10 backdrop-blur-md transition-all hover:bg-white hover:text-rose-500 ${favoriteIds.includes(entry.id) ? 'text-rose-300' : 'text-white/65'}`}
+                        title={favoriteIds.includes(entry.id) ? '取消收藏' : '加入收藏'}
+                        aria-label={favoriteIds.includes(entry.id) ? '取消收藏' : '加入收藏'}
+                      >
+                        <Heart className={`h-4 w-4 ${favoriteIds.includes(entry.id) ? 'fill-current' : ''}`} />
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleShare(entry)}
+                      className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/10 text-white/65 backdrop-blur-md transition-all hover:bg-white hover:text-indigo-600"
+                      title="複製分享內容"
+                      aria-label="複製分享內容"
+                    >
+                      {copiedId === entry.id ? <Check className="h-4 w-4 text-emerald-400" /> : <Share2 className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="relative z-10 mt-6">
+                  <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-300">Admission record</p>
+                  <h3 className="text-2xl font-black leading-tight tracking-tight text-white sm:text-[1.7rem]">{entry.school}</h3>
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 px-3 py-1.5 text-xs font-bold text-white/85 ring-1 ring-white/10">
+                      <School className="h-3.5 w-3.5 text-indigo-300" />{entry.department}
+                    </span>
+                    {minPointsMap.get(`${entry.year}-${entry.school}`) === entry.totalPoints && (
+                      <span className="inline-flex items-center gap-1.5 rounded-xl bg-rose-400/15 px-3 py-1.5 text-xs font-bold text-rose-200 ring-1 ring-rose-300/20">
+                        <Sparkles className="h-3.5 w-3.5" />同校同年最低錄取資料
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
+
+              <div className="-mt-3 grid grid-cols-2 gap-3 px-5 sm:px-6">
+                <div className="relative z-10 rounded-2xl border border-indigo-100 bg-white p-4 shadow-[0_12px_30px_-18px_rgba(79,70,229,0.55)]">
+                  <span className="text-[10px] font-black uppercase tracking-[0.18em] text-indigo-400">總積分</span>
+                  <strong className="mt-1 block text-3xl font-black tracking-tight text-indigo-700">{entry.totalPoints}</strong>
+                </div>
+                <div className="relative z-10 rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50 to-white p-4 shadow-[0_12px_30px_-18px_rgba(245,158,11,0.5)]">
+                  <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.18em] text-amber-500"><Sparkles className="h-3 w-3" />總積點</span>
+                  <strong className="mt-1 block text-3xl font-black tracking-tight text-amber-600">{entry.totalCredits ?? '—'}</strong>
+                </div>
+              </div>
+
+              <div className="flex flex-1 flex-col px-5 pb-5 pt-5 sm:px-6 sm:pb-6">
+                <div className="grid grid-cols-6 gap-1.5 rounded-2xl border border-slate-100 bg-slate-50 p-2">
+                  {(['chinese', 'english', 'math', 'nature', 'social'] as const).map(sub => (
+                    <div key={sub} className={`flex min-w-0 flex-col items-center justify-center rounded-xl border px-1 py-2.5 ${getGradeStyle(entry.scores[sub])}`}>
+                      <span className="mb-1 text-[9px] font-black opacity-60">{SUBJECT_LABELS[sub]}</span>
+                      <span className="whitespace-nowrap font-mono text-sm font-black leading-none">{entry.scores[sub]}</span>
+                    </div>
+                  ))}
+                  <div className={`flex min-w-0 flex-col items-center justify-center rounded-xl border px-1 py-2.5 ${getWritingStyle(entry.scores.writing)}`}>
+                    <span className="mb-1 text-[9px] font-black opacity-60">作文</span>
+                    <span className="whitespace-nowrap font-mono text-sm font-black leading-none">{entry.scores.writing}<small className="ml-0.5 text-[9px]">級</small></span>
+                  </div>
+                </div>
+
+                {entry.notes && (
+                  <div className="relative mt-4 rounded-2xl border border-slate-100 bg-white p-4 pl-11 shadow-sm">
+                    <div className="absolute left-4 top-4 flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-50 text-indigo-400">
+                      <Quote className="h-3.5 w-3.5 rotate-180" />
+                    </div>
+                    <p className="text-sm font-medium leading-6 text-slate-600">{entry.notes}</p>
+                  </div>
+                )}
+
+                <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-4 text-[10px] font-bold text-slate-400">
+                  <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>匿名考生分享</span>
+                  <span>僅供升學參考</span>
+                </div>
+              </div>
+            </article>
           ))
         )}
       </div>
