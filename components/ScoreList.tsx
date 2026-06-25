@@ -49,6 +49,7 @@ const ScoreSkeleton = () => (
         </div>
         <div className="w-20 h-16 bg-slate-200/60 rounded-2xl"></div>
       </div>
+
       <div className="grid grid-cols-3 gap-2 mt-8 sm:mt-12 border-t border-slate-200/50 pt-6">
         {[...Array(6)].map((_, i) => (
           <div key={i} className="aspect-square rounded-2xl bg-slate-200/50"></div>
@@ -64,7 +65,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
   const [filterSchool, setFilterSchool] = useState<string>('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(24);
+  const [itemsPerPage, setItemsPerPage] = useState(12);
   const [groupBySchool, setGroupBySchool] = useState<boolean>(false);
   const [cooldown, setCooldown] = useState<number>(0);
 
@@ -128,6 +129,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
   });
 
   const sortedEntries = [...filteredEntries];
+
   if (groupBySchool) {
     sortedEntries.sort((a, b) => {
       if (a.school !== b.school) {
@@ -155,17 +157,21 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
 
   return (
     <div className="space-y-6" ref={listTopRef}>
+      {/* Filter Area Container - Redesigned */}
       <div className="bg-white rounded-[2rem] border border-slate-100 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.05)] p-5 sm:p-6 mb-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
         <div className="flex flex-col gap-6">
+          {/* Top Row: Title & Actions */}
           <div className="flex justify-between items-center bg-slate-50/80 -mx-5 -mt-5 px-5 py-4 sm:-mx-6 sm:-mt-6 sm:px-6 sm:py-5 border-b border-slate-100 rounded-t-[2rem]">
             <div className="flex items-center gap-3.5">
               <div className="bg-indigo-600 p-2 rounded-xl shadow-md shadow-indigo-200">
                 <Filter className="w-5 h-5 text-white" />
               </div>
+
               <div>
                 <h3 className="font-black text-slate-800 text-lg sm:text-xl tracking-tight mb-0.5">
                   最新分享
                 </h3>
+
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
                   <p className="text-xs text-slate-500 font-bold">
@@ -190,7 +196,9 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
             )}
           </div>
 
+          {/* Bottom Row: Controls */}
           <div className="flex flex-col lg:flex-row items-center gap-4">
+            {/* Search Bar - Prominent */}
             <div className="relative w-full lg:max-w-md group">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
               <input
@@ -202,6 +210,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
               />
             </div>
 
+            {/* Filters */}
             <div className="flex flex-wrap lg:flex-nowrap items-center w-full lg:w-auto gap-3 flex-1 justify-end">
               <div className="relative flex-1 lg:flex-none">
                 <select
@@ -214,6 +223,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
                     <option key={year} value={year}>{year}年</option>
                   ))}
                 </select>
+
                 <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
               </div>
 
@@ -227,6 +237,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
 
               <div className="h-8 w-px bg-slate-200 hidden lg:block mx-1"></div>
 
+              {/* Group by School Toggle */}
               <label className="flex-1 lg:flex-none flex items-center justify-center lg:justify-start gap-2.5 text-sm text-slate-700 font-bold cursor-pointer hover:text-indigo-600 transition-colors bg-slate-50 lg:bg-transparent px-4 py-3 lg:p-0 rounded-2xl lg:rounded-none border border-slate-100 lg:border-none group">
                 <div className="relative flex items-center justify-center">
                   <input
@@ -235,10 +246,12 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
                     onChange={(e) => setGroupBySchool(e.target.checked)}
                     className="peer sr-only"
                   />
+
                   <div className="w-5 h-5 border-2 border-slate-300 rounded-md bg-white peer-checked:bg-indigo-600 peer-checked:border-indigo-600 transition-all flex items-center justify-center shadow-sm">
                     <Check className="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 scale-50 peer-checked:scale-100 transition-all" strokeWidth={3} />
                   </div>
                 </div>
+
                 <span>同校排在一起</span>
               </label>
             </div>
@@ -246,7 +259,8 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-6">
+      {/* Card Grid */}
+      <div className="mx-auto grid w-full max-w-[1400px] grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
         {isLoading ? (
           <>
             <ScoreSkeleton />
@@ -262,9 +276,11 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
             <div className="relative z-10 mx-auto flex max-w-md flex-col items-center">
               <div className="relative mb-7">
                 <div className="absolute inset-0 scale-150 rounded-full bg-indigo-200/50 blur-2xl"></div>
+
                 <div className="relative flex h-20 w-20 items-center justify-center rounded-[1.75rem] border border-indigo-100 bg-gradient-to-br from-white to-indigo-50 text-indigo-500 shadow-xl shadow-indigo-100/70">
                   <Search className="h-9 w-9" />
                 </div>
+
                 <span className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-amber-400 text-white shadow-md">
                   <Sparkles className="h-3.5 w-3.5" />
                 </span>
@@ -272,6 +288,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
 
               <span className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500">No results found</span>
               <h3 className="text-2xl font-black tracking-tight text-slate-800">找不到符合的資料</h3>
+
               <p className="mt-3 text-sm font-medium leading-6 text-slate-500">
                 目前的搜尋條件沒有相符結果，試著更換年份、區域，<br className="hidden sm:block" />
                 或使用其他學校關鍵字搜尋。
@@ -304,6 +321,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
                     <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-[10px] font-black text-indigo-100 backdrop-blur-md">
                       <Calendar className="h-3 w-3" /> {entry.year} 年
                     </span>
+
                     <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-[10px] font-black text-indigo-100 backdrop-blur-md">
                       <MapPin className="h-3 w-3" /> {entry.region}
                     </span>
@@ -357,7 +375,9 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
                 </div>
 
                 <div className="relative z-10 rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50 to-white p-4 shadow-[0_12px_30px_-18px_rgba(245,158,11,0.5)]">
-                  <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.18em] text-amber-500"><Sparkles className="h-3 w-3" />總積點</span>
+                  <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.18em] text-amber-500">
+                    <Sparkles className="h-3 w-3" />總積點
+                  </span>
                   <strong className="mt-1 block text-3xl font-black tracking-tight text-amber-600">{entry.totalCredits ?? '—'}</strong>
                 </div>
               </div>
@@ -374,7 +394,8 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
                   <div className={`flex min-w-0 flex-col items-center justify-center rounded-xl border px-1 py-2.5 ${getWritingStyle(entry.scores.writing)}`}>
                     <span className="mb-1 text-[9px] font-black opacity-60">作文</span>
                     <span className="whitespace-nowrap font-mono text-sm font-black leading-none">
-                      {entry.scores.writing}<small className="ml-0.5 text-[9px]">級</small>
+                      {entry.scores.writing}
+                      <small className="ml-0.5 text-[9px]">級</small>
                     </span>
                   </div>
                 </div>
@@ -401,10 +422,12 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
         )}
       </div>
 
+      {/* Pagination Controls */}
       {filteredEntries.length > 0 && !isLoading && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 mt-8 mx-auto w-full max-w-lg sm:max-w-none">
           <div className="flex items-center gap-3">
             <span className="text-sm font-medium text-slate-500">每頁顯示</span>
+
             <select
               value={itemsPerPage}
               onChange={(e) => setItemsPerPage(Number(e.target.value))}
@@ -412,8 +435,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
             >
               <option value={12}>12 筆</option>
               <option value={24}>24 筆</option>
-              <option value={48}>48 筆</option>
-              <option value={66}>66 筆</option>
+              <option value={60}>60 筆</option>
             </select>
           </div>
 
@@ -443,6 +465,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
         </div>
       )}
 
+      {/* Region Selection Modal */}
       {isRegionModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div
