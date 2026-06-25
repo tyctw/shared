@@ -37,23 +37,23 @@ const getWritingStyle = (grade: number) => {
 const ScoreSkeleton = () => (
   <div className="bg-white rounded-[2rem] border border-slate-100 p-1 shadow-sm">
     <div className="bg-slate-50/50 rounded-[1.75rem] p-6 sm:p-8 relative overflow-hidden">
-        <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/60 to-transparent z-10"></div>
-        <div className="flex justify-between items-start mb-6">
-            <div className="space-y-4">
-                <div className="flex gap-2">
-                    <div className="w-16 h-6 bg-slate-200/60 rounded-lg"></div>
-                    <div className="w-16 h-6 bg-slate-200/60 rounded-lg"></div>
-                </div>
-                <div className="w-48 h-8 bg-slate-200/80 rounded-xl"></div>
-                <div className="w-24 h-6 bg-slate-200/60 rounded-lg"></div>
-            </div>
-            <div className="w-20 h-16 bg-slate-200/60 rounded-2xl"></div>
+      <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/60 to-transparent z-10"></div>
+      <div className="flex justify-between items-start mb-6">
+        <div className="space-y-4">
+          <div className="flex gap-2">
+            <div className="w-16 h-6 bg-slate-200/60 rounded-lg"></div>
+            <div className="w-16 h-6 bg-slate-200/60 rounded-lg"></div>
+          </div>
+          <div className="w-48 h-8 bg-slate-200/80 rounded-xl"></div>
+          <div className="w-24 h-6 bg-slate-200/60 rounded-lg"></div>
         </div>
-        <div className="grid grid-cols-3 gap-2 mt-8 sm:mt-12 border-t border-slate-200/50 pt-6">
-            {[...Array(6)].map((_, i) => (
-                <div key={i} className="aspect-square rounded-2xl bg-slate-200/50"></div>
-            ))}
-        </div>
+        <div className="w-20 h-16 bg-slate-200/60 rounded-2xl"></div>
+      </div>
+      <div className="grid grid-cols-3 gap-2 mt-8 sm:mt-12 border-t border-slate-200/50 pt-6">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="aspect-square rounded-2xl bg-slate-200/50"></div>
+        ))}
+      </div>
     </div>
   </div>
 );
@@ -93,7 +93,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
 
   const [isRegionModalOpen, setIsRegionModalOpen] = useState(false);
   const [regionSearchTerm, setRegionSearchTerm] = useState('');
-  
+
   const listTopRef = React.useRef<HTMLDivElement>(null);
 
   const minPointsMap = React.useMemo(() => {
@@ -112,13 +112,12 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
   }, [filterRegion, filterYear, filterSchool, itemsPerPage, groupBySchool]);
 
   const handlePageChange = (newPage: number) => {
-      setCurrentPage(newPage);
-      if (listTopRef.current) {
-          // Adjust offset to not hide behind fixed header if there's any, minus some padding
-          const yOffset = -20; 
-          const y = listTopRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
-          window.scrollTo({ top: y, behavior: 'smooth' });
-      }
+    setCurrentPage(newPage);
+    if (listTopRef.current) {
+      const yOffset = -20;
+      const y = listTopRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
   };
 
   const filteredEntries = entries.filter(entry => {
@@ -130,12 +129,12 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
 
   const sortedEntries = [...filteredEntries];
   if (groupBySchool) {
-      sortedEntries.sort((a, b) => {
-          if (a.school !== b.school) {
-              return a.school.localeCompare(b.school, 'zh-TW');
-          }
-          return b.timestamp - a.timestamp;
-      });
+    sortedEntries.sort((a, b) => {
+      if (a.school !== b.school) {
+        return a.school.localeCompare(b.school, 'zh-TW');
+      }
+      return b.timestamp - a.timestamp;
+    });
   }
 
   const totalPages = Math.max(1, Math.ceil(sortedEntries.length / itemsPerPage));
@@ -156,149 +155,149 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
 
   return (
     <div className="space-y-6" ref={listTopRef}>
-       {/* Filter Area Container - Redesigned */}
-       <div className="bg-white rounded-[2rem] border border-slate-100 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.05)] p-5 sm:p-6 mb-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-         <div className="flex flex-col gap-6">
-            
-            {/* Top Row: Title & Actions */}
-            <div className="flex justify-between items-center bg-slate-50/80 -mx-5 -mt-5 px-5 py-4 sm:-mx-6 sm:-mt-6 sm:px-6 sm:py-5 border-b border-slate-100 rounded-t-[2rem]">
-                <div className="flex items-center gap-3.5">
-                    <div className="bg-indigo-600 p-2 rounded-xl shadow-md shadow-indigo-200">
-                        <Filter className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                        <h3 className="font-black text-slate-800 text-lg sm:text-xl tracking-tight mb-0.5">
-                            最新分享
-                        </h3>
-                        <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-                            <p className="text-xs text-slate-500 font-bold">
-                                {!isLoading ? `找到 ${filteredEntries.length} 筆資料` : '載入中...'}
-                            </p>
-                        </div>
-                    </div>
-                </div>
+      {/* Filter Area Container - Redesigned */}
+      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.05)] p-5 sm:p-6 mb-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+        <div className="flex flex-col gap-6">
 
-                {onRefresh && (
-                     <button
-                         onClick={handleRefresh}
-                         disabled={isRefreshing || cooldown > 0}
-                         className="flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 bg-white border border-slate-200 shadow-sm text-slate-600 rounded-xl text-sm font-bold transition-all disabled:opacity-50 hover:border-indigo-300 hover:text-indigo-600 hover:shadow active:scale-95 group"
-                         title="重新整理"
-                     >
-                         <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-indigo-500' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
-                         <span className="hidden sm:inline">
-                             {cooldown > 0 ? `冷卻中 ${cooldown}s` : '重新載入'}
-                         </span>
-                     </button>
-                 )}
+          {/* Top Row: Title & Actions */}
+          <div className="flex justify-between items-center bg-slate-50/80 -mx-5 -mt-5 px-5 py-4 sm:-mx-6 sm:-mt-6 sm:px-6 sm:py-5 border-b border-slate-100 rounded-t-[2rem]">
+            <div className="flex items-center gap-3.5">
+              <div className="bg-indigo-600 p-2 rounded-xl shadow-md shadow-indigo-200">
+                <Filter className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="font-black text-slate-800 text-lg sm:text-xl tracking-tight mb-0.5">
+                  最新分享
+                </h3>
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  <p className="text-xs text-slate-500 font-bold">
+                    {!isLoading ? `找到 ${filteredEntries.length} 筆資料` : '載入中...'}
+                  </p>
+                </div>
+              </div>
             </div>
 
-            {/* Bottom Row: Controls */}
-            <div className="flex flex-col lg:flex-row items-center gap-4">
-                
-                {/* Search Bar - Prominent */}
-                <div className="relative w-full lg:max-w-md group">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
-                    <input 
-                        type="text" 
-                        placeholder="想找哪間學校？" 
-                        value={filterSchool}
-                        onChange={(e) => setFilterSchool(e.target.value)}
-                        className="w-full bg-slate-50/50 hover:bg-slate-50 border-2 border-slate-100 rounded-2xl py-3.5 pl-12 pr-4 text-base font-semibold text-slate-800 outline-none focus:bg-white focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-slate-400 placeholder:font-medium"
-                    />
-                </div>
+            {onRefresh && (
+              <button
+                onClick={handleRefresh}
+                disabled={isRefreshing || cooldown > 0}
+                className="flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 bg-white border border-slate-200 shadow-sm text-slate-600 rounded-xl text-sm font-bold transition-all disabled:opacity-50 hover:border-indigo-300 hover:text-indigo-600 hover:shadow active:scale-95 group"
+                title="重新整理"
+              >
+                <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-indigo-500' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
+                <span className="hidden sm:inline">
+                  {cooldown > 0 ? `冷卻中 ${cooldown}s` : '重新載入'}
+                </span>
+              </button>
+            )}
+          </div>
 
-                {/* Filters */}
-                <div className="flex flex-wrap lg:flex-nowrap items-center w-full lg:w-auto gap-3 flex-1 justify-end">
-                    
-                    <div className="relative flex-1 lg:flex-none">
-                        <select
-                            value={filterYear}
-                            onChange={(e) => setFilterYear(e.target.value)}
-                            className="w-full appearance-none bg-white border border-slate-200 rounded-2xl py-3 pl-4 pr-10 text-sm font-bold text-slate-700 outline-none hover:border-indigo-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all cursor-pointer shadow-sm"
-                        >
-                            <option value="All">所有年份</option>
-                            {YEARS.map(year => (
-                                <option key={year} value={year}>{year}年</option>
-                            ))}
-                        </select>
-                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                    </div>
+          {/* Bottom Row: Controls */}
+          <div className="flex flex-col lg:flex-row items-center gap-4">
 
-                    <button 
-                        onClick={() => setIsRegionModalOpen(true)}
-                        className="flex-1 lg:flex-none flex items-center justify-between gap-3 bg-white border border-slate-200 rounded-2xl py-3 px-4 text-sm font-bold outline-none hover:border-indigo-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all cursor-pointer text-slate-700 shadow-sm active:scale-95 group"
-                    >
-                        <span className="truncate">{filterRegion === 'All' ? '所有區域' : filterRegion}</span>
-                        <MapPin className="w-4 h-4 text-slate-400 group-hover:text-indigo-500 transition-colors shrink-0" />
-                    </button>
-
-                    <div className="h-8 w-px bg-slate-200 hidden lg:block mx-1"></div>
-
-                    {/* Group by School Toggle */}
-                    <label className="flex-1 lg:flex-none flex items-center justify-center lg:justify-start gap-2.5 text-sm text-slate-700 font-bold cursor-pointer hover:text-indigo-600 transition-colors bg-slate-50 lg:bg-transparent px-4 py-3 lg:p-0 rounded-2xl lg:rounded-none border border-slate-100 lg:border-none group">
-                        <div className="relative flex items-center justify-center">
-                            <input 
-                                type="checkbox"
-                                checked={groupBySchool}
-                                onChange={(e) => setGroupBySchool(e.target.checked)}
-                                className="peer sr-only"
-                            />
-                            <div className="w-5 h-5 border-2 border-slate-300 rounded-md bg-white peer-checked:bg-indigo-600 peer-checked:border-indigo-600 transition-all flex items-center justify-center shadow-sm">
-                                <Check className="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 scale-50 peer-checked:scale-100 transition-all" strokeWidth={3} />
-                            </div>
-                        </div>
-                        <span>同校排在一起</span>
-                    </label>
-
-                </div>
+            {/* Search Bar - Prominent */}
+            <div className="relative w-full lg:max-w-md group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+              <input
+                type="text"
+                placeholder="想找哪間學校？"
+                value={filterSchool}
+                onChange={(e) => setFilterSchool(e.target.value)}
+                className="w-full bg-slate-50/50 hover:bg-slate-50 border-2 border-slate-100 rounded-2xl py-3.5 pl-12 pr-4 text-base font-semibold text-slate-800 outline-none focus:bg-white focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-slate-400 placeholder:font-medium"
+              />
             </div>
-         </div>
-       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Filters */}
+            <div className="flex flex-wrap lg:flex-nowrap items-center w-full lg:w-auto gap-3 flex-1 justify-end">
+
+              <div className="relative flex-1 lg:flex-none">
+                <select
+                  value={filterYear}
+                  onChange={(e) => setFilterYear(e.target.value)}
+                  className="w-full appearance-none bg-white border border-slate-200 rounded-2xl py-3 pl-4 pr-10 text-sm font-bold text-slate-700 outline-none hover:border-indigo-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all cursor-pointer shadow-sm"
+                >
+                  <option value="All">所有年份</option>
+                  {YEARS.map(year => (
+                    <option key={year} value={year}>{year}年</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+              </div>
+
+              <button
+                onClick={() => setIsRegionModalOpen(true)}
+                className="flex-1 lg:flex-none flex items-center justify-between gap-3 bg-white border border-slate-200 rounded-2xl py-3 px-4 text-sm font-bold outline-none hover:border-indigo-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all cursor-pointer text-slate-700 shadow-sm active:scale-95 group"
+              >
+                <span className="truncate">{filterRegion === 'All' ? '所有區域' : filterRegion}</span>
+                <MapPin className="w-4 h-4 text-slate-400 group-hover:text-indigo-500 transition-colors shrink-0" />
+              </button>
+
+              <div className="h-8 w-px bg-slate-200 hidden lg:block mx-1"></div>
+
+              {/* Group by School Toggle */}
+              <label className="flex-1 lg:flex-none flex items-center justify-center lg:justify-start gap-2.5 text-sm text-slate-700 font-bold cursor-pointer hover:text-indigo-600 transition-colors bg-slate-50 lg:bg-transparent px-4 py-3 lg:p-0 rounded-2xl lg:rounded-none border border-slate-100 lg:border-none group">
+                <div className="relative flex items-center justify-center">
+                  <input
+                    type="checkbox"
+                    checked={groupBySchool}
+                    onChange={(e) => setGroupBySchool(e.target.checked)}
+                    className="peer sr-only"
+                  />
+                  <div className="w-5 h-5 border-2 border-slate-300 rounded-md bg-white peer-checked:bg-indigo-600 peer-checked:border-indigo-600 transition-all flex items-center justify-center shadow-sm">
+                    <Check className="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 scale-50 peer-checked:scale-100 transition-all" strokeWidth={3} />
+                  </div>
+                </div>
+                <span>同校排在一起</span>
+              </label>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {isLoading ? (
-            <>
-                <ScoreSkeleton />
-                <ScoreSkeleton />
-                <ScoreSkeleton />
-            </>
+          <>
+            <ScoreSkeleton />
+            <ScoreSkeleton />
+            <ScoreSkeleton />
+          </>
         ) : filteredEntries.length === 0 ? (
           <div className="relative col-span-full mx-1 overflow-hidden rounded-[2.5rem] border border-slate-200 bg-white px-6 py-16 text-center shadow-[0_18px_60px_-35px_rgba(15,23,42,0.35)] sm:mx-0 sm:px-10">
-             <div className="pointer-events-none absolute -left-24 -top-28 h-64 w-64 rounded-full bg-indigo-100/70 blur-[70px]"></div>
-             <div className="pointer-events-none absolute -bottom-28 -right-20 h-64 w-64 rounded-full bg-fuchsia-100/70 blur-[70px]"></div>
-             <div className="pointer-events-none absolute inset-0 opacity-[0.035] [background-image:linear-gradient(rgba(79,70,229,.8)_1px,transparent_1px),linear-gradient(90deg,rgba(79,70,229,.8)_1px,transparent_1px)] [background-size:32px_32px]"></div>
+            <div className="pointer-events-none absolute -left-24 -top-28 h-64 w-64 rounded-full bg-indigo-100/70 blur-[70px]"></div>
+            <div className="pointer-events-none absolute -bottom-28 -right-20 h-64 w-64 rounded-full bg-fuchsia-100/70 blur-[70px]"></div>
+            <div className="pointer-events-none absolute inset-0 opacity-[0.035] [background-image:linear-gradient(rgba(79,70,229,.8)_1px,transparent_1px),linear-gradient(90deg,rgba(79,70,229,.8)_1px,transparent_1px)] [background-size:32px_32px]"></div>
 
-             <div className="relative z-10 mx-auto flex max-w-md flex-col items-center">
-                <div className="relative mb-7">
-                   <div className="absolute inset-0 scale-150 rounded-full bg-indigo-200/50 blur-2xl"></div>
-                   <div className="relative flex h-20 w-20 items-center justify-center rounded-[1.75rem] border border-indigo-100 bg-gradient-to-br from-white to-indigo-50 text-indigo-500 shadow-xl shadow-indigo-100/70">
-                      <Search className="h-9 w-9" />
-                   </div>
-                   <span className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-amber-400 text-white shadow-md">
-                      <Sparkles className="h-3.5 w-3.5" />
-                   </span>
+            <div className="relative z-10 mx-auto flex max-w-md flex-col items-center">
+              <div className="relative mb-7">
+                <div className="absolute inset-0 scale-150 rounded-full bg-indigo-200/50 blur-2xl"></div>
+                <div className="relative flex h-20 w-20 items-center justify-center rounded-[1.75rem] border border-indigo-100 bg-gradient-to-br from-white to-indigo-50 text-indigo-500 shadow-xl shadow-indigo-100/70">
+                  <Search className="h-9 w-9" />
                 </div>
+                <span className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-amber-400 text-white shadow-md">
+                  <Sparkles className="h-3.5 w-3.5" />
+                </span>
+              </div>
 
-                <span className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500">No results found</span>
-                <h3 className="text-2xl font-black tracking-tight text-slate-800">找不到符合的資料</h3>
-                <p className="mt-3 text-sm font-medium leading-6 text-slate-500">
-                   目前的搜尋條件沒有相符結果，試著更換年份、區域，<br className="hidden sm:block" />
-                   或使用其他學校關鍵字搜尋。
-                </p>
+              <span className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500">No results found</span>
+              <h3 className="text-2xl font-black tracking-tight text-slate-800">找不到符合的資料</h3>
+              <p className="mt-3 text-sm font-medium leading-6 text-slate-500">
+                目前的搜尋條件沒有相符結果，試著更換年份、區域，<br className="hidden sm:block" />
+                或使用其他學校關鍵字搜尋。
+              </p>
 
-                {(filterRegion !== 'All' || filterYear !== 'All' || filterSchool || groupBySchool) && (
-                  <button
-                    type="button"
-                    onClick={clearFilters}
-                    className="group mt-7 inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-6 py-3.5 text-sm font-black text-white shadow-lg shadow-slate-200 transition-all hover:-translate-y-0.5 hover:bg-indigo-600 hover:shadow-indigo-200 active:scale-95"
-                  >
-                    <RotateCcw className="h-4 w-4 transition-transform duration-500 group-hover:-rotate-180" />
-                    清除所有篩選
-                  </button>
-                )}
-             </div>
+              {(filterRegion !== 'All' || filterYear !== 'All' || filterSchool || groupBySchool) && (
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="group mt-7 inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-6 py-3.5 text-sm font-black text-white shadow-lg shadow-slate-200 transition-all hover:-translate-y-0.5 hover:bg-indigo-600 hover:shadow-indigo-200 active:scale-95"
+                >
+                  <RotateCcw className="h-4 w-4 transition-transform duration-500 group-hover:-rotate-180" />
+                  清除所有篩選
+                </button>
+              )}
+            </div>
           </div>
         ) : (
           paginatedEntries.map((entry) => (
@@ -403,115 +402,115 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
 
       {/* Pagination Controls */}
       {filteredEntries.length > 0 && !isLoading && (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 mt-8 mx-auto w-full max-w-lg sm:max-w-none">
-              <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-slate-500">每頁顯示</span>
-                  <select 
-                      value={itemsPerPage} 
-                      onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                      className="bg-white/70 backdrop-blur-sm border border-slate-200 rounded-xl py-1.5 px-3 text-sm font-bold text-slate-600 outline-none focus:ring-2 focus:ring-indigo-100 transition-all shadow-sm cursor-pointer"
-                  >
-                      <option value={5}>5 筆</option>
-                      <option value={10}>10 筆</option>
-                      <option value={20}>20 筆</option>
-                      <option value={50}>50 筆</option>
-                  </select>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                  <button 
-                      onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                      disabled={currentPage === 1}
-                      className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-all"
-                  >
-                      <ChevronLeft className="w-5 h-5" />
-                  </button>
-                  
-                  <div className="text-sm font-bold text-slate-600 px-3 flex items-center gap-2 min-w-[5rem] justify-center bg-white border border-slate-200 rounded-xl py-2 shadow-sm">
-                      <span>{currentPage}</span>
-                      <span className="text-slate-300">/</span>
-                      <span>{totalPages}</span>
-                  </div>
-
-                  <button 
-                      onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                      disabled={currentPage === totalPages}
-                      className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-all"
-                  >
-                      <ChevronRight className="w-5 h-5" />
-                  </button>
-              </div>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 mt-8 mx-auto w-full max-w-lg sm:max-w-none">
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium text-slate-500">每頁顯示</span>
+            <select
+              value={itemsPerPage}
+              onChange={(e) => setItemsPerPage(Number(e.target.value))}
+              className="bg-white/70 backdrop-blur-sm border border-slate-200 rounded-xl py-1.5 px-3 text-sm font-bold text-slate-600 outline-none focus:ring-2 focus:ring-indigo-100 transition-all shadow-sm cursor-pointer"
+            >
+              <option value={5}>5 筆</option>
+              <option value={10}>10 筆</option>
+              <option value={20}>20 筆</option>
+              <option value={50}>50 筆</option>
+            </select>
           </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+              className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-all"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+
+            <div className="text-sm font-bold text-slate-600 px-3 flex items-center gap-2 min-w-[5rem] justify-center bg-white border border-slate-200 rounded-xl py-2 shadow-sm">
+              <span>{currentPage}</span>
+              <span className="text-slate-300">/</span>
+              <span>{totalPages}</span>
+            </div>
+
+            <button
+              onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+              disabled={currentPage === totalPages}
+              className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-all"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Region Selection Modal */}
       {isRegionModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
-           <div 
-             className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-             onClick={() => setIsRegionModalOpen(false)}
-           />
-           <div className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[80vh]">
-              <div className="bg-slate-50 p-4 border-b border-slate-100 flex items-center gap-3">
-                 <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                    <input
-                        type="text"
-                        value={regionSearchTerm}
-                        onChange={(e) => setRegionSearchTerm(e.target.value)}
-                        placeholder="搜尋區域..."
-                        className="w-full bg-white border border-slate-200 focus:border-indigo-400 rounded-xl py-3 pl-10 pr-4 text-slate-700 outline-none focus:ring-4 focus:ring-indigo-100 transition-all font-medium placeholder:text-slate-400"
-                        autoFocus
-                    />
-                 </div>
-                 <button 
-                    type="button"
-                    onClick={() => setIsRegionModalOpen(false)}
-                    className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors shrink-0 font-medium"
-                 >
-                    取消
-                 </button>
+          <div
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            onClick={() => setIsRegionModalOpen(false)}
+          />
+          <div className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[80vh]">
+            <div className="bg-slate-50 p-4 border-b border-slate-100 flex items-center gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <input
+                  type="text"
+                  value={regionSearchTerm}
+                  onChange={(e) => setRegionSearchTerm(e.target.value)}
+                  placeholder="搜尋區域..."
+                  className="w-full bg-white border border-slate-200 focus:border-indigo-400 rounded-xl py-3 pl-10 pr-4 text-slate-700 outline-none focus:ring-4 focus:ring-indigo-100 transition-all font-medium placeholder:text-slate-400"
+                  autoFocus
+                />
               </div>
+              <button
+                type="button"
+                onClick={() => setIsRegionModalOpen(false)}
+                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors shrink-0 font-medium"
+              >
+                取消
+              </button>
+            </div>
 
-              <div className="overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-indigo-200 flex-1">
-                 <button
-                     type="button"
-                     onClick={() => {
-                         setFilterRegion('All');
-                         setIsRegionModalOpen(false);
-                     }}
-                     className="w-full text-left px-4 py-3 hover:bg-indigo-50 text-slate-700 font-medium transition-colors border-b border-slate-50 last:border-0 flex items-center justify-between group"
-                 >
-                     <div className="flex items-center gap-3">
-                         <span className="group-hover:text-indigo-700">所有區域</span>
-                     </div>
-                 </button>
-                 {REGIONS.filter(r => r.includes(regionSearchTerm)).length > 0 ? (
-                     REGIONS.filter(r => r.includes(regionSearchTerm)).map(region => (
-                         <button
-                             key={region}
-                             type="button"
-                             onClick={() => {
-                                 setFilterRegion(region);
-                                 setIsRegionModalOpen(false);
-                             }}
-                             className="w-full text-left px-4 py-3 hover:bg-indigo-50 text-slate-700 font-medium transition-colors border-b border-slate-50 last:border-0 flex items-center justify-between group"
-                         >
-                             <div className="flex items-center gap-3">
-                                 <span className="group-hover:text-indigo-700">{region}</span>
-                             </div>
-                         </button>
-                     ))
-                 ) : (
-                     <div className="px-4 py-12 text-slate-400 text-sm flex flex-col items-center gap-3 text-center">
-                         <div className="p-4 bg-slate-50 rounded-full">
-                            <Search className="w-6 h-6 text-slate-300" />
-                         </div>
-                         <p>找不到符合「{regionSearchTerm}」的區域</p>
-                     </div>
-                 )}
-              </div>
-           </div>
+            <div className="overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-indigo-200 flex-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setFilterRegion('All');
+                  setIsRegionModalOpen(false);
+                }}
+                className="w-full text-left px-4 py-3 hover:bg-indigo-50 text-slate-700 font-medium transition-colors border-b border-slate-50 last:border-0 flex items-center justify-between group"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="group-hover:text-indigo-700">所有區域</span>
+                </div>
+              </button>
+              {REGIONS.filter(r => r.includes(regionSearchTerm)).length > 0 ? (
+                REGIONS.filter(r => r.includes(regionSearchTerm)).map(region => (
+                  <button
+                    key={region}
+                    type="button"
+                    onClick={() => {
+                      setFilterRegion(region);
+                      setIsRegionModalOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-3 hover:bg-indigo-50 text-slate-700 font-medium transition-colors border-b border-slate-50 last:border-0 flex items-center justify-between group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="group-hover:text-indigo-700">{region}</span>
+                    </div>
+                  </button>
+                ))
+              ) : (
+                <div className="px-4 py-12 text-slate-400 text-sm flex flex-col items-center gap-3 text-center">
+                  <div className="p-4 bg-slate-50 rounded-full">
+                    <Search className="w-6 h-6 text-slate-300" />
+                  </div>
+                  <p>找不到符合「{regionSearchTerm}」的區域</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>
