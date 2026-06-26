@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ScoreEntry } from '../types';
 import { REGIONS, YEARS } from '../constants';
-import { MapPin, Search, Sparkles, Share2, Check, Calendar, Quote, School, ChevronLeft, ChevronRight, Heart, Filter, ChevronDown, RefreshCw, RotateCcw } from 'lucide-react';
+import { MapPin, Search, Sparkles, Share2, Check, Calendar, Quote, School, ChevronLeft, ChevronRight, Heart, Filter, ChevronDown, RefreshCw, RotateCcw, MailWarning } from 'lucide-react';
 
 interface ScoreListProps {
   entries: ScoreEntry[];
@@ -19,6 +19,8 @@ const SUBJECT_LABELS: Record<string, string> = {
   nature: '自然',
   social: '社會',
 };
+
+const REPORT_EMAIL = import.meta.env.VITE_REPORT_EMAIL || '';
 
 const getGradeStyle = (grade: string) => {
   if (grade === 'A++') return 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 text-amber-600 shadow-sm shadow-amber-100';
@@ -153,6 +155,38 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
     } catch (error) {
       console.error('Error sharing:', error);
     }
+  };
+
+  const buildReportMailto = (entry: ScoreEntry) => {
+    const subject = `資料錯誤回報：${entry.year}年 ${entry.school} ${entry.department}`;
+    const pageUrl = typeof window !== 'undefined' ? window.location.href : '';
+    const body = [
+      '您好，我想回報以下資料可能有誤：',
+      '',
+      '請在此描述錯誤內容：',
+      '- ',
+      '',
+      '--- 資料內容 ---',
+      `資料 ID：${entry.id}`,
+      `年份：${entry.year} 年`,
+      `區域：${entry.region}`,
+      `學校：${entry.school}`,
+      `科系/班別：${entry.department}`,
+      `總積分：${entry.totalPoints}`,
+      `總積點：${entry.totalCredits ?? '未提供'}`,
+      `國文：${entry.scores.chinese}`,
+      `英文：${entry.scores.english}`,
+      `數學：${entry.scores.math}`,
+      `自然：${entry.scores.nature}`,
+      `社會：${entry.scores.social}`,
+      `作文：${entry.scores.writing}級`,
+      `心得備註：${entry.notes || '無'}`,
+      pageUrl ? `頁面：${pageUrl}` : '',
+      '',
+      '感謝協助修正資料。',
+    ].filter(Boolean).join('\n');
+
+    return `mailto:${REPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
   return (
@@ -355,6 +389,15 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
                     >
                       {copiedId === entry.id ? <Check className="h-4 w-4 text-emerald-400" /> : <Share2 className="h-4 w-4" />}
                     </button>
+
+                    <a
+                      href={buildReportMailto(entry)}
+                      className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white/80 text-slate-400 shadow-sm backdrop-blur-md transition-all hover:border-amber-200 hover:bg-amber-50 hover:text-amber-600"
+                      title="Email 回報資料錯誤"
+                      aria-label="Email 回報資料錯誤"
+                    >
+                      <MailWarning className="h-4 w-4" />
+                    </a>
                   </div>
                 </div>
 
