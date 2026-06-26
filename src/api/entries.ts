@@ -17,6 +17,7 @@ export const fetchEntries = async (): Promise<ScoreEntry[]> => {
 
     return (data || []).map((item: any) => ({
       ...item,
+      scores: typeof item.scores === 'string' ? JSON.parse(item.scores) : item.scores,
       totalPoints: item.total_points ?? item.totalPoints,
       totalCredits: item.total_credits ?? item.totalCredits,
     }))
@@ -32,8 +33,19 @@ export const fetchEntries = async (): Promise<ScoreEntry[]> => {
 export const submitEntry = async (entry: ScoreEntry): Promise<boolean> => {
   try {
     const { error } = await supabase
-      .from('entries')
-      .insert([entry])
+      .from('score_entries')
+      .insert([{
+        id: entry.id,
+        year: entry.year,
+        school: entry.school,
+        department: entry.department || null,
+        region: entry.region,
+        scores: typeof entry.scores === 'string' ? JSON.parse(entry.scores) : entry.scores,
+        total_points: entry.totalPoints,
+        total_credits: entry.totalCredits ?? null,
+        notes: entry.notes || '',
+        timestamp: entry.timestamp,
+      }])
 
     if (error) {
       console.error('Insert error:', error)

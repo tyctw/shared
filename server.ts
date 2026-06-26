@@ -75,11 +75,11 @@ app.post('/api/entries', async (req, res) => {
           id: entry.id,
           year: entry.year,
           school: entry.school,
-          department: entry.department,
+          department: entry.department || null,
           region: entry.region,
-          scores: typeof entry.scores === 'object' ? JSON.stringify(entry.scores) : entry.scores, // Store as JSON string or object depending on schema
+          scores: typeof entry.scores === 'string' ? JSON.parse(entry.scores) : entry.scores,
           total_points: entry.totalPoints,
-          total_credits: entry.totalCredits || null,
+          total_credits: entry.totalCredits ?? null,
           notes: entry.notes || '',
           timestamp: entry.timestamp,
         }
