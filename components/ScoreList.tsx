@@ -268,7 +268,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
       </div>
 
       {/* Card Grid */}
-      <div className="mx-auto grid w-full max-w-[1400px] grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+      <div className="mx-auto grid w-full max-w-[1320px] grid-cols-1 gap-6 md:grid-cols-[repeat(auto-fit,minmax(360px,1fr))] lg:gap-8">
         {isLoading ? (
           <>
             <ScoreSkeleton />
@@ -320,17 +320,17 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
               key={entry.id}
               className="group relative flex h-full flex-col overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white shadow-[0_12px_40px_-24px_rgba(15,23,42,0.3)] transition-all duration-500 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-[0_24px_60px_-28px_rgba(79,70,229,0.38)]"
             >
-              <div className="relative overflow-hidden bg-gradient-to-br from-[#14162f] via-[#20234b] to-indigo-800 px-5 pb-7 pt-5 text-white sm:px-6">
-                <div className="pointer-events-none absolute -right-12 -top-16 h-44 w-44 rounded-full border-[28px] border-white/[0.06]"></div>
-                <div className="pointer-events-none absolute -bottom-20 left-1/4 h-40 w-40 rounded-full bg-fuchsia-500/20 blur-[55px]"></div>
+              <div className="relative overflow-hidden border-b border-slate-100 bg-gradient-to-br from-white via-indigo-50/70 to-sky-50 px-5 pb-7 pt-5 text-slate-900 sm:px-6">
+                <div className="pointer-events-none absolute -right-12 -top-16 h-44 w-44 rounded-full border-[28px] border-indigo-100/55"></div>
+                <div className="pointer-events-none absolute -bottom-20 left-1/4 h-40 w-40 rounded-full bg-sky-100/80 blur-[55px]"></div>
 
                 <div className="relative z-10 flex items-center justify-between gap-3">
                   <div className="flex flex-wrap gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-[10px] font-black text-indigo-100 backdrop-blur-md">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-100 bg-white/80 px-3 py-1.5 text-[10px] font-black text-indigo-600 shadow-sm backdrop-blur-md">
                       <Calendar className="h-3 w-3" /> {entry.year} 年
                     </span>
 
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-[10px] font-black text-indigo-100 backdrop-blur-md">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-100 bg-white/80 px-3 py-1.5 text-[10px] font-black text-sky-700 shadow-sm backdrop-blur-md">
                       <MapPin className="h-3 w-3" /> {entry.region}
                     </span>
                   </div>
@@ -339,7 +339,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
                     {toggleFavorite && (
                       <button
                         onClick={() => toggleFavorite(entry.id)}
-                        className={`flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/10 backdrop-blur-md transition-all hover:bg-white hover:text-rose-500 ${favoriteIds.includes(entry.id) ? 'text-rose-300' : 'text-white/65'}`}
+                        className={`flex h-9 w-9 items-center justify-center rounded-xl border bg-white/80 shadow-sm backdrop-blur-md transition-all hover:border-rose-200 hover:bg-rose-50 hover:text-rose-500 ${favoriteIds.includes(entry.id) ? 'border-rose-100 text-rose-500' : 'border-slate-200 text-slate-400'}`}
                         title={favoriteIds.includes(entry.id) ? '取消收藏' : '加入收藏'}
                         aria-label={favoriteIds.includes(entry.id) ? '取消收藏' : '加入收藏'}
                       >
@@ -349,7 +349,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
 
                     <button
                       onClick={() => handleShare(entry)}
-                      className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/10 text-white/65 backdrop-blur-md transition-all hover:bg-white hover:text-indigo-600"
+                      className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white/80 text-slate-400 shadow-sm backdrop-blur-md transition-all hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
                       title="複製分享內容"
                       aria-label="複製分享內容"
                     >
@@ -359,16 +359,16 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
                 </div>
 
                 <div className="relative z-10 mt-6">
-                  <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-300">Admission record</p>
-                  <h3 className="text-2xl font-black leading-tight tracking-tight text-white sm:text-[1.7rem]">{entry.school}</h3>
+                  <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500">Admission record</p>
+                  <h3 className="text-2xl font-black leading-tight tracking-tight text-slate-900 sm:text-[1.7rem]">{entry.school}</h3>
 
                   <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 px-3 py-1.5 text-xs font-bold text-white/85 ring-1 ring-white/10">
-                      <School className="h-3.5 w-3.5 text-indigo-300" />{entry.department}
+                    <span className="inline-flex items-center gap-1.5 rounded-xl bg-white/85 px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm ring-1 ring-slate-200">
+                      <School className="h-3.5 w-3.5 text-indigo-500" />{entry.department}
                     </span>
 
                     {minPointsMap.get(`${entry.year}-${entry.school}`) === entry.totalPoints && (
-                      <span className="inline-flex items-center gap-1.5 rounded-xl bg-rose-400/15 px-3 py-1.5 text-xs font-bold text-rose-200 ring-1 ring-rose-300/20">
+                      <span className="inline-flex items-center gap-1.5 rounded-xl bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-600 ring-1 ring-rose-100">
                         <Sparkles className="h-3.5 w-3.5" />同校同年最低錄取資料
                       </span>
                     )}

@@ -480,33 +480,33 @@ const App: React.FC = () => {
             {activeTab === 'list' && (
             <div className="space-y-12">
                  {/* Editorial data-driven hero */}
-                 <section className="relative isolate overflow-hidden rounded-[2rem] border border-white/10 bg-[#11132b] shadow-[0_28px_80px_-30px_rgba(49,46,129,0.75)] sm:rounded-[2.75rem]">
+                 <section className="relative isolate overflow-hidden rounded-[2rem] border border-white/80 bg-white shadow-[0_28px_80px_-45px_rgba(15,23,42,0.38)] ring-1 ring-slate-200/70 sm:rounded-[2.75rem]">
                     <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                        <div className="absolute -right-24 -top-28 h-80 w-80 rounded-full bg-violet-500/30 blur-[90px]"></div>
-                        <div className="absolute -bottom-36 left-1/4 h-80 w-80 rounded-full bg-indigo-500/25 blur-[100px]"></div>
-                        <div className="absolute inset-0 opacity-[0.055] [background-image:linear-gradient(rgba(255,255,255,.7)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.7)_1px,transparent_1px)] [background-size:42px_42px]"></div>
+                        <div className="absolute -right-24 -top-28 h-80 w-80 rounded-full bg-sky-100/90 blur-[90px]"></div>
+                        <div className="absolute -bottom-36 left-1/4 h-80 w-80 rounded-full bg-indigo-100/80 blur-[100px]"></div>
+                        <div className="absolute inset-0 opacity-[0.38] [background-image:linear-gradient(rgba(99,102,241,.11)_1px,transparent_1px),linear-gradient(90deg,rgba(99,102,241,.11)_1px,transparent_1px)] [background-size:42px_42px]"></div>
                     </div>
 
                     <div className="relative grid min-h-[510px] items-center gap-10 px-6 py-10 sm:px-10 sm:py-14 lg:grid-cols-[1.08fr_.92fr] lg:px-14 lg:py-16">
                         <div className="max-w-xl">
-                            <div className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.07] px-3.5 py-2 text-xs font-bold text-indigo-100 backdrop-blur-md sm:text-sm">
+                            <div className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-indigo-100 bg-indigo-50/85 px-3.5 py-2 text-xs font-bold text-indigo-700 shadow-sm backdrop-blur-md sm:text-sm">
                                 <span className="relative flex h-2.5 w-2.5">
                                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-300 opacity-70"></span>
                                   <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
                                 </span>
                                 <span>114會考</span>
-                                <span className="h-3 w-px bg-white/20"></span>
-                                <span className="text-white/65">數據即時更新</span>
+                                <span className="h-3 w-px bg-indigo-200"></span>
+                                <span className="text-slate-500">數據即時更新</span>
                             </div>
 
-                            <h2 className="text-[2.65rem] font-black leading-[1.08] tracking-[-0.045em] text-white sm:text-6xl lg:text-[4.25rem]">
+                            <h2 className="text-[2.65rem] font-black leading-[1.08] tracking-[-0.045em] text-slate-900 sm:text-6xl lg:text-[4.25rem]">
                                 精準落點，
-                                <span className="mt-1 block bg-gradient-to-r from-indigo-300 via-fuchsia-300 to-amber-200 bg-clip-text text-transparent">
+                                <span className="mt-1 block bg-gradient-to-r from-indigo-600 via-sky-500 to-amber-500 bg-clip-text text-transparent">
                                     預見你的未來
                                 </span>
                             </h2>
 
-                            <p className="mt-6 max-w-lg text-base font-medium leading-8 text-slate-300 sm:text-lg">
+                            <p className="mt-6 max-w-lg text-base font-medium leading-8 text-slate-600 sm:text-lg">
                                 彙整全台各區真實錄取分數，透明公開。<br className="hidden sm:block" />
                                 拒絕資訊焦慮，用數據規劃最適合的升學藍圖。
                             </p>
@@ -514,22 +514,22 @@ const App: React.FC = () => {
                             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                                 <button
                                     onClick={() => handleTabChange('form')}
-                                    className="group flex w-full items-center justify-center gap-2.5 rounded-2xl bg-white px-6 py-4 text-base font-black text-slate-900 shadow-[0_16px_35px_-16px_rgba(255,255,255,0.7)] transition-all hover:-translate-y-1 hover:bg-indigo-50 hover:shadow-xl active:scale-[0.98] sm:w-auto"
+                                    className="group flex w-full items-center justify-center gap-2.5 rounded-2xl bg-slate-900 px-6 py-4 text-base font-black text-white shadow-[0_16px_35px_-18px_rgba(15,23,42,0.65)] transition-all hover:-translate-y-1 hover:bg-indigo-600 hover:shadow-indigo-200 active:scale-[0.98] sm:w-auto"
                                 >
-                                    <PlusCircle className="h-5 w-5 text-indigo-600 transition-transform duration-500 group-hover:rotate-90" />
+                                    <PlusCircle className="h-5 w-5 text-indigo-200 transition-transform duration-500 group-hover:rotate-90" />
                                     我要分享分數
-                                    <ArrowRight className="h-4 w-4 text-slate-400 transition-transform group-hover:translate-x-1 group-hover:text-indigo-600" />
+                                    <ArrowRight className="h-4 w-4 text-white/55 transition-transform group-hover:translate-x-1 group-hover:text-white" />
                                 </button>
                                 <button
                                     onClick={() => handleTabChange('guide')}
-                                    className="flex w-full items-center justify-center gap-2.5 rounded-2xl border border-white/15 bg-white/[0.07] px-6 py-4 text-base font-bold text-white backdrop-blur-md transition-all hover:-translate-y-1 hover:border-white/30 hover:bg-white/[0.12] active:scale-[0.98] sm:w-auto"
+                                    className="flex w-full items-center justify-center gap-2.5 rounded-2xl border border-slate-200 bg-white px-6 py-4 text-base font-bold text-slate-700 shadow-sm backdrop-blur-md transition-all hover:-translate-y-1 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 active:scale-[0.98] sm:w-auto"
                                 >
-                                    <BookOpen className="h-5 w-5 text-indigo-300" />
+                                    <BookOpen className="h-5 w-5 text-indigo-500" />
                                     新手指南
                                 </button>
                             </div>
 
-                            <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-semibold text-slate-400">
+                            <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-semibold text-slate-500">
                                 <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-400" />匿名分享</span>
                                 <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-400" />各區自動計分</span>
                                 <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-400" />免費查詢</span>
@@ -537,20 +537,20 @@ const App: React.FC = () => {
                         </div>
 
                         <div className="relative hidden min-h-[390px] lg:block" aria-hidden="true">
-                            <div className="absolute left-3 top-5 w-[88%] rotate-[-3deg] rounded-[2rem] border border-white/10 bg-white/[0.07] p-5 opacity-60 backdrop-blur-xl"></div>
-                            <div className="absolute right-0 top-0 w-[92%] rotate-2 rounded-[2rem] border border-white/15 bg-white/[0.09] p-5 opacity-70 backdrop-blur-xl"></div>
+                            <div className="absolute left-3 top-5 w-[88%] rotate-[-3deg] rounded-[2rem] border border-indigo-100 bg-white/60 p-5 opacity-80 shadow-sm backdrop-blur-xl"></div>
+                            <div className="absolute right-0 top-0 w-[92%] rotate-2 rounded-[2rem] border border-sky-100 bg-white/70 p-5 opacity-90 shadow-sm backdrop-blur-xl"></div>
 
-                            <div className="absolute inset-x-4 top-8 overflow-hidden rounded-[2rem] border border-white/15 bg-white/[0.11] p-6 shadow-2xl backdrop-blur-2xl">
+                            <div className="absolute inset-x-4 top-8 overflow-hidden rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-2xl shadow-slate-200/70 backdrop-blur-2xl">
                                 <div className="flex items-start justify-between">
                                     <div>
-                                        <div className="mb-2 flex items-center gap-2 text-xs font-bold text-indigo-200">
+                                        <div className="mb-2 flex items-center gap-2 text-xs font-bold text-indigo-500">
                                             <MapPin className="h-3.5 w-3.5" />
                                             桃連區・114 年
                                         </div>
-                                        <p className="text-lg font-black text-white">理想高中錄取分享</p>
-                                        <p className="mt-1 text-xs font-medium text-slate-400">匿名考生提供的真實經驗</p>
+                                        <p className="text-lg font-black text-slate-900">理想高中錄取分享</p>
+                                        <p className="mt-1 text-xs font-medium text-slate-500">匿名考生提供的真實經驗</p>
                                     </div>
-                                    <div className="rounded-2xl bg-emerald-400/15 px-3 py-2 text-xs font-black text-emerald-300 ring-1 ring-emerald-300/20">
+                                    <div className="rounded-2xl bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-600 ring-1 ring-emerald-100">
                                         已錄取
                                     </div>
                                 </div>
@@ -560,21 +560,21 @@ const App: React.FC = () => {
                                       ['國', 'A++'], ['英', 'A+'], ['數', 'A++'],
                                       ['自', 'A'], ['社', 'A+'], ['作', '5級']
                                     ].map(([subject, grade]) => (
-                                      <div key={subject} className="rounded-xl border border-white/10 bg-slate-950/25 px-1 py-3 text-center">
-                                        <span className="block text-[9px] font-bold text-slate-500">{subject}</span>
-                                        <strong className="mt-1 block text-xs font-black text-white">{grade}</strong>
+                                      <div key={subject} className="rounded-xl border border-slate-200 bg-slate-50 px-1 py-3 text-center">
+                                        <span className="block text-[9px] font-bold text-slate-400">{subject}</span>
+                                        <strong className="mt-1 block text-xs font-black text-slate-800">{grade}</strong>
                                       </div>
                                     ))}
                                 </div>
 
                                 <div className="mt-5 grid grid-cols-2 gap-3">
-                                    <div className="rounded-2xl bg-indigo-400/15 p-4 ring-1 ring-indigo-300/15">
-                                        <span className="text-[10px] font-bold tracking-widest text-indigo-300">總積分</span>
-                                        <strong className="mt-1 block text-3xl font-black text-white">31</strong>
+                                    <div className="rounded-2xl bg-indigo-50 p-4 ring-1 ring-indigo-100">
+                                        <span className="text-[10px] font-bold tracking-widest text-indigo-500">總積分</span>
+                                        <strong className="mt-1 block text-3xl font-black text-indigo-700">31</strong>
                                     </div>
-                                    <div className="rounded-2xl bg-amber-300/10 p-4 ring-1 ring-amber-200/15">
-                                        <span className="text-[10px] font-bold tracking-widest text-amber-200">總積點</span>
-                                        <strong className="mt-1 block text-3xl font-black text-white">33</strong>
+                                    <div className="rounded-2xl bg-amber-50 p-4 ring-1 ring-amber-100">
+                                        <span className="text-[10px] font-bold tracking-widest text-amber-500">總積點</span>
+                                        <strong className="mt-1 block text-3xl font-black text-amber-600">33</strong>
                                     </div>
                                 </div>
                             </div>

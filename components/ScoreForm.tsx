@@ -27,7 +27,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
     notes: '',
   });
 
-  const [selectedGroup, setSelectedGroup] = useState<string>('普通高中/綜合高中');
+  const [selectedGroup, setSelectedGroup] = useState<string>('');
   const [isManualDept, setIsManualDept] = useState(false);
   const [isManualSchool, setIsManualSchool] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -74,15 +74,6 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
     }));
   }, [formData.region, formData.scores]);
 
-  useEffect(() => {
-    if (selectedGroup && !isManualDept) {
-      const depts = DEPARTMENT_GROUPS[selectedGroup];
-      if (depts && depts.length > 0) {
-        setFormData(prev => ({ ...prev, department: depts[0] }));
-      }
-    }
-  }, [selectedGroup, isManualDept]);
-
   // Reset school when region changes
   useEffect(() => {
     if (!isManualSchool) {
@@ -106,6 +97,42 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
 
   const handleChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const allDepartments = React.useMemo(() => {
+    return Array.from(new Set(Object.values(DEPARTMENT_GROUPS).flat()));
+  }, []);
+
+  const departmentToGroup = React.useMemo(() => {
+    const map = new Map<string, string>();
+    Object.entries(DEPARTMENT_GROUPS).forEach(([group, departments]) => {
+      departments.forEach(department => {
+        if (!map.has(department)) {
+          map.set(department, group);
+        }
+      });
+    });
+    return map;
+  }, []);
+
+  const getGroupByDepartment = (department: string) => {
+    const normalizedDepartment = department.trim();
+    if (!normalizedDepartment) return '';
+
+    const exactGroup = departmentToGroup.get(normalizedDepartment);
+    if (exactGroup) return exactGroup;
+
+    const fuzzyMatch = allDepartments.find(item =>
+      item.includes(normalizedDepartment) || normalizedDepartment.includes(item)
+    );
+    return fuzzyMatch ? departmentToGroup.get(fuzzyMatch) || 'custom' : 'custom';
+  };
+
+  const handleDepartmentChange = (department: string, manual = false) => {
+    const nextGroup = getGroupByDepartment(department);
+    setFormData(prev => ({ ...prev, department }));
+    setSelectedGroup(nextGroup);
+    setIsManualDept(manual || nextGroup === 'custom');
   };
 
   const handleScoreChange = (subject: string, value: any) => {
@@ -148,7 +175,9 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
       });
       
       setIsSubmitting(false);
-      setFormData(prev => ({...prev, school: '', notes: '', totalPoints: '', totalCredits: ''}));
+      setFormData(prev => ({...prev, school: '', department: '', notes: '', totalPoints: '', totalCredits: ''}));
+      setSelectedGroup('');
+      setIsManualDept(false);
       setIsManualSchool(false);
     }, 600);
   };
@@ -157,7 +186,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
   const filteredSchools = availableSchools.filter(s => s.includes(searchSchoolTerm));
   const availableGroups = Object.keys(DEPARTMENT_GROUPS);
   const filteredGroups = availableGroups.filter(g => g.includes(groupSearchTerm));
-  const availableDepts = DEPARTMENT_GROUPS[selectedGroup] || [];
+  const availableDepts = allDepartments;
   const filteredDepts = availableDepts.filter(d => d.includes(deptSearchTerm));
   const filteredRegions = REGIONS.filter(r => r.includes(regionSearchTerm));
 
@@ -321,40 +350,20 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                 
                 {/* Department Row */}
                 <div className="md:col-span-12 grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 border-t border-slate-100/50 mt-2">
-                     {/* Group */}
-                     <div className="space-y-1">
-                        <div className="mb-2 flex min-h-[20px] items-center justify-between">
-                            <label className="flex items-center gap-1.5 text-[13px] font-black text-slate-600">群別分類</label>
-                        </div>
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setGroupSearchTerm('');
-                                setIsGroupModalOpen(true);
-                            }}
-                            className={`${inputClass} text-left flex items-center justify-between group/btn`}
-                        >
-                            <span className={selectedGroup ? 'text-slate-700' : 'text-slate-400'}>
-                                {selectedGroup || '點擊選擇群別...'}
-                            </span>
-                            <Search className="w-4 h-4 text-slate-400 group-hover/btn:text-indigo-400 transition-colors" />
-                        </button>
-                     </div>
-
                      {/* Department */}
                      <div className="space-y-1">
                         <div className="mb-2 flex min-h-[20px] items-center justify-between">
                              <label className="flex items-center gap-1.5 text-[13px] font-black text-slate-600">科系/班別 <span className="text-rose-500">*</span></label>
-                             {selectedGroup !== 'custom' && !isManualDept && (
-                                <button type="button" onClick={() => { setIsManualDept(true); setFormData(prev => ({...prev, department: ''})) }} className="text-[11px] text-indigo-500 hover:text-indigo-700 font-semibold underline">自行輸入</button>
+                             {!isManualDept && (
+                                <button type="button" onClick={() => { setIsManualDept(true); handleDepartmentChange('', true); }} className="text-[11px] text-indigo-500 hover:text-indigo-700 font-semibold underline">自行輸入</button>
                             )}
-                            {isManualDept && selectedGroup !== 'custom' && (
+                            {isManualDept && (
                                     <button type="button" onClick={() => setIsManualDept(false)} className="text-[11px] text-slate-500 hover:text-slate-700 font-semibold underline">選單選擇</button>
                             )}
                         </div>
                         
-                        {selectedGroup === 'custom' || isManualDept ? (
-                            <input type="text" value={formData.department} onChange={(e) => handleChange('department', e.target.value)} placeholder="輸入科系名稱" className={inputClass} />
+                        {isManualDept ? (
+                            <input type="text" value={formData.department} onChange={(e) => handleDepartmentChange(e.target.value, true)} placeholder="輸入科系名稱" className={inputClass} />
                         ) : (
                             <button
                                 type="button"
@@ -370,6 +379,20 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                                 <Search className="w-4 h-4 text-slate-400 group-hover/btn:text-indigo-400 transition-colors" />
                             </button>
                         )}
+                     </div>
+
+                     {/* Group */}
+                     <div className="space-y-1">
+                        <div className="mb-2 flex min-h-[20px] items-center justify-between">
+                            <label className="flex items-center gap-1.5 text-[13px] font-black text-slate-600">群別分類</label>
+                            <span className="text-[11px] font-semibold text-slate-400">自動判斷</span>
+                        </div>
+                        <div className={`${inputClass} flex items-center justify-between bg-slate-50 text-left`}>
+                            <span className={selectedGroup ? 'text-slate-700' : 'text-slate-400'}>
+                                {selectedGroup === 'custom' ? '其他 / 自行輸入' : selectedGroup || '選擇科系後自動帶入'}
+                            </span>
+                            <ShieldCheck className={`h-4 w-4 ${selectedGroup ? 'text-emerald-500' : 'text-slate-300'}`} />
+                        </div>
                      </div>
                 </div>
                 </>
@@ -810,7 +833,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                              key={dept}
                              type="button"
                              onClick={() => {
-                                 handleChange('department', dept);
+                                 handleDepartmentChange(dept);
                                  setIsDeptModalOpen(false);
                              }}
                              className="w-full text-left px-4 py-3 hover:bg-indigo-50 text-slate-700 font-medium transition-colors border-b border-slate-50 last:border-0 flex items-center justify-between group"
@@ -831,7 +854,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                              type="button" 
                              onClick={() => { 
                                  setIsManualDept(true);
-                                 handleChange('department', deptSearchTerm);
+                                 handleDepartmentChange(deptSearchTerm, true);
                                  setIsDeptModalOpen(false); 
                              }}
                              className="mt-2 text-white font-bold text-sm bg-indigo-500 hover:bg-indigo-600 px-5 py-2.5 rounded-xl shadow-sm transition-colors"
