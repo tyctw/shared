@@ -20,7 +20,7 @@ const SUBJECT_LABELS: Record<string, string> = {
   social: '社會',
 };
 
-const REPORT_EMAIL = import.meta.env.VITE_REPORT_EMAIL || '';
+const REPORT_EMAIL = import.meta.env.VITE_REPORT_EMAIL || 'tyctw.analyze@gmail.com';
 
 const getGradeStyle = (grade: string) => {
   if (grade === 'A++') return 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 text-amber-600 shadow-sm shadow-amber-100';
