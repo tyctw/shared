@@ -168,14 +168,14 @@ const App: React.FC = () => {
                  >
                    <X className="h-5 w-5" />
                  </button>
-                 <div className="relative z-10 flex items-center gap-4 pr-10">
-                   <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-lg shadow-amber-200">
+                 <div className="relative z-10 flex items-start gap-3 pr-10 sm:items-center sm:gap-4">
+                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-lg shadow-amber-200 sm:h-14 sm:w-14">
                     <ShieldAlert className="h-7 w-7" />
                    </div>
-                   <div>
+                   <div className="min-w-0 flex-1">
                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-600">Platform notice</p>
-                     <h3 className="mt-1 text-2xl font-black tracking-tight text-slate-900">使用前請詳閱</h3>
-                     <p className="mt-1 text-sm font-medium text-slate-500">了解資料來源、使用限制與隱私原則</p>
+                     <h3 className="mt-1 text-2xl font-black leading-tight tracking-tight text-slate-900">使用前請詳閱</h3>
+                     <p className="mt-1 text-sm font-medium leading-6 text-slate-500">了解資料來源、使用限制與隱私原則</p>
                    </div>
                  </div>
               </div>
