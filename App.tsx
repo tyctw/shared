@@ -12,6 +12,7 @@ import { fetchEntries, submitEntry, logUserAction } from './services/apiService'
 import { ENTRY_LOCK_MESSAGE, isEntryYearLocked } from './utils/entryOpenLock';
 import { GraduationCap, BarChart3, PlusCircle, BookOpen, CloudOff, Info, Menu, X, ExternalLink, Calculator, Compass, Sparkles, RefreshCw, Home, ShieldAlert, Check, Heart, Shield, Share2, ArrowRight, MapPin, Search, Table2, ChevronDown, MailWarning } from 'lucide-react';
 
+
 // New Custom Loader Component
 const AppLoader = () => (
   <div className="flex flex-col items-center justify-center min-h-[50vh] animate-in fade-in duration-700">
