@@ -714,7 +714,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
                  </div>
               </div>
 
-              <div className="min-h-0 flex-1 space-y-2 overflow-hidden p-3 sm:space-y-3 sm:p-4">
+              <div className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain p-3 sm:space-y-3 sm:p-4">
                  <section className="rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-slate-50 p-3 sm:p-4">
                     <div className="mb-2 flex flex-wrap items-center gap-1.5">
                        <span className="inline-flex items-center gap-1 rounded-lg bg-white px-2 py-1 text-[10px] font-black text-indigo-600 shadow-sm ring-1 ring-indigo-100">
@@ -783,7 +783,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
                  {formData.notes && (
                     <section className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
                        <h5 className="mb-1 text-xs font-black text-slate-700">附加說明</h5>
-                       <p className="max-h-10 overflow-hidden break-words text-xs font-medium leading-5 text-slate-600">{formData.notes}</p>
+                       <p className="whitespace-pre-wrap break-words text-xs font-medium leading-5 text-slate-600">{formData.notes}</p>
                     </section>
                  )}
               </div>
