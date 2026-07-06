@@ -12,7 +12,6 @@ import { fetchEntries, submitEntry, logUserAction } from './services/apiService'
 import { ENTRY_LOCK_MESSAGE, isEntryYearLocked } from './utils/entryOpenLock';
 import { GraduationCap, BarChart3, PlusCircle, BookOpen, CloudOff, Info, Menu, X, ExternalLink, Calculator, Compass, Sparkles, RefreshCw, Home, ShieldAlert, Check, Heart, Shield, Share2, ArrowRight, MapPin, Search, Table2, ChevronDown, MailWarning } from 'lucide-react';
 
-
 // New Custom Loader Component
 const AppLoader = () => (
   <div className="flex flex-col items-center justify-center min-h-[50vh] animate-in fade-in duration-700">
@@ -839,7 +838,9 @@ const App: React.FC = () => {
   // Desktop Nav Button
   const NavButton = ({ id, label, icon: Icon }: { id: typeof activeTab, label: string, icon: any }) => (
     <button
+      type="button"
       onClick={() => handleTabChange(id)}
+      aria-current={activeTab === id ? 'page' : undefined}
       className={`relative px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 group ${
         activeTab === id 
           ? 'bg-white text-indigo-700 shadow-sm border border-slate-200/60 scale-100' 
@@ -857,7 +858,9 @@ const App: React.FC = () => {
   // Mobile Bottom Nav Button
   const MobileNavButton = ({ id, label, icon: Icon }: { id: typeof activeTab, label: string, icon: any }) => (
     <button
+      type="button"
       onClick={() => handleTabChange(id)}
+      aria-current={activeTab === id ? 'page' : undefined}
       className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 relative transition-all duration-300 ${
         activeTab === id ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'
       }`}
@@ -876,6 +879,12 @@ const App: React.FC = () => {
 
   return (
     <div className="font-sans text-slate-900 selection:bg-indigo-200 selection:text-indigo-900 overflow-x-hidden min-h-screen">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-xl focus:bg-slate-900 focus:px-4 focus:py-3 focus:text-sm focus:font-black focus:text-white focus:shadow-xl"
+      >
+        跳到主要內容
+      </a>
 
       {/* Share Modal */}
       <ShareModal 
@@ -890,7 +899,12 @@ const App: React.FC = () => {
             onClick={() => setShowThankYouModal(false)}
           />
 
-          <div className="relative w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/70 bg-white shadow-[0_32px_100px_-25px_rgba(15,23,42,0.6)] animate-in zoom-in-95 duration-300">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="thank-you-title"
+            className="relative w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/70 bg-white shadow-[0_32px_100px_-25px_rgba(15,23,42,0.6)] animate-in zoom-in-95 duration-300"
+          >
             <div className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-indigo-50 p-7 text-center sm:p-9">
               <div className="pointer-events-none absolute -right-12 -top-16 h-44 w-44 rounded-full border-[28px] border-emerald-100/70" />
               <div className="pointer-events-none absolute -bottom-20 left-8 h-40 w-40 rounded-full bg-indigo-100/70 blur-3xl" />
@@ -901,7 +915,7 @@ const App: React.FC = () => {
 
               <div className="relative z-10">
                 <p className="text-[10px] font-black uppercase tracking-[0.22em] text-emerald-600">Submitted</p>
-                <h3 className="mt-2 text-3xl font-black tracking-tight text-slate-900">感謝你的分享</h3>
+                <h3 id="thank-you-title" className="mt-2 text-3xl font-black tracking-tight text-slate-900">感謝你的分享</h3>
                 <p className="mx-auto mt-3 max-w-sm text-sm font-medium leading-6 text-slate-500">
                   你的錄取資料已成功送出，會成為下一位考生判斷志願時很有用的參考。
                 </p>
@@ -941,7 +955,12 @@ const App: React.FC = () => {
             onClick={() => setPendingNavigationTab(null)}
           />
 
-          <div className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-white/70 bg-white shadow-[0_32px_100px_-25px_rgba(15,23,42,0.6)] animate-in zoom-in-95 duration-200">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="unsaved-title"
+            className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-white/70 bg-white shadow-[0_32px_100px_-25px_rgba(15,23,42,0.6)] animate-in zoom-in-95 duration-200"
+          >
             <div className="bg-amber-50 p-5 ring-1 ring-amber-100">
               <div className="flex items-start gap-4">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-lg shadow-amber-100">
@@ -949,7 +968,7 @@ const App: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-600">Unsaved changes</p>
-                  <h3 className="mt-1 text-xl font-black text-slate-900">資料尚未送出</h3>
+                  <h3 id="unsaved-title" className="mt-1 text-xl font-black text-slate-900">資料尚未送出</h3>
                 </div>
               </div>
             </div>
@@ -987,7 +1006,12 @@ const App: React.FC = () => {
             onClick={() => setShowFavoritesModal(false)}
           />
 
-          <div className="relative flex max-h-[86vh] w-full max-w-5xl flex-col overflow-hidden rounded-[2rem] border border-white/70 bg-slate-50 shadow-[0_32px_100px_-25px_rgba(15,23,42,0.6)] animate-in zoom-in-95 duration-300">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="favorites-title"
+            className="relative flex max-h-[86vh] w-full max-w-5xl flex-col overflow-hidden rounded-[2rem] border border-white/70 bg-slate-50 shadow-[0_32px_100px_-25px_rgba(15,23,42,0.6)] animate-in zoom-in-95 duration-300"
+          >
             <div className="flex items-center justify-between gap-4 border-b border-slate-200/70 bg-white p-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-500 ring-1 ring-rose-100">
@@ -995,7 +1019,7 @@ const App: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-rose-500">Favorites</p>
-                  <h3 className="text-xl font-black text-slate-900">我的收藏</h3>
+                  <h3 id="favorites-title" className="text-xl font-black text-slate-900">我的收藏</h3>
                 </div>
               </div>
 
@@ -1190,7 +1214,12 @@ const App: React.FC = () => {
         <div className="max-w-5xl mx-auto h-16 sm:h-20 flex items-center justify-between px-4 sm:px-6 bg-white/80 backdrop-blur-2xl rounded-3xl shadow-[0_4px_40px_-10px_rgba(0,0,0,0.1)] border border-white/60">
           
           {/* Left: Logo */}
-          <div className="flex items-center gap-3 cursor-pointer group flex-shrink-0" onClick={() => handleTabChange('list')}>
+          <button
+            type="button"
+            className="flex items-center gap-3 group flex-shrink-0 text-left"
+            onClick={() => handleTabChange('list')}
+            aria-label="回到瀏覽首頁"
+          >
             <div className="relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-xl sm:rounded-2xl shadow-md group-hover:shadow-indigo-500/30 transition-all duration-300 group-hover:scale-[1.02]">
                 <div className="absolute inset-[2px] bg-white rounded-[10px] sm:rounded-[14px] z-0"></div>
                 <GraduationCap className="relative z-10 w-5 h-5 sm:w-6 sm:h-6 text-indigo-600 group-hover:rotate-12 transition-transform duration-500" />
@@ -1201,17 +1230,19 @@ const App: React.FC = () => {
                 </h1>
                 <p className="text-[10px] sm:text-xs font-bold text-slate-400 tracking-widest uppercase origin-left scale-90">CAP Score Sharing</p>
             </div>
-          </div>
+          </button>
 
           {/* Center: Desktop Navigation (Hidden on Mobile) */}
-          <nav className="hidden md:flex items-center bg-slate-50/80 p-1.5 rounded-2xl border border-slate-100/50 shadow-[inset_0_1px_4px_rgba(0,0,0,0.02)] gap-1">
+          <nav aria-label="主要導覽" className="hidden md:flex items-center bg-slate-50/80 p-1.5 rounded-2xl border border-slate-100/50 shadow-[inset_0_1px_4px_rgba(0,0,0,0.02)] gap-1">
              <NavButton id="list" label="瀏覽" icon={BookOpen} />
              <NavButton id="minimums" label="最低" icon={Table2} />
              <NavButton id="stats" label="統計" icon={BarChart3} />
              <NavButton id="guide" label="說明" icon={Info} />
              <div className="w-px h-6 bg-slate-200 mx-1"></div>
              <button
+                 type="button"
                  onClick={() => setShowShareModal(true)}
+                 aria-label="分享這個網站"
                  className="relative px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 group text-slate-500 hover:text-indigo-600 hover:bg-slate-100/50 scale-95 hover:scale-100 border border-transparent"
              >
                  <Share2 className="w-4 h-4 group-hover:text-indigo-500 text-slate-400" />
@@ -1224,7 +1255,9 @@ const App: React.FC = () => {
             
             {/* PROMINENT SHARE CTA - Visible everywhere */}
             <button
+                type="button"
                 onClick={() => handleTabChange('form')}
+                aria-current={activeTab === 'form' ? 'page' : undefined}
                 className={`
                     relative group flex items-center justify-center gap-1.5 sm:gap-2 
                     overflow-hidden rounded-full
@@ -1247,7 +1280,10 @@ const App: React.FC = () => {
 
             {/* Menu Button */}
             <button 
+                type="button"
                 onClick={() => setIsSidebarOpen(true)}
+                aria-label="開啟更多功能"
+                aria-expanded={isSidebarOpen}
                 className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors md:hidden"
                 title="更多功能"
             >
@@ -1258,7 +1294,7 @@ const App: React.FC = () => {
       </header>
 
       {/* Floating Bottom Navigation (Mobile Only) */}
-      <nav className="fixed bottom-5 left-4 right-4 z-50 md:hidden animate-in slide-in-from-bottom-6 duration-500">
+      <nav aria-label="手機主要導覽" className="fixed bottom-5 left-4 right-4 z-50 md:hidden animate-in slide-in-from-bottom-6 duration-500">
          <div className="bg-white/80 backdrop-blur-2xl border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.12)] rounded-[2rem] p-2 flex justify-between items-center max-w-sm mx-auto ring-1 ring-white/60">
             <MobileNavButton id="list" label="瀏覽" icon={BookOpen} />
             <MobileNavButton id="minimums" label="最低" icon={Table2} />
@@ -1269,7 +1305,7 @@ const App: React.FC = () => {
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-5xl mx-auto px-3 sm:px-6 pt-24 sm:pt-32 pb-28 sm:pb-16">
+      <main id="main-content" className="max-w-5xl mx-auto px-3 sm:px-6 pt-24 sm:pt-32 pb-28 sm:pb-16">
         
         <div className="animate-in fade-in duration-700 slide-in-from-bottom-6">
             
