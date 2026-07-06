@@ -958,7 +958,7 @@ const App: React.FC = () => {
                 你正在填寫「分享你的錄取數據」。如果現在離開，目前尚未送出的內容可能會遺失。
               </p>
 
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={() => setPendingNavigationTab(null)}
