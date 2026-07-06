@@ -57,6 +57,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
   const [groupSearchTerm, setGroupSearchTerm] = useState('');
   const [isDeptModalOpen, setIsDeptModalOpen] = useState(false);
   const [deptSearchTerm, setDeptSearchTerm] = useState('');
+  const [activeDeptGroup, setActiveDeptGroup] = useState('');
   const [isRegionModalOpen, setIsRegionModalOpen] = useState(false);
   const [regionSearchTerm, setRegionSearchTerm] = useState('');
 
@@ -250,6 +251,19 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
   const filteredGroups = availableGroups.filter(g => g.includes(groupSearchTerm));
   const availableDepts = allDepartments;
   const filteredDepts = availableDepts.filter(d => d.includes(deptSearchTerm));
+  const currentDeptGroup = activeDeptGroup || (selectedGroup && selectedGroup !== 'custom' ? selectedGroup : availableGroups[0]);
+  const groupedDeptResults = availableGroups
+    .map(group => {
+      const departments = DEPARTMENT_GROUPS[group] || [];
+      const isGroupMatched = group.includes(deptSearchTerm);
+      const matchedDepartments = deptSearchTerm
+        ? departments.filter(dept => isGroupMatched || dept.includes(deptSearchTerm))
+        : departments;
+
+      return { group, departments: matchedDepartments };
+    })
+    .filter(item => item.departments.length > 0);
+  const activeGroupDepartments = DEPARTMENT_GROUPS[currentDeptGroup] || [];
   const filteredRegions = REGIONS.filter(r => r.includes(regionSearchTerm));
 
   // Style Constants
@@ -959,47 +973,102 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
              onClick={() => setIsDeptModalOpen(false)}
            />
-           <div className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[80vh]">
-              <div className="bg-slate-50 p-4 border-b border-slate-100 flex items-center gap-3">
-                 <div className="relative flex-1">
+           <div className="relative bg-white w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[84vh]">
+              <div className="bg-slate-50 p-4 border-b border-slate-100 space-y-3">
+                 <div className="flex items-center gap-3">
+                  <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <input
                         type="text"
                         value={deptSearchTerm}
                         onChange={(e) => setDeptSearchTerm(e.target.value)}
-                        placeholder="搜尋科系..."
+                        placeholder="搜尋科系或群別..."
                         className="w-full bg-white border border-slate-200 focus:border-indigo-400 rounded-xl py-3 pl-10 pr-4 text-slate-700 outline-none focus:ring-4 focus:ring-indigo-100 transition-all font-medium placeholder:text-slate-400"
                     />
+                  </div>
+                  <button 
+                      type="button"
+                      onClick={() => setIsDeptModalOpen(false)}
+                      className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors shrink-0 font-medium"
+                  >
+                      取消
+                  </button>
                  </div>
-                 <button 
-                    type="button"
-                    onClick={() => setIsDeptModalOpen(false)}
-                    className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors shrink-0 font-medium"
-                 >
-                    取消
-                 </button>
+                 <div className="flex gap-2 overflow-x-auto pb-1 md:hidden">
+                    {availableGroups.map(group => (
+                      <button
+                        key={group}
+                        type="button"
+                        onClick={() => {
+                          setActiveDeptGroup(group);
+                          setDeptSearchTerm('');
+                        }}
+                        className={`shrink-0 rounded-full px-3 py-2 text-xs font-bold transition-colors ${
+                          currentDeptGroup === group && !deptSearchTerm
+                            ? 'bg-indigo-600 text-white shadow-sm'
+                            : 'bg-white text-slate-500 border border-slate-200'
+                        }`}
+                      >
+                        {group}
+                      </button>
+                    ))}
+                 </div>
               </div>
 
-              <div className="overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-indigo-200 flex-1">
-                 {filteredDepts.length > 0 ? (
-                     <>
-                     {filteredDepts.map(dept => (
-                         <button
-                             key={dept}
-                             type="button"
-                             onClick={() => {
-                                 handleDepartmentChange(dept);
-                                 setIsDeptModalOpen(false);
-                             }}
-                             className="w-full text-left px-4 py-3 hover:bg-indigo-50 text-slate-700 font-medium transition-colors border-b border-slate-50 last:border-0 flex items-center justify-between group"
-                         >
-                             <div className="flex items-center gap-3">
-                                 <span className="group-hover:text-indigo-700">{dept}</span>
-                             </div>
-                         </button>
-                     ))}
-                     </>
-                 ) : (
+              <div className="grid min-h-0 flex-1 grid-cols-1 md:grid-cols-[220px_1fr]">
+                 <div className="hidden overflow-y-auto border-r border-slate-100 bg-slate-50/70 p-2 md:block">
+                    {availableGroups.map(group => (
+                      <button
+                        key={group}
+                        type="button"
+                        onClick={() => {
+                          setActiveDeptGroup(group);
+                          setDeptSearchTerm('');
+                        }}
+                        className={`mb-1 flex w-full items-center justify-between rounded-2xl px-3 py-3 text-left text-sm font-bold transition-colors ${
+                          currentDeptGroup === group && !deptSearchTerm
+                            ? 'bg-indigo-600 text-white shadow-sm'
+                            : 'text-slate-600 hover:bg-white hover:text-indigo-700'
+                        }`}
+                      >
+                        <span>{group}</span>
+                        <span className={`text-xs ${currentDeptGroup === group && !deptSearchTerm ? 'text-indigo-100' : 'text-slate-400'}`}>
+                          {DEPARTMENT_GROUPS[group]?.length || 0}
+                        </span>
+                      </button>
+                    ))}
+                 </div>
+
+                 <div className="overflow-y-auto p-3 scrollbar-thin scrollbar-thumb-indigo-200">
+                 {deptSearchTerm ? (
+                   groupedDeptResults.length > 0 ? (
+                    <div className="space-y-4">
+                      {groupedDeptResults.map(({ group, departments }) => (
+                        <div key={group}>
+                          <div className="mb-2 flex items-center justify-between px-1">
+                            <h4 className="text-xs font-black tracking-widest text-indigo-500">{group}</h4>
+                            <span className="text-[11px] font-bold text-slate-400">{departments.length} 項</span>
+                          </div>
+                          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                            {departments.map(dept => (
+                              <button
+                                key={`${group}-${dept}`}
+                                type="button"
+                                onClick={() => {
+                                  handleDepartmentChange(dept);
+                                  setActiveDeptGroup(group);
+                                  setIsDeptModalOpen(false);
+                                }}
+                                className="rounded-2xl border border-slate-100 bg-white px-4 py-3 text-left font-bold text-slate-700 transition-colors hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700"
+                              >
+                                {dept}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                   ) : (
                      <div className="px-4 py-12 text-slate-400 text-sm flex flex-col items-center gap-3 text-center">
                          <div className="p-4 bg-slate-50 rounded-full">
                             <Search className="w-6 h-6 text-slate-300" />
@@ -1017,7 +1086,37 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
                              手動輸入「{deptSearchTerm}」
                          </button>
                      </div>
+                   )
+                 ) : (
+                   <div>
+                     <div className="mb-3 flex items-center justify-between px-1">
+                       <div>
+                         <h4 className="text-base font-black text-slate-800">{currentDeptGroup}</h4>
+                         <p className="mt-0.5 text-xs font-medium text-slate-400">先選群別，再點選科系/班別即可帶入表單</p>
+                       </div>
+                       <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-black text-indigo-600">
+                         {activeGroupDepartments.length} 項
+                       </span>
+                     </div>
+                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                       {activeGroupDepartments.map(dept => (
+                         <button
+                           key={dept}
+                           type="button"
+                           onClick={() => {
+                             handleDepartmentChange(dept);
+                             setActiveDeptGroup(currentDeptGroup);
+                             setIsDeptModalOpen(false);
+                           }}
+                           className="rounded-2xl border border-slate-100 bg-white px-4 py-3 text-left font-bold text-slate-700 transition-colors hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700"
+                         >
+                           {dept}
+                         </button>
+                       ))}
+                     </div>
+                   </div>
                  )}
+                 </div>
               </div>
            </div>
         </div>
