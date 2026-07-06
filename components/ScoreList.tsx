@@ -146,7 +146,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
   const paginatedEntries = sortedEntries.slice(startIndex, startIndex + itemsPerPage);
 
   const handleShare = async (entry: ScoreEntry) => {
-    const shareText = `【會考落點分享】\n🏫 ${entry.school} (${entry.department})\n📅 ${entry.year}年 | 📍 ${entry.region}\n🏆 總積分：${entry.totalPoints}\n\n📝 科目成績：\n國${entry.scores.chinese} 英${entry.scores.english} 數${entry.scores.math} 自${entry.scores.nature} 社${entry.scores.social} 作${entry.scores.writing}`;
+    const shareText = `【會考落點分享】\n🏫 ${entry.school} (${entry.department})\n📅 ${entry.year}年 | 📍 ${entry.region}\n👤 考生身分：${entry.studentIdentity ?? '一般生'}\n🏆 總積分：${entry.totalPoints}\n\n📝 科目成績：\n國${entry.scores.chinese} 英${entry.scores.english} 數${entry.scores.math} 自${entry.scores.nature} 社${entry.scores.social} 作${entry.scores.writing}`;
 
     try {
       await navigator.clipboard.writeText(shareText);
@@ -172,6 +172,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
       `區域：${entry.region}`,
       `學校：${entry.school}`,
       `科系/班別：${entry.department}`,
+      `考生身分：${entry.studentIdentity ?? '一般生'}`,
       `總積分：${entry.totalPoints}`,
       `總積點：${entry.totalCredits ?? '未提供'}`,
       `國文：${entry.scores.chinese}`,
@@ -408,6 +409,10 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
                   <div className="mt-3 flex flex-wrap items-center gap-2">
                     <span className="inline-flex items-center gap-1.5 rounded-xl bg-white/85 px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm ring-1 ring-slate-200">
                       <School className="h-3.5 w-3.5 text-indigo-500" />{entry.department}
+                    </span>
+
+                    <span className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-600 ring-1 ring-indigo-100">
+                      {entry.studentIdentity ?? '一般生'}
                     </span>
 
                     {minPointsMap.get(`${entry.year}-${entry.school}`) === entry.totalPoints && (

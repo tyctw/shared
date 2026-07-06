@@ -8,6 +8,7 @@ import ShareModal from './components/ShareModal';
 import GreetingModal from './components/GreetingModal';
 import { ScoreEntry } from './types';
 import { fetchEntries, submitEntry, logUserAction } from './services/apiService';
+import { ENTRY_LOCK_MESSAGE, isEntryYearLocked } from './utils/entryOpenLock';
 import { GraduationCap, BarChart3, PlusCircle, BookOpen, CloudOff, Info, Menu, X, ExternalLink, Calculator, Compass, Sparkles, RefreshCw, Home, ShieldAlert, Check, Heart, Shield, Share2, ArrowRight, MapPin, Search } from 'lucide-react';
 
 // New Custom Loader Component
@@ -93,6 +94,11 @@ const App: React.FC = () => {
   };
 
   const handleAddEntry = async (newEntry: Omit<ScoreEntry, 'id' | 'timestamp'>) => {
+    if (isEntryYearLocked(newEntry.year)) {
+      alert(ENTRY_LOCK_MESSAGE);
+      return;
+    }
+
     const entry: ScoreEntry = {
       ...newEntry,
       id: Math.random().toString(36).substr(2, 9),

@@ -1,5 +1,6 @@
 import { ScoreEntry } from '../types'
 import { supabase } from '../lib/supabase'
+import { isEntryYearLocked } from '../../utils/entryOpenLock'
 
 // ===============================
 // Fetch Entries（讀取資料）
@@ -18,6 +19,7 @@ export const fetchEntries = async (): Promise<ScoreEntry[]> => {
     return (data || []).map((item: any) => ({
       ...item,
       scores: typeof item.scores === 'string' ? JSON.parse(item.scores) : item.scores,
+      studentIdentity: item.student_identity ?? item.studentIdentity ?? '一般生',
       totalPoints: item.total_points ?? item.totalPoints,
       totalCredits: item.total_credits ?? item.totalCredits,
     }))
@@ -32,6 +34,10 @@ export const fetchEntries = async (): Promise<ScoreEntry[]> => {
 // ===============================
 export const submitEntry = async (entry: ScoreEntry): Promise<boolean> => {
   try {
+    if (isEntryYearLocked(entry.year)) {
+      return false
+    }
+
     const { error } = await supabase
       .from('score_entries')
       .insert([{
@@ -39,6 +45,7 @@ export const submitEntry = async (entry: ScoreEntry): Promise<boolean> => {
         year: entry.year,
         school: entry.school,
         department: entry.department || null,
+        student_identity: entry.studentIdentity,
         region: entry.region,
         scores: typeof entry.scores === 'string' ? JSON.parse(entry.scores) : entry.scores,
         total_points: entry.totalPoints,

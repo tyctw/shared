@@ -1,18 +1,34 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ScoreEntry, Region, Grade, WritingGrade } from '../types';
+import { ScoreEntry, Region, Grade, WritingGrade, StudentIdentity } from '../types';
 import { YEARS, GRADES, WRITING_GRADES, REGIONS, DEPARTMENT_GROUPS, SCHOOLS_BY_REGION } from '../constants';
 import { calculateRegionalScore } from '../utils/scoreCalculator';
+import { ENTRY_OPEN_AT_LABEL, isEntryYearLocked } from '../utils/entryOpenLock';
 import { Send, Loader2, ChevronDown, User, PenTool, Search, ShieldCheck, MapPin, School, GraduationCap, Trophy, FileText, Sparkles, Lock } from 'lucide-react';
 
 interface ScoreFormProps {
   onSubmit: (entry: Omit<ScoreEntry, 'id' | 'timestamp'>) => void;
 }
 
+const STUDENT_IDENTITIES: StudentIdentity[] = [
+  '一般生',
+  '低收入戶生',
+  '中低收入戶生',
+  '直系血親尊親屬支領失業給付者',
+  '身心障礙生',
+  '原住民生',
+  '僑生',
+  '蒙藏生',
+  '政府派赴國外工作人員子女',
+  '境外優秀科學技術人才子女',
+  '退伍軍人',
+];
+
 const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
   const [formData, setFormData] = useState({
     year: YEARS[0],
     school: '',
     department: '',
+    studentIdentity: '一般生' as StudentIdentity,
     region: REGIONS[0],
     scores: {
       chinese: '' as Grade,
@@ -41,14 +57,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
   const [isRegionModalOpen, setIsRegionModalOpen] = useState(false);
   const [regionSearchTerm, setRegionSearchTerm] = useState('');
 
-  // Lock 115 year logic
-  const is115Locked = () => {
-    const now = new Date();
-    // 115/07/07 08:00 Taiwan time (2026)
-    const unlockDate = new Date('2026-07-07T08:00:00+08:00');
-    return now < unlockDate;
-  };
-  const showLockState = formData.year === 115 && is115Locked();
+  const showLockState = isEntryYearLocked(formData.year);
 
   // Auto-calculate total points & credits based on region
   useEffect(() => {
@@ -146,7 +155,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
       const errors: string[] = [];
       if (!formData.school.trim()) errors.push("錄取學校");
       if (!formData.department.trim()) errors.push("科系/班別");
-      if (Object.values(formData.scores).some(score => score === '')) errors.push("完整會考成績");
+      if (Object.values(formData.scores).some(score => String(score) === '')) errors.push("完整會考成績");
       if (!formData.totalPoints) errors.push("總積分");
       return errors;
   };
@@ -175,7 +184,15 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
       });
       
       setIsSubmitting(false);
-      setFormData(prev => ({...prev, school: '', department: '', notes: '', totalPoints: '', totalCredits: ''}));
+      setFormData(prev => ({
+        ...prev,
+        school: '',
+        department: '',
+        studentIdentity: '一般生',
+        notes: '',
+        totalPoints: '',
+        totalCredits: '',
+      }));
       setSelectedGroup('');
       setIsManualDept(false);
       setIsManualSchool(false);
@@ -296,7 +313,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                             </div>
                             <div className="shrink-0 rounded-2xl border border-indigo-100 bg-white/90 px-5 py-3 shadow-sm">
                                 <span className="block text-[10px] font-black uppercase tracking-widest text-indigo-400">開放時間</span>
-                                <strong className="mt-1 block whitespace-nowrap text-base font-black text-indigo-700">115/07/07 08:00</strong>
+                                <strong className="mt-1 block whitespace-nowrap text-base font-black text-indigo-700">{ENTRY_OPEN_AT_LABEL}</strong>
                             </div>
                         </div>
                     </div>
@@ -346,6 +363,23 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                             <Search className="w-4 h-4 text-slate-400 group-hover/btn:text-indigo-400 transition-colors" />
                         </button>
                     )}
+                </div>
+
+                {/* Student Identity */}
+                <div className="md:col-span-12 space-y-1">
+                    <label className={labelClass}>考生身分</label>
+                    <div className={selectWrapperClass}>
+                        <select
+                            value={formData.studentIdentity}
+                            onChange={(e) => handleChange('studentIdentity', e.target.value as StudentIdentity)}
+                            className={`${inputClass} cursor-pointer`}
+                        >
+                            {STUDENT_IDENTITIES.map(identity => (
+                                <option key={identity} value={identity}>{identity}</option>
+                            ))}
+                        </select>
+                        <ChevronDown className={selectArrowClass} />
+                    </div>
                 </div>
                 
                 {/* Department Row */}
@@ -566,6 +600,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                     </div>
                     <h4 className="text-2xl font-black text-slate-800 leading-tight">{formData.school}</h4>
                     <p className="text-slate-500 font-medium">{formData.department}</p>
+                    <p className="text-xs font-bold text-indigo-500">{formData.studentIdentity}</p>
                  </div>
 
                  {/* Mini Score Grid */}
@@ -656,7 +691,6 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                         onChange={(e) => setSearchSchoolTerm(e.target.value)}
                         placeholder={`搜尋 ${formData.region} 的學校...`}
                         className="w-full bg-white border border-slate-200 focus:border-indigo-400 rounded-xl py-3 pl-10 pr-4 text-slate-700 outline-none focus:ring-4 focus:ring-indigo-100 transition-all font-medium placeholder:text-slate-400"
-                        autoFocus
                     />
                  </div>
                  <button 
@@ -729,7 +763,6 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                         onChange={(e) => setGroupSearchTerm(e.target.value)}
                         placeholder="搜尋群別..."
                         className="w-full bg-white border border-slate-200 focus:border-indigo-400 rounded-xl py-3 pl-10 pr-4 text-slate-700 outline-none focus:ring-4 focus:ring-indigo-100 transition-all font-medium placeholder:text-slate-400"
-                        autoFocus
                     />
                  </div>
                  <button 
@@ -813,7 +846,6 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                         onChange={(e) => setDeptSearchTerm(e.target.value)}
                         placeholder="搜尋科系..."
                         className="w-full bg-white border border-slate-200 focus:border-indigo-400 rounded-xl py-3 pl-10 pr-4 text-slate-700 outline-none focus:ring-4 focus:ring-indigo-100 transition-all font-medium placeholder:text-slate-400"
-                        autoFocus
                     />
                  </div>
                  <button 
@@ -885,7 +917,6 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                         onChange={(e) => setRegionSearchTerm(e.target.value)}
                         placeholder="搜尋區域..."
                         className="w-full bg-white border border-slate-200 focus:border-indigo-400 rounded-xl py-3 pl-10 pr-4 text-slate-700 outline-none focus:ring-4 focus:ring-indigo-100 transition-all font-medium placeholder:text-slate-400"
-                        autoFocus
                     />
                  </div>
                  <button 

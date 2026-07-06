@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { Grade, Region, ScoreEntry, SubjectScores, WritingGrade } from '../types';
 import { calculateRegionalScore } from '../utils/scoreCalculator';
+import { ENTRY_LOCK_MESSAGE, isEntryYearLocked } from '../utils/entryOpenLock';
 
 // ===============================
 // Initialize Supabase Client
@@ -83,6 +84,7 @@ const getCorrectedScorePayload = (item: any) => {
         entry: {
           ...item,
           scores,
+          studentIdentity: item.student_identity ?? item.studentIdentity ?? '一般生',
           totalPoints: toNullableNumber(currentPoints) ?? expectedPoints,
           totalCredits: toNullableNumber(currentCredits) ?? undefined,
         } as ScoreEntry,
@@ -99,6 +101,7 @@ const getCorrectedScorePayload = (item: any) => {
       entry: {
         ...item,
         scores,
+        studentIdentity: item.student_identity ?? item.studentIdentity ?? '一般生',
         totalPoints: expectedPoints,
         totalCredits: expectedCredits ?? undefined,
       } as ScoreEntry,
@@ -120,6 +123,7 @@ const repairScoreEntries = async (items: any[]): Promise<ScoreEntry[]> => {
       repairedEntries.push({
         ...item,
         scores: parseScoresSafely(item.scores),
+        studentIdentity: item.student_identity ?? item.studentIdentity ?? '一般生',
         totalPoints: item.total_points ?? item.totalPoints,
         totalCredits: item.total_credits ?? item.totalCredits,
       } as ScoreEntry);
@@ -183,6 +187,11 @@ export const fetchEntries = async (): Promise<ScoreEntry[]> => {
 // ===============================
 export const submitEntry = async (entry: ScoreEntry): Promise<boolean> => {
    try {
+    if (isEntryYearLocked(entry.year)) {
+      console.warn(ENTRY_LOCK_MESSAGE);
+      return false;
+    }
+
     const { error } = await supabase
       .from('score_entries')
       .insert([
@@ -191,6 +200,7 @@ export const submitEntry = async (entry: ScoreEntry): Promise<boolean> => {
           year: entry.year,
           school: entry.school,
           department: entry.department || null,
+          student_identity: entry.studentIdentity,
           region: entry.region,
           scores: parseScoresSafely(entry.scores),
           total_points: entry.totalPoints,

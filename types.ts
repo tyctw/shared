@@ -1,5 +1,17 @@
 export type Grade = 'A++' | 'A+' | 'A' | 'B++' | 'B+' | 'B' | 'C';
 export type WritingGrade = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+export type StudentIdentity =
+  | '一般生'
+  | '低收入戶生'
+  | '中低收入戶生'
+  | '直系血親尊親屬支領失業給付者'
+  | '身心障礙生'
+  | '原住民生'
+  | '僑生'
+  | '蒙藏生'
+  | '政府派赴國外工作人員子女'
+  | '境外優秀科學技術人才子女'
+  | '退伍軍人';
 
 export enum Region {
   KEELUNG_TAIPEI_NEWTAIPEI = '基北區',
@@ -33,6 +45,7 @@ export interface ScoreEntry {
   year: number; // ROC Year (e.g., 113)
   school: string;
   department: string;
+  studentIdentity: StudentIdentity;
   region: Region;
   scores: SubjectScores;
   totalPoints: number; // e.g., 36, 108, etc. depending on region

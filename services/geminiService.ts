@@ -56,6 +56,7 @@ export const generateMockDataWithAI = async (count: number = 3): Promise<ScoreEn
     // Add IDs and timestamp
     return rawData.map((d: any) => ({
         ...d,
+        studentIdentity: d.studentIdentity ?? '一般生',
         id: Math.random().toString(36).substr(2, 9),
         timestamp: Date.now()
     }));

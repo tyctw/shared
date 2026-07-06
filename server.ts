@@ -3,6 +3,7 @@ import path from 'path';
 import cors from 'cors';
 import { createServer as createViteServer } from 'vite';
 import { createClient } from '@supabase/supabase-js';
+import { ENTRY_LOCK_MESSAGE, isEntryYearLocked } from './utils/entryOpenLock';
 
 const app = express();
 const PORT = 3000;
@@ -44,9 +45,10 @@ app.get('/api/entries', async (req, res) => {
     }
 
     // Parse JSON fields if necessary, depends on how they are stored
-    const formattedData = data.map(entry => ({
+    const formattedData = data.map((entry: any) => ({
       ...entry,
-      scores: typeof entry.scores === 'string' ? JSON.parse(entry.scores) : entry.scores
+      scores: typeof entry.scores === 'string' ? JSON.parse(entry.scores) : entry.scores,
+      studentIdentity: entry.student_identity ?? entry.studentIdentity ?? '一般生',
     }));
 
     res.json(formattedData);
@@ -68,22 +70,28 @@ app.post('/api/entries', async (req, res) => {
       return res.status(400).json({ error: 'Missing entry data' });
     }
 
-    const { data, error } = await supabase
+    if (isEntryYearLocked(entry.year)) {
+      return res.status(403).json({ status: 'error', message: ENTRY_LOCK_MESSAGE });
+    }
+
+    const payload = {
+      id: entry.id,
+      year: entry.year,
+      school: entry.school,
+      department: entry.department || null,
+      student_identity: entry.studentIdentity ?? '一般生',
+      region: entry.region,
+      scores: typeof entry.scores === 'string' ? JSON.parse(entry.scores) : entry.scores,
+      total_points: entry.totalPoints,
+      total_credits: entry.totalCredits ?? null,
+      notes: entry.notes || '',
+      timestamp: entry.timestamp,
+    };
+
+    const supabaseClient = supabase as any;
+    const { data, error } = await supabaseClient
       .from('score_entries')
-      .insert([
-        {
-          id: entry.id,
-          year: entry.year,
-          school: entry.school,
-          department: entry.department || null,
-          region: entry.region,
-          scores: typeof entry.scores === 'string' ? JSON.parse(entry.scores) : entry.scores,
-          total_points: entry.totalPoints,
-          total_credits: entry.totalCredits ?? null,
-          notes: entry.notes || '',
-          timestamp: entry.timestamp,
-        }
-      ]);
+      .insert([payload]);
 
     if (error) {
       throw error;
