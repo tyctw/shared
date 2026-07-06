@@ -24,7 +24,7 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
   const [copied, setCopied] = React.useState(false);
   const [copiedMessage, setCopiedMessage] = React.useState('已複製網站連結');
   const shareUrl = window.location.href;
-  const shareTitle = '會考落點導航';
+  const shareTitle = '會考錄取分享平台';
   const shareText = '一起用真實錄取資料，找到更適合自己的升學方向。';
 
   useEffect(() => {

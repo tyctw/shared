@@ -36,18 +36,190 @@ const AppLoader = () => (
   </div>
 );
 
+type ActiveTab = 'list' | 'form' | 'stats' | 'guide' | 'compare' | 'disclaimer' | 'privacy';
+
+const DisclaimerPage = ({ onBack }: { onBack: () => void }) => {
+  const items = [
+    ['非官方錄取資料', '本平台內容由考生匿名、自願回報，並非教育主管機關、招生委員會或學校公布的正式錄取門檻，也不代表最低錄取標準、保證錄取分數或任何官方統計結果。', 'rose'],
+    ['資料可能存在誤差', '回報內容可能因記憶落差、輸入錯誤、不同招生管道、特殊身分、超額比序、志願序或年度規則差異而產生偏差。平台會盡力維護資料品質，但無法逐筆查核真實性。', 'indigo'],
+    ['官方資訊優先', '選填志願前，請務必查閱當年度免試入學簡章、招生名額、超額比序規則、各區招生公告與學校正式資訊；若平台內容與官方資訊不同，應以官方公告為準。', 'amber'],
+    ['判讀方式限制', '單筆資料不應被視為錄取門檻。建議同時比較同年度、同區域、同校科、多筆相近條件資料，並留意特殊身分、科系差異與積分制度變化。', 'emerald'],
+    ['不構成升學建議', '平台提供資訊整理與經驗分享，不提供個別升學諮詢、錄取保證、志願序建議或法律責任承諾。任何升學決策仍應由使用者與家長、師長討論後自行判斷。', 'violet'],
+    ['匿名分享與個資保護', '表單不要求姓名、電話或身分證字號。請勿在心得或補充說明中填寫姓名、准考證號、聯絡方式、地址、班級座號或任何可識別自己及他人的資訊。', 'indigo'],
+    ['資料調整與移除', '平台可基於資料品質、隱私風險、明顯異常、惡意填寫或維運需求，調整、隱藏或移除部分資料。若你認為資料有誤，可透過頁面提供的回報方式協助更正。', 'amber'],
+    ['使用者自行承擔風險', '使用本平台資料所做的志願選填、升學規劃或其他決策，其結果與風險由使用者自行承擔。平台維護者不對任何直接、間接、附帶或衍生損失負責。', 'rose'],
+  ];
+
+  const toneClass: Record<string, string> = {
+    rose: 'bg-rose-50 text-rose-500',
+    indigo: 'bg-indigo-50 text-indigo-500',
+    amber: 'bg-amber-50 text-amber-600',
+    emerald: 'bg-emerald-50 text-emerald-600',
+    violet: 'bg-violet-50 text-violet-600',
+  };
+
+  return (
+    <div className="mx-auto max-w-4xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <section className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-amber-50 via-white to-orange-50 p-6 shadow-[0_18px_60px_-35px_rgba(15,23,42,0.35)] ring-1 ring-amber-100 sm:p-8">
+        <div className="pointer-events-none absolute -right-10 -top-14 h-40 w-40 rounded-full border-[24px] border-amber-100/70" />
+        <div className="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-lg shadow-amber-200">
+              <ShieldAlert className="h-7 w-7" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-600">Platform notice</p>
+              <h2 className="mt-1 text-3xl font-black tracking-tight text-slate-900">免責聲明</h2>
+              <p className="mt-2 text-sm font-medium leading-6 text-slate-500">使用本平台資料前，請先了解資料來源、使用限制與判讀原則。</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onBack}
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-black text-white shadow-lg shadow-slate-200 transition-all hover:bg-indigo-600 active:scale-[0.98]"
+          >
+            <ArrowRight className="h-4 w-4 rotate-180" />
+            返回瀏覽資料
+          </button>
+        </div>
+      </section>
+
+      <section className="grid gap-3">
+        {items.map(([title, body, tone], index) => (
+          <article key={title} className="flex gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+            <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm font-black ${toneClass[tone]}`}>
+              {index + 1}
+            </div>
+            <div>
+              <h3 className="font-black text-slate-800">{title}</h3>
+              <p className="mt-1 text-sm font-medium leading-6 text-slate-500">{body}</p>
+            </div>
+          </article>
+        ))}
+      </section>
+    </div>
+  );
+};
+
+const PrivacyPage = ({ onBack }: { onBack: () => void }) => (
+  <div className="mx-auto max-w-4xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <section className="relative overflow-hidden rounded-[2rem] border border-indigo-100 bg-white p-6 shadow-[0_18px_60px_-35px_rgba(15,23,42,0.35)] sm:p-8">
+      <div className="pointer-events-none absolute -right-12 -top-16 h-44 w-44 rounded-full bg-indigo-100/80 blur-3xl" />
+      <div className="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-start gap-4">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-200">
+            <Shield className="h-7 w-7" />
+          </div>
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500">Privacy & Copyright</p>
+            <h2 className="mt-1 text-3xl font-black tracking-tight text-slate-900">隱私權與版權聲明</h2>
+            <p className="mt-2 text-sm font-medium leading-6 text-slate-500">說明資料蒐集方式、瀏覽器儲存、資料風險與版權使用規範。</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={onBack}
+          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-black text-white shadow-lg shadow-slate-200 transition-all hover:bg-indigo-600 active:scale-[0.98]"
+        >
+          <ArrowRight className="h-4 w-4 rotate-180" />
+          返回瀏覽資料
+        </button>
+      </div>
+    </section>
+
+    <section className="space-y-4 rounded-[2rem] border border-slate-100 bg-white p-5 shadow-sm sm:p-8">
+      <section className="space-y-3">
+        <h3 className="border-l-4 border-indigo-500 pl-3 text-lg font-black text-slate-800">1. 資料蒐集與使用</h3>
+        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
+          本平台（CAP Score Sharing）為匿名性質的資料分享平台。當您填寫並送出分數分享表單時，我們會蒐集您自願提供的會考年份、就學區、錄取學校、科系或班別、考生身分、各科成績、總積分、總積點與補充說明等內容。
+          這些資料將用於公開呈現、統計整理、篩選查詢與協助其他考生判讀歷年錄取經驗。
+        </p>
+        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
+          本平台表單<span className="font-bold text-rose-500">不要求</span>姓名、身分證字號、電話、地址、准考證號、學號、班級座號或其他可直接識別個人的資料。請勿主動在心得或補充欄位填入自己或他人的個人資料。
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h3 className="border-l-4 border-indigo-500 pl-3 text-lg font-black text-slate-800">2. 瀏覽器儲存與使用紀錄</h3>
+        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
+          為了提供更好的使用體驗，本網站會使用 Local Storage 儲存您的收藏名單、已閱讀免責聲明狀態等偏好設定。這些資料主要存放於您的瀏覽器中，用於讓您下次回到網站時保留操作狀態。
+        </p>
+        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
+          若您清除瀏覽器資料、更換裝置或使用無痕模式，這些本機偏好設定可能會消失。本平台不會以本機收藏資料識別您的真實身分。
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h3 className="border-l-4 border-rose-500 pl-3 text-lg font-black text-slate-800">3. 公開資料與匿名風險</h3>
+        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
+          您送出的錄取資料可能會在網站上公開展示，供其他使用者查詢、篩選、比較或分享。雖然平台不要求直接識別個資，但若您在補充說明中留下足以辨識身分的內容，仍可能造成個資外洩風險。
+        </p>
+        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
+          若發現資料含有個人資訊、錯誤內容、冒用或不當文字，平台可視情況進行修正、隱藏或刪除。使用者也可透過資料卡片上的回報方式協助我們維護資料品質。
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h3 className="border-l-4 border-indigo-500 pl-3 text-lg font-black text-slate-800">4. 第三方服務與資料傳輸</h3>
+        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
+          本平台可能使用第三方服務提供資料庫、網站部署、分析或分享功能，例如雲端資料庫、網站主機、瀏覽器分享 API 或外部社群分享連結。當您使用這些功能時，相關服務可能依其自身政策處理必要的技術資料。
+        </p>
+        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
+          若您透過 LINE、社群平台、Email 或其他外部工具分享本站內容，該分享行為將受外部平台的服務條款與隱私政策約束。
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h3 className="border-l-4 border-indigo-500 pl-3 text-lg font-black text-slate-800">5. 資料保存、修正與刪除</h3>
+        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
+          為維持歷年資料參考價值，您自願送出的匿名錄取資料可能會被保存於資料庫中，直到平台維運者判斷不再需要、資料明顯錯誤、涉及隱私風險或使用者提出合理刪修需求。
+        </p>
+        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
+          因本平台採匿名分享設計，若您未提供可驗證的資料識別資訊，平台可能無法確認特定資料是否由您本人提交。回報刪修時，請提供資料卡片中可見的年份、區域、學校、科系與錯誤原因，協助我們定位資料。
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h3 className="border-l-4 border-amber-500 pl-3 text-lg font-black text-slate-800">6. 使用者責任</h3>
+        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
+          使用者應確保提交內容盡可能真實、完整且不侵害他人權益。請勿提交虛假資料、惡意攻擊、歧視性文字、廣告、個資、侵犯著作權內容或任何違反法律與善良風俗的資訊。
+        </p>
+        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
+          若使用者因提交不當內容造成第三方權益受損或法律爭議，應由提交者自行負責；平台可基於安全與維運需求移除相關內容。
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h3 className="border-l-4 border-indigo-500 pl-3 text-lg font-black text-slate-800">7. 版權聲明 (Copyright)</h3>
+        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
+          本網站的原始程式碼、介面設計、網站架構、視覺排版、資料整理方式與文字內容，除另有標示外，皆受相關智慧財產權保護。未經授權，不得冒名、抄襲、販售、批量轉載或以誤導方式二次發布。
+        </p>
+        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
+          若您引用本站資料作為非商業討論、心得分享或教育參考，請註明資料來源「TYCTW會考落點分享平台」或「會考錄取分享平台」，並避免將匿名回報資料包裝成官方錄取門檻。
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h3 className="border-l-4 border-indigo-500 pl-3 text-lg font-black text-slate-800">8. 條款更新</h3>
+        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
+          本頁內容可能因平台功能、資料欄位、法規環境或維運需求而調整。更新後的內容會公布於本頁，使用者持續使用本平台即表示了解並接受更新後的聲明內容。
+        </p>
+      </section>
+    </section>
+  </div>
+);
+
 const App: React.FC = () => {
   const [entries, setEntries] = useState<ScoreEntry[]>([]);
-  const [activeTab, setActiveTab] = useState<'list' | 'form' | 'stats' | 'guide' | 'compare'>('list');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('list');
   const [favoriteIds, setFavoriteIds] = useState<string[]>(() => {
       const saved = localStorage.getItem('cap_favorites');
       return saved ? JSON.parse(saved) : [];
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [showDisclaimer, setShowDisclaimer] = useState(false);
-  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showThankYouModal, setShowThankYouModal] = useState(false);
 
   useEffect(() => {
       localStorage.setItem('cap_favorites', JSON.stringify(favoriteIds));
@@ -84,7 +256,7 @@ const App: React.FC = () => {
 
   const handleAcceptDisclaimer = () => {
     localStorage.setItem('cap_disclaimer_accepted', 'true');
-    setShowDisclaimer(false);
+    setActiveTab('list');
     logUserAction('accept_disclaimer', 'agreed');
   };
 
@@ -104,12 +276,15 @@ const App: React.FC = () => {
       id: Math.random().toString(36).substr(2, 9),
       timestamp: Date.now(),
     };
-    setEntries(prev => [entry, ...prev]);
-    setActiveTab('list');
     const success = await submitEntry(entry);
-    if (!success) {
-      alert("資料已顯示在本地，但同步到雲端失敗。請檢查網路或 API 設定。");
+    if (success) {
+      setEntries(prev => [entry, ...prev]);
+      setActiveTab('list');
+      setShowThankYouModal(true);
+      return;
     }
+
+    alert("資料同步到雲端失敗，請檢查網路或 API 設定後再試一次。");
   };
 
   // Desktop Nav Button
@@ -151,99 +326,61 @@ const App: React.FC = () => {
   );
 
   return (
-    <div className={`font-sans text-slate-900 selection:bg-indigo-200 selection:text-indigo-900 overflow-x-hidden min-h-screen ${showDisclaimer ? 'h-screen overflow-hidden' : ''}`}>
-      
-      {/* Disclaimer Modal */}
-      {showDisclaimer && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
-           <button
-             type="button"
-             className="absolute inset-0 h-full w-full cursor-default bg-slate-950/65 backdrop-blur-md"
-             onClick={() => setShowDisclaimer(false)}
-             aria-label="關閉使用說明"
-           />
-           
-           <div className="relative flex max-h-[88vh] w-full max-w-2xl flex-col overflow-hidden rounded-[2rem] border border-white/70 bg-white shadow-[0_32px_100px_-25px_rgba(15,23,42,0.6)] animate-in zoom-in-95 duration-300">
-              <div className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-white to-orange-50 p-6 sm:p-8">
-                 <div className="pointer-events-none absolute -right-10 -top-14 h-40 w-40 rounded-full border-[24px] border-amber-100/70" />
-                 <button
-                   type="button"
-                   onClick={() => setShowDisclaimer(false)}
-                   className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-amber-100 bg-white text-slate-400 shadow-sm transition hover:rotate-90 hover:text-slate-800"
-                   aria-label="關閉"
-                 >
-                   <X className="h-5 w-5" />
-                 </button>
-                 <div className="relative z-10 flex items-start gap-3 pr-10 sm:items-center sm:gap-4">
-                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-lg shadow-amber-200 sm:h-14 sm:w-14">
-                    <ShieldAlert className="h-7 w-7" />
-                   </div>
-                   <div className="min-w-0 flex-1">
-                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-600">Platform notice</p>
-                     <h3 className="mt-1 text-2xl font-black leading-tight tracking-tight text-slate-900">使用前請詳閱</h3>
-                     <p className="mt-1 text-sm font-medium leading-6 text-slate-500">了解資料來源、使用限制與隱私原則</p>
-                   </div>
-                 </div>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-5 sm:p-8">
-                 <div className="space-y-3">
-                    <div className="flex gap-4 rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-rose-50 text-sm font-black text-rose-500">1</div>
-                        <div>
-                            <h4 className="mb-1 font-black text-slate-800">非官方錄取資料</h4>
-                            <p className="text-sm leading-6 text-slate-500">平台內容由考生匿名、自願回報，並非教育主管機關、招生委員會或學校公布的正式錄取門檻，也不代表最低錄取標準。</p>
-                        </div>
-                    </div>
-                    <div className="flex gap-4 rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-sm font-black text-indigo-500">2</div>
-                        <div>
-                            <h4 className="mb-1 font-black text-slate-800">資料可能存在誤差</h4>
-                            <p className="text-sm leading-6 text-slate-500">回報內容可能出現填寫錯誤、特殊招生身分或其他未揭露條件。請比較同年度、同區域的多筆資料，避免以單一數字做決定。</p>
-                        </div>
-                    </div>
-                    <div className="flex gap-4 rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-sm font-black text-amber-600">3</div>
-                        <div>
-                            <h4 className="mb-1 font-black text-slate-800">官方資訊優先</h4>
-                            <p className="text-sm leading-6 text-slate-500">選填志願前，務必查閱當年度免試入學簡章、招生名額、超額比序規則與學校正式公告；本平台不可取代官方資訊。</p>
-                        </div>
-                    </div>
-                    <div className="flex gap-4 rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-sm font-black text-emerald-600">4</div>
-                        <div>
-                            <h4 className="mb-1 font-black text-slate-800">匿名分享與個資保護</h4>
-                            <p className="text-sm leading-6 text-slate-500">表單不要求姓名、電話或身分證字號。請勿在心得中填寫姓名、准考證號、聯絡方式、地址或任何可識別自己及他人的資訊。</p>
-                        </div>
-                    </div>
-                    <div className="flex gap-4 rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-sm font-black text-violet-600">5</div>
-                        <div>
-                            <h4 className="mb-1 font-black text-slate-800">使用者自行判斷</h4>
-                            <p className="text-sm leading-6 text-slate-500">平台不提供錄取保證，也不對依據資料所做的升學決策或其結果負責。請依個人成績、志願排序與正式規定審慎評估。</p>
-                        </div>
-                    </div>
-                 </div>
-              </div>
-
-              <div className="border-t border-slate-100 bg-slate-50 p-5 sm:px-8">
-                <button
-                    onClick={handleAcceptDisclaimer}
-                    className="group flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 py-3.5 text-sm font-black text-white shadow-lg shadow-slate-200 transition-all hover:bg-indigo-600 active:scale-[0.98]"
-                >
-                    <Check className="h-4 w-4" />
-                    我已了解，關閉說明
-                </button>
-              </div>
-           </div>
-        </div>
-      )}
+    <div className="font-sans text-slate-900 selection:bg-indigo-200 selection:text-indigo-900 overflow-x-hidden min-h-screen">
 
       {/* Share Modal */}
       <ShareModal 
         isOpen={showShareModal} 
         onClose={() => setShowShareModal(false)} 
       />
+
+      {showThankYouModal && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div
+            className="absolute inset-0 bg-slate-950/65 backdrop-blur-md"
+            onClick={() => setShowThankYouModal(false)}
+          />
+
+          <div className="relative w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/70 bg-white shadow-[0_32px_100px_-25px_rgba(15,23,42,0.6)] animate-in zoom-in-95 duration-300">
+            <div className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-indigo-50 p-7 text-center sm:p-9">
+              <div className="pointer-events-none absolute -right-12 -top-16 h-44 w-44 rounded-full border-[28px] border-emerald-100/70" />
+              <div className="pointer-events-none absolute -bottom-20 left-8 h-40 w-40 rounded-full bg-indigo-100/70 blur-3xl" />
+
+              <div className="relative z-10 mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-emerald-500 text-white shadow-xl shadow-emerald-200">
+                <Check className="h-8 w-8" />
+              </div>
+
+              <div className="relative z-10">
+                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-emerald-600">Submitted</p>
+                <h3 className="mt-2 text-3xl font-black tracking-tight text-slate-900">感謝你的分享</h3>
+                <p className="mx-auto mt-3 max-w-sm text-sm font-medium leading-6 text-slate-500">
+                  你的錄取資料已成功送出，會成為下一位考生判斷志願時很有用的參考。
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-3 border-t border-slate-100 bg-slate-50/70 p-4 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowThankYouModal(false);
+                  setActiveTab('form');
+                }}
+                className="rounded-2xl border border-slate-200 bg-white px-5 py-3 font-black text-slate-600 shadow-sm transition-colors hover:bg-slate-100"
+              >
+                再分享一筆
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowThankYouModal(false)}
+                className="rounded-2xl bg-indigo-600 px-5 py-3 font-black text-white shadow-lg shadow-indigo-200 transition-all hover:bg-indigo-700 active:scale-95"
+              >
+                查看分享資料
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Greeting Modal */}
       <GreetingModal />
@@ -388,7 +525,7 @@ const App: React.FC = () => {
             </div>
             <div className="flex flex-col">
                 <h1 className="text-lg sm:text-xl font-black text-slate-800 tracking-tight leading-none mb-0.5">
-                  會考落點<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">導航</span>
+                  會考錄取<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">分享平台</span>
                 </h1>
                 <p className="text-[10px] sm:text-xs font-bold text-slate-400 tracking-widest uppercase origin-left scale-90">CAP Score Sharing</p>
             </div>
@@ -464,7 +601,7 @@ const App: React.FC = () => {
         
         <div className="animate-in fade-in duration-700 slide-in-from-bottom-6">
             
-            {!isLoading && entries.length === 0 && activeTab !== 'guide' && (
+            {!isLoading && entries.length === 0 && !['guide', 'disclaimer', 'privacy'].includes(activeTab) && (
                  <div className="mb-8 bg-white/50 backdrop-blur-md border border-amber-200/60 rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left shadow-sm">
                     <div className="bg-amber-100 p-3 rounded-full text-amber-600">
                         <CloudOff className="w-6 h-6" />
@@ -640,6 +777,14 @@ const App: React.FC = () => {
                 <ScoreForm onSubmit={handleAddEntry} />
             </div>
             )}
+
+            {activeTab === 'disclaimer' && (
+              <DisclaimerPage onBack={handleAcceptDisclaimer} />
+            )}
+
+            {activeTab === 'privacy' && (
+              <PrivacyPage onBack={() => handleTabChange('list')} />
+            )}
         </div>
       </main>
       
@@ -661,14 +806,14 @@ const App: React.FC = () => {
 
                 <div className="flex gap-4 sm:gap-6">
                     <button 
-                         onClick={() => setShowDisclaimer(true)}
+                         onClick={() => handleTabChange('disclaimer')}
                          className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors"
                     >
                         <ShieldAlert className="w-4 h-4" />
                         <span>免責聲明</span>
                     </button>
                     <button 
-                         onClick={() => setShowPrivacyPolicy(true)}
+                         onClick={() => handleTabChange('privacy')}
                          className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors"
                     >
                         <Shield className="w-4 h-4" />
@@ -685,83 +830,6 @@ const App: React.FC = () => {
         </div>
       </footer>
 
-      {/* Privacy Policy Modal */}
-      {showPrivacyPolicy && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
-           {/* Backdrop */}
-           <div 
-             className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" 
-             onClick={() => setShowPrivacyPolicy(false)}
-           />
-           
-           {/* Modal Card */}
-           <div className="relative bg-white w-full max-w-2xl max-h-[85vh] flex flex-col rounded-[2rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-200">
-              {/* Header */}
-              <div className="bg-slate-50 p-6 sm:p-8 flex items-start justify-between border-b border-slate-100 flex-shrink-0">
-                 <div>
-                    <div className="flex items-center gap-3 mb-2">
-                       <div className="p-2 bg-indigo-100 text-indigo-600 rounded-xl">
-                          <Shield className="w-6 h-6" />
-                       </div>
-                       <h3 className="text-slate-800 text-2xl font-black">
-                          隱私權與版權聲明
-                       </h3>
-                    </div>
-                    <p className="text-slate-500 font-medium text-sm">Privacy Policy & Copyright Declaration</p>
-                 </div>
-                 <button 
-                    onClick={() => setShowPrivacyPolicy(false)}
-                    className="p-2.5 bg-white hover:bg-slate-200 text-slate-500 rounded-full transition-colors border border-slate-200"
-                 >
-                    <X className="w-5 h-5" />
-                 </button>
-              </div>
-
-              {/* Body */}
-              <div className="p-6 sm:p-8 space-y-8 bg-white overflow-y-auto">
-                 <section className="space-y-3">
-                    <h4 className="font-black text-lg text-slate-800 border-l-4 border-indigo-500 pl-3">1. 資料蒐集與使用</h4>
-                    <p className="text-sm text-slate-500 leading-relaxed pl-4">
-                        本平台（CAP Score Sharing）為匿名性質的資料分享平台。當您填寫並送出分數分享表單時，我們僅蒐集您自願提供的考試成績、錄取學校、就讀區域及經驗分享等資訊。
-                        我們<span className="font-bold text-rose-500">不會蒐集</span>您的姓名、身分證字號、聯絡方式或任何可直接識別您身分的個人資料。
-                    </p>
-                 </section>
-                 
-                 <section className="space-y-3">
-                    <h4 className="font-black text-lg text-slate-800 border-l-4 border-indigo-500 pl-3">2. Cookie 及網頁儲存區 (Local Storage)</h4>
-                    <p className="text-sm text-slate-500 leading-relaxed pl-4">
-                        為了提供更好的使用者體驗，本網站會使用 Local Storage 來儲存您的「收藏名單」以及「已閱讀免責聲明」之狀態。這些資料僅存放於您的瀏覽器中，本平台伺服器不會主動獲取此資料。
-                    </p>
-                 </section>
-
-                 <section className="space-y-3">
-                    <h4 className="font-black text-lg text-slate-800 border-l-4 border-rose-500 pl-3">3. 數據準確性與風險承擔</h4>
-                    <p className="text-sm text-slate-500 leading-relaxed pl-4">
-                        本平台展示之歷年落點數據均來自熱心考生的自主回報，<span className="font-bold text-rose-500">並非官方正式公告</span>。我們無法保證每一筆數據的絕對準確性與最新狀態。
-                        使用者在選填志願或進行升學決策時，請務必多方查證、參考各校官方網站，並承擔使用本平台資訊的相關風險。本平台對因使用數據而造成的任何直接或間接損失概不負責。
-                    </p>
-                 </section>
-
-                 <section className="space-y-3">
-                    <h4 className="font-black text-lg text-slate-800 border-l-4 border-indigo-500 pl-3">4. 版權聲明 (Copyright)</h4>
-                    <p className="text-sm text-slate-500 leading-relaxed pl-4">
-                        本網站的原始程式碼、介面設計、網站架構皆受相關智慧財產權保護。如需引用、修改或二次發布，請註明資料來源「TYCTW會考落點分享平台」。
-                    </p>
-                 </section>
-              </div>
-
-              {/* Footer */}
-              <div className="p-6 bg-slate-50 border-t border-slate-100 flex-shrink-0">
-                 <button
-                     onClick={() => setShowPrivacyPolicy(false)}
-                     className="w-full sm:w-auto sm:ml-auto block px-8 py-3 bg-slate-900 hover:bg-indigo-600 text-white font-bold rounded-xl transition-colors text-center"
-                 >
-                     我了解了
-                 </button>
-              </div>
-           </div>
-        </div>
-      )}
     </div>
   );
 };

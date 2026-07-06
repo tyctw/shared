@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ScoreEntry } from '../types';
+import { ScoreEntry, StudentIdentity } from '../types';
 import { REGIONS, YEARS } from '../constants';
-import { MapPin, Search, Sparkles, Share2, Check, Calendar, Quote, School, ChevronLeft, ChevronRight, Heart, Filter, ChevronDown, RefreshCw, RotateCcw, MailWarning } from 'lucide-react';
+import { MapPin, Search, Sparkles, Share2, Check, Calendar, Quote, School, ChevronLeft, ChevronRight, Heart, Filter, ChevronDown, RefreshCw, RotateCcw, MailWarning, UsersRound } from 'lucide-react';
 
 interface ScoreListProps {
   entries: ScoreEntry[];
@@ -21,6 +21,20 @@ const SUBJECT_LABELS: Record<string, string> = {
 };
 
 const REPORT_EMAIL = import.meta.env.VITE_REPORT_EMAIL || 'tyctw.analyze@gmail.com';
+
+const STUDENT_IDENTITY_FILTERS: StudentIdentity[] = [
+  '一般生',
+  '低收入戶生',
+  '中低收入戶生',
+  '直系血親尊親屬支領失業給付者',
+  '身心障礙生',
+  '原住民生',
+  '僑生',
+  '蒙藏生',
+  '政府派赴國外工作人員子女',
+  '境外優秀科學技術人才子女',
+  '退伍軍人',
+];
 
 const getGradeStyle = (grade: string) => {
   if (grade === 'A++') return 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 text-amber-600 shadow-sm shadow-amber-100';
@@ -64,6 +78,7 @@ const ScoreSkeleton = () => (
 const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds = [], toggleFavorite, onRefresh, isRefreshing }) => {
   const [filterRegion, setFilterRegion] = useState<string>('All');
   const [filterYear, setFilterYear] = useState<string>('All');
+  const [filterStudentIdentity, setFilterStudentIdentity] = useState<string>('All');
   const [filterSchool, setFilterSchool] = useState<string>('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -89,6 +104,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
   const clearFilters = () => {
     setFilterRegion('All');
     setFilterYear('All');
+    setFilterStudentIdentity('All');
     setFilterSchool('');
     setGroupBySchool(false);
     setCurrentPage(1);
@@ -112,7 +128,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filterRegion, filterYear, filterSchool, itemsPerPage, groupBySchool]);
+  }, [filterRegion, filterYear, filterStudentIdentity, filterSchool, itemsPerPage, groupBySchool]);
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
@@ -126,8 +142,11 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
   const filteredEntries = entries.filter(entry => {
     const matchRegion = filterRegion === 'All' || entry.region === filterRegion;
     const matchYear = filterYear === 'All' || entry.year === Number(filterYear);
+    const matchStudentIdentity =
+      filterStudentIdentity === 'All' ||
+      (entry.studentIdentity ?? '一般生') === filterStudentIdentity;
     const matchSchool = entry.school.includes(filterSchool);
-    return matchRegion && matchYear && matchSchool;
+    return matchRegion && matchYear && matchStudentIdentity && matchSchool;
   });
 
   const sortedEntries = [...filteredEntries];
@@ -210,7 +229,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
                     <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_0_4px_rgba(52,211,153,0.16)]" />
                     {!isLoading ? `找到 ${filteredEntries.length} 筆資料` : '載入中...'}
                   </span>
-                  {(filterRegion !== 'All' || filterYear !== 'All' || filterSchool || groupBySchool) && (
+                  {(filterRegion !== 'All' || filterYear !== 'All' || filterStudentIdentity !== 'All' || filterSchool || groupBySchool) && (
                     <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-indigo-600">已套用篩選</span>
                   )}
                 </div>
@@ -218,7 +237,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
             </div>
 
             <div className="flex gap-2">
-              {(filterRegion !== 'All' || filterYear !== 'All' || filterSchool || groupBySchool) && (
+              {(filterRegion !== 'All' || filterYear !== 'All' || filterStudentIdentity !== 'All' || filterSchool || groupBySchool) && (
                 <button
                   type="button"
                   onClick={clearFilters}
@@ -243,7 +262,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
             </div>
           </div>
 
-          <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(260px,1fr)_180px_180px_170px]">
+          <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(220px,1fr)_160px_170px_180px_150px]">
             <div className="group relative">
               <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-indigo-500" />
               <input
@@ -282,12 +301,30 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
               <ChevronDown className="h-4 w-4 shrink-0 text-slate-400" />
             </button>
 
+            <div className="relative">
+              <UsersRound className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <select
+                value={filterStudentIdentity}
+                onChange={(e) => setFilterStudentIdentity(e.target.value)}
+                className="h-14 w-full appearance-none rounded-2xl border border-slate-200 bg-white pl-11 pr-10 text-sm font-black text-slate-700 shadow-sm outline-none transition-all hover:border-indigo-200 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10"
+              >
+                <option value="All">所有身分</option>
+                {STUDENT_IDENTITY_FILTERS.map(identity => (
+                  <option key={identity} value={identity}>{identity}</option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            </div>
+
             <label className={`flex h-14 cursor-pointer items-center justify-between gap-3 rounded-2xl border px-4 text-sm font-black shadow-sm transition-all active:scale-[0.98] ${
               groupBySchool
                 ? 'border-indigo-200 bg-indigo-50 text-indigo-700'
                 : 'border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:text-indigo-700'
             }`}>
-              <span className="truncate">同校分組</span>
+              <span className="flex min-w-0 items-center gap-2">
+                <School className={`h-4 w-4 shrink-0 ${groupBySchool ? 'text-indigo-600' : 'text-slate-400'}`} />
+                <span className="truncate">同校分組</span>
+              </span>
               <span className={`relative h-6 w-11 rounded-full transition-colors ${groupBySchool ? 'bg-indigo-600' : 'bg-slate-200'}`}>
                 <input
                   type="checkbox"
@@ -337,7 +374,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
                 或使用其他學校關鍵字搜尋。
               </p>
 
-              {(filterRegion !== 'All' || filterYear !== 'All' || filterSchool || groupBySchool) && (
+              {(filterRegion !== 'All' || filterYear !== 'All' || filterStudentIdentity !== 'All' || filterSchool || groupBySchool) && (
                 <button
                   type="button"
                   onClick={clearFilters}

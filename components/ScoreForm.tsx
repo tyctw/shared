@@ -48,6 +48,8 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
   const [isManualSchool, setIsManualSchool] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isStudentIdentityConfirmOpen, setIsStudentIdentityConfirmOpen] = useState(false);
+  const [pendingStudentIdentity, setPendingStudentIdentity] = useState<StudentIdentity | null>(null);
   const [isSchoolModalOpen, setIsSchoolModalOpen] = useState(false);
   const [searchSchoolTerm, setSearchSchoolTerm] = useState('');
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
@@ -106,6 +108,31 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
 
   const handleChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleStudentIdentityChange = (identity: StudentIdentity) => {
+    if (identity === '一般生') {
+      setPendingStudentIdentity(null);
+      setIsStudentIdentityConfirmOpen(false);
+      handleChange('studentIdentity', identity);
+      return;
+    }
+
+    setPendingStudentIdentity(identity);
+    setIsStudentIdentityConfirmOpen(true);
+  };
+
+  const confirmStudentIdentityChange = () => {
+    if (pendingStudentIdentity) {
+      handleChange('studentIdentity', pendingStudentIdentity);
+    }
+    setPendingStudentIdentity(null);
+    setIsStudentIdentityConfirmOpen(false);
+  };
+
+  const cancelStudentIdentityChange = () => {
+    setPendingStudentIdentity(null);
+    setIsStudentIdentityConfirmOpen(false);
   };
 
   const allDepartments = React.useMemo(() => {
@@ -371,7 +398,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
                     <div className={selectWrapperClass}>
                         <select
                             value={formData.studentIdentity}
-                            onChange={(e) => handleChange('studentIdentity', e.target.value as StudentIdentity)}
+                            onChange={(e) => handleStudentIdentityChange(e.target.value as StudentIdentity)}
                             className={`${inputClass} cursor-pointer`}
                         >
                             {STUDENT_IDENTITIES.map(identity => (
@@ -574,6 +601,66 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
 
       </form>
 
+      {/* Student Identity Confirmation Modal */}
+      {isStudentIdentityConfirmOpen && pendingStudentIdentity && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200">
+           <div
+             className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+             onClick={cancelStudentIdentityChange}
+           />
+
+           <div className="relative w-full max-w-md overflow-hidden rounded-[2rem] bg-white shadow-2xl animate-in zoom-in-95 duration-200">
+              <div className="relative overflow-hidden bg-[#11132b] px-6 py-6 text-white">
+                 <div className="pointer-events-none absolute -right-12 -top-16 h-40 w-40 rounded-full bg-amber-400/25 blur-3xl"></div>
+                 <div className="pointer-events-none absolute -bottom-20 left-8 h-40 w-40 rounded-full bg-indigo-500/20 blur-3xl"></div>
+
+                 <div className="relative z-10 flex items-center gap-3">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-amber-200 ring-1 ring-white/15">
+                       <ShieldCheck className="h-6 w-6" />
+                    </div>
+                    <div className="min-w-0">
+                       <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-200">Identity check</p>
+                       <h3 className="mt-1 text-2xl font-black tracking-tight">確認考生身分</h3>
+                       <p className="mt-1 text-xs font-medium text-slate-300">特殊身分送出前需要再次確認。</p>
+                    </div>
+                 </div>
+              </div>
+
+              <div className="space-y-4 p-5 text-center sm:p-6">
+                 <span className="inline-flex max-w-full items-center justify-center rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 px-5 py-3 text-base font-black text-amber-700 shadow-sm shadow-amber-100">
+                    {pendingStudentIdentity}
+                 </span>
+
+                 <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 text-left">
+                    <p className="text-sm font-bold leading-6 text-slate-700">
+                       請確認這是你的實際考生身分。
+                    </p>
+                    <p className="mt-1 text-xs font-medium leading-5 text-slate-500">
+                       特殊身分可能影響錄取結果判讀，若選錯會讓後續考生參考時產生誤差。
+                    </p>
+                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 border-t border-slate-100 bg-white/95 p-4 shadow-[0_-12px_30px_-24px_rgba(15,23,42,0.45)]">
+                 <button
+                    type="button"
+                    onClick={cancelStudentIdentityChange}
+                    className="rounded-2xl border border-slate-200 bg-white py-3 font-black text-slate-600 transition-colors hover:bg-slate-50"
+                 >
+                    返回
+                 </button>
+                 <button
+                    type="button"
+                    onClick={confirmStudentIdentityChange}
+                    className="rounded-2xl bg-amber-500 py-3 font-black text-white shadow-lg shadow-amber-200 transition-all hover:bg-amber-600 active:scale-95"
+                 >
+                    確認選擇
+                 </button>
+              </div>
+           </div>
+        </div>
+      )}
+
       {/* Confirmation Modal */}
       {isConfirmModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
@@ -584,85 +671,109 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
            />
            
            {/* Modal Card */}
-           <div className="relative bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-              <div className="bg-slate-800 p-6 text-center">
-                 <h3 className="text-white text-xl font-bold flex justify-center items-center gap-2">
-                    <ShieldCheck className="w-5 h-5 text-emerald-400" />
-                    確認資料正確
-                 </h3>
-                 <p className="text-slate-400 text-sm mt-1">請再次核對，送出後無法修改</p>
+           <div className="relative flex max-h-[calc(100dvh-1rem)] w-full max-w-2xl flex-col overflow-hidden rounded-[1.5rem] bg-white shadow-2xl animate-in zoom-in-95 duration-200 sm:rounded-[2rem]">
+              <div className="relative shrink-0 overflow-hidden bg-[#11132b] px-4 py-3 text-white sm:px-6 sm:py-4">
+                 <div className="pointer-events-none absolute -right-14 -top-20 h-44 w-44 rounded-full bg-indigo-500/30 blur-3xl"></div>
+                 <div className="pointer-events-none absolute -bottom-20 left-10 h-40 w-40 rounded-full bg-emerald-400/20 blur-3xl"></div>
+
+                 <div className="relative z-10 flex items-center gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-emerald-300 ring-1 ring-white/15">
+                       <ShieldCheck className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                       <p className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-200">Final check</p>
+                       <h3 className="text-xl font-black tracking-tight sm:text-2xl">確認資料正確</h3>
+                       <p className="text-xs font-medium text-slate-300">請再次核對，送出後無法修改。</p>
+                    </div>
+                 </div>
               </div>
 
-              <div className="p-6 space-y-5">
-                 <div className="text-center space-y-1">
-                    <div className="inline-block px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-bold rounded-full mb-1">
-                        {formData.year} 年 • {formData.region}
+              <div className="min-h-0 flex-1 space-y-2 overflow-hidden p-3 sm:space-y-3 sm:p-4">
+                 <section className="rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-slate-50 p-3 sm:p-4">
+                    <div className="mb-2 flex flex-wrap items-center gap-1.5">
+                       <span className="inline-flex items-center gap-1 rounded-lg bg-white px-2 py-1 text-[10px] font-black text-indigo-600 shadow-sm ring-1 ring-indigo-100">
+                          <MapPin className="h-3.5 w-3.5" />
+                          {formData.region}
+                       </span>
+                       <span className="inline-flex rounded-lg bg-slate-900 px-2 py-1 text-[10px] font-black text-white shadow-sm">
+                          {formData.year} 年
+                       </span>
+                       <span className="inline-flex rounded-lg bg-white px-2 py-1 text-[10px] font-black text-slate-600 shadow-sm ring-1 ring-slate-200">
+                          {formData.studentIdentity}
+                       </span>
                     </div>
-                    <h4 className="text-2xl font-black text-slate-800 leading-tight">{formData.school}</h4>
-                    <p className="text-slate-500 font-medium">{formData.department}</p>
-                    <p className="text-xs font-bold text-indigo-500">{formData.studentIdentity}</p>
-                 </div>
 
-                 {/* Mini Score Grid */}
-                 <div className="grid grid-cols-6 gap-1 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                    {(['chinese', 'english', 'math', 'nature', 'social', 'writing'] as const).map((key) => {
-                        const isWriting = key === 'writing';
-                        const val = formData.scores[key] as any;
-                        let textClass = 'text-slate-700';
-                        if (isWriting) {
-                            if (val === 6) textClass = 'text-rose-500';
-                            else if (val === 5) textClass = 'text-fuchsia-500';
-                        } else {
-                            if (val === 'A++') textClass = 'text-amber-500';
-                            else if (val === 'A+') textClass = 'text-emerald-500';
-                            else if (val === 'A') textClass = 'text-indigo-500';
-                        }
-                        
-                        return (
-                            <div key={key} className="text-center">
-                                <div className="text-[10px] text-slate-400 uppercase font-bold mb-0.5">
-                                    {key === 'chinese' ? '國' : key === 'english' ? '英' : key === 'math' ? '數' : key === 'nature' ? '自' : key === 'social' ? '社' : '作'}
-                                </div>
-                                <div className={`font-mono font-black text-lg ${textClass}`}>
-                                    {val}{isWriting ? '級' : ''}
-                                </div>
-                            </div>
-                        );
-                    })}
-                 </div>
+                    <h4 className="truncate text-lg font-black leading-tight tracking-tight text-slate-900 sm:text-xl">{formData.school}</h4>
+                    <div className="mt-2 flex max-w-full items-center gap-2 rounded-xl bg-white px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm ring-1 ring-slate-200 sm:text-sm">
+                       <School className="h-3.5 w-3.5 shrink-0 text-indigo-500" />
+                       <span className="min-w-0 truncate">{formData.department}</span>
+                    </div>
+                 </section>
 
-                 <div className="flex gap-4">
-                     <div className="flex-1 bg-indigo-50 p-3 rounded-xl border border-indigo-100 flex flex-col items-center">
-                        <span className="text-xs font-bold text-indigo-400 uppercase">總積分</span>
-                        <span className="text-2xl font-black text-indigo-600">{formData.totalPoints}</span>
-                     </div>
-                     {formData.totalCredits && (
-                        <div className="flex-1 bg-amber-50 p-3 rounded-xl border border-amber-100 flex flex-col items-center">
-                            <span className="text-xs font-bold text-amber-400 uppercase">總積點</span>
-                            <span className="text-2xl font-black text-amber-600">{formData.totalCredits}</span>
-                        </div>
-                     )}
-                 </div>
-                 
+                 <section className="rounded-2xl border border-slate-100 bg-white p-3 shadow-sm">
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                       <h5 className="text-xs font-black text-slate-700 sm:text-sm">會考成績</h5>
+                       <span className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Scores</span>
+                    </div>
+                    <div className="grid grid-cols-6 gap-1.5">
+                       {(['chinese', 'english', 'math', 'nature', 'social', 'writing'] as const).map((key) => {
+                           const isWriting = key === 'writing';
+                           const val = formData.scores[key] as any;
+                           let boxClass = 'border-slate-200 bg-slate-50 text-slate-700';
+                           if (isWriting) {
+                               if (val === 6) boxClass = 'border-rose-200 bg-rose-50 text-rose-600';
+                               else if (val === 5) boxClass = 'border-fuchsia-200 bg-fuchsia-50 text-fuchsia-600';
+                           } else {
+                               if (val === 'A++') boxClass = 'border-amber-200 bg-amber-50 text-amber-600';
+                               else if (val === 'A+') boxClass = 'border-emerald-200 bg-emerald-50 text-emerald-600';
+                               else if (val === 'A') boxClass = 'border-indigo-200 bg-indigo-50 text-indigo-600';
+                           }
+
+                           return (
+                               <div key={key} className={`rounded-xl border px-1 py-2 text-center ${boxClass}`}>
+                                  <div className="mb-1 text-[9px] font-black leading-none opacity-60">
+                                      {key === 'chinese' ? '國' : key === 'english' ? '英' : key === 'math' ? '數' : key === 'nature' ? '自' : key === 'social' ? '社' : '作'}
+                                  </div>
+                                  <div className="whitespace-nowrap font-mono text-sm font-black leading-none sm:text-base">
+                                      {val}{isWriting ? '級' : ''}
+                                  </div>
+                               </div>
+                           );
+                       })}
+                    </div>
+                 </section>
+
+                 <section className="grid grid-cols-2 gap-2">
+                    <div className="rounded-2xl border border-indigo-100 bg-indigo-50 p-3">
+                       <span className="text-[10px] font-black uppercase tracking-[0.18em] text-indigo-400">總積分</span>
+                       <strong className="block text-2xl font-black tracking-tight text-indigo-700 sm:text-3xl">{formData.totalPoints}</strong>
+                    </div>
+                    <div className="rounded-2xl border border-amber-100 bg-amber-50 p-3">
+                       <span className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-500">總積點</span>
+                       <strong className="block text-2xl font-black tracking-tight text-amber-600 sm:text-3xl">{formData.totalCredits || '—'}</strong>
+                    </div>
+                 </section>
+
                  {formData.notes && (
-                    <div className="text-sm text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100 italic">
-                        "{formData.notes}"
-                    </div>
+                    <section className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
+                       <h5 className="mb-1 text-xs font-black text-slate-700">附加說明</h5>
+                       <p className="max-h-10 overflow-hidden break-words text-xs font-medium leading-5 text-slate-600">{formData.notes}</p>
+                    </section>
                  )}
               </div>
 
-              <div className="p-4 border-t border-slate-100 grid grid-cols-2 gap-3 bg-slate-50/50">
+              <div className="grid shrink-0 grid-cols-2 gap-2 border-t border-slate-100 bg-white/95 p-3 shadow-[0_-12px_30px_-24px_rgba(15,23,42,0.45)]">
                  <button
                     type="button"
                     onClick={() => setIsConfirmModalOpen(false)}
-                    className="py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-colors"
+                    className="rounded-2xl border border-slate-200 bg-white py-2.5 text-sm font-black text-slate-600 transition-colors hover:bg-slate-50 sm:py-3"
                  >
                     返回修改
                  </button>
                  <button
                     type="button"
                     onClick={handleFinalSubmit}
-                    className="py-3 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all active:scale-95 flex items-center justify-center gap-2"
+                    className="flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 py-2.5 text-sm font-black text-white shadow-lg shadow-indigo-200 transition-all hover:bg-indigo-700 active:scale-95 sm:py-3"
                  >
                     確認送出 <Send className="w-4 h-4" />
                  </button>
