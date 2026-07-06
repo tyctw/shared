@@ -341,9 +341,9 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 relative z-10">
                 {/* Year */}
                 <div className="md:col-span-3 space-y-1">
-                    <label className={labelClass}>會考年份</label>
+                    <label htmlFor="entry-year" className={labelClass}>會考年份</label>
                     <div className={selectWrapperClass}>
-                        <select value={formData.year} onChange={(e) => handleChange('year', Number(e.target.value))} className={`${inputClass} cursor-pointer`}>
+                        <select id="entry-year" value={formData.year} onChange={(e) => handleChange('year', Number(e.target.value))} className={`${inputClass} cursor-pointer`}>
                             {YEARS.map(y => <option key={y} value={y}>{y} 年</option>)}
                         </select>
                         <ChevronDown className={selectArrowClass} />
@@ -374,13 +374,16 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
                 <>
                 {/* Region */}
                 <div className="md:col-span-4 space-y-1">
-                    <label className={labelClass}>所屬區域</label>
+                    <label id="entry-region-label" className={labelClass}>所屬區域</label>
                     <button
                         type="button"
                         onClick={() => {
                             setRegionSearchTerm('');
                             setIsRegionModalOpen(true);
                         }}
+                        aria-labelledby="entry-region-label"
+                        aria-haspopup="dialog"
+                        aria-expanded={isRegionModalOpen}
                         className={`${inputClass} text-left flex items-center justify-between group/btn`}
                     >
                         <span className={formData.region ? 'text-slate-700' : 'text-slate-400'}>
@@ -393,14 +396,14 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
                 {/* School */}
                 <div className="md:col-span-5 space-y-1">
                     <div className="flex justify-between items-center mb-2">
-                        <label className="text-sm font-bold text-slate-600 flex items-center gap-1.5">錄取學校 <span className="text-rose-500">*</span></label>
+                        <label htmlFor="entry-school" id="entry-school-label" className="text-sm font-bold text-slate-600 flex items-center gap-1.5">錄取學校 <span className="text-rose-500">*</span></label>
                         <button type="button" onClick={() => { setIsManualSchool(!isManualSchool); if(!isManualSchool) setFormData(prev => ({...prev, school: ''})); }} className="text-[11px] text-indigo-500 hover:text-indigo-700 font-semibold underline transition-colors">
                             {isManualSchool ? '返回選單' : '找不到學校？'}
                         </button>
                     </div>
 
                     {isManualSchool ? (
-                         <input type="text" value={formData.school} onChange={(e) => handleChange('school', e.target.value)} placeholder="例：建國中學" className={inputClass} autoFocus />
+                         <input id="entry-school" type="text" value={formData.school} onChange={(e) => handleChange('school', e.target.value)} placeholder="例：建國中學" className={inputClass} autoFocus aria-required="true" />
                     ) : (
                         <button
                             type="button"
@@ -408,6 +411,9 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
                                 setSearchSchoolTerm('');
                                 setIsSchoolModalOpen(true);
                             }}
+                            aria-labelledby="entry-school-label"
+                            aria-haspopup="dialog"
+                            aria-expanded={isSchoolModalOpen}
                             className={`${inputClass} text-left flex items-center justify-between group/btn`}
                         >
                             <span className={formData.school ? 'text-slate-700' : 'text-slate-400'}>
@@ -420,9 +426,10 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
 
                 {/* Student Identity */}
                 <div className="md:col-span-12 space-y-1">
-                    <label className={labelClass}>考生身分</label>
+                    <label htmlFor="entry-student-identity" className={labelClass}>考生身分</label>
                     <div className={selectWrapperClass}>
                         <select
+                            id="entry-student-identity"
                             value={formData.studentIdentity}
                             onChange={(e) => handleStudentIdentityChange(e.target.value as StudentIdentity)}
                             className={`${inputClass} cursor-pointer`}
@@ -440,7 +447,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
                      {/* Department */}
                      <div className="space-y-1">
                         <div className="mb-2 flex min-h-[20px] items-center justify-between">
-                             <label className="flex items-center gap-1.5 text-[13px] font-black text-slate-600">科系/班別 <span className="text-rose-500">*</span></label>
+                             <label htmlFor="entry-department" id="entry-department-label" className="flex items-center gap-1.5 text-[13px] font-black text-slate-600">科系/班別 <span className="text-rose-500">*</span></label>
                              {!isManualDept && (
                                 <button type="button" onClick={() => { setIsManualDept(true); handleDepartmentChange('', true); }} className="text-[11px] text-indigo-500 hover:text-indigo-700 font-semibold underline">自行輸入</button>
                             )}
@@ -450,7 +457,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
                         </div>
                         
                         {isManualDept ? (
-                            <input type="text" value={formData.department} onChange={(e) => handleDepartmentChange(e.target.value, true)} placeholder="輸入科系名稱" className={inputClass} />
+                            <input id="entry-department" type="text" value={formData.department} onChange={(e) => handleDepartmentChange(e.target.value, true)} placeholder="輸入科系名稱" className={inputClass} aria-required="true" />
                         ) : (
                             <button
                                 type="button"
@@ -458,6 +465,9 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
                                     setDeptSearchTerm('');
                                     setIsDeptModalOpen(true);
                                 }}
+                                aria-labelledby="entry-department-label"
+                                aria-haspopup="dialog"
+                                aria-expanded={isDeptModalOpen}
                                 className={`${inputClass} text-left flex items-center justify-between group/btn`}
                             >
                                 <span className={formData.department ? 'text-slate-700' : 'text-slate-400'}>
@@ -471,10 +481,10 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
                      {/* Group */}
                      <div className="space-y-1">
                         <div className="mb-2 flex min-h-[20px] items-center justify-between">
-                            <label className="flex items-center gap-1.5 text-[13px] font-black text-slate-600">群別分類</label>
+                            <span className="flex items-center gap-1.5 text-[13px] font-black text-slate-600">群別分類</span>
                             <span className="text-[11px] font-semibold text-slate-400">自動判斷</span>
                         </div>
-                        <div className={`${inputClass} flex items-center justify-between bg-slate-50 text-left`}>
+                        <div className={`${inputClass} flex items-center justify-between bg-slate-50 text-left`} role="status" aria-live="polite">
                             <span className={selectedGroup ? 'text-slate-700' : 'text-slate-400'}>
                                 {selectedGroup === 'custom' ? '其他 / 自行輸入' : selectedGroup || '選擇科系後自動帶入'}
                             </span>
@@ -508,11 +518,12 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-4">
                     {(['chinese', 'english', 'math', 'nature', 'social'] as const).map(subject => (
                     <div key={subject} className="flex flex-col gap-1.5">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">
+                        <label htmlFor={`score-${subject}`} className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">
                             {subject === 'chinese' ? '國文' : subject === 'english' ? '英文' : subject === 'math' ? '數學' : subject === 'nature' ? '自然' : '社會'}
                         </label>
                         <div className="relative group">
                             <select 
+                                id={`score-${subject}`}
                                 value={formData.scores[subject]} 
                                 onChange={(e) => handleScoreChange(subject, e.target.value)} 
                                 className={`w-full h-14 rounded-xl border-2 text-center font-mono font-black text-xl shadow-sm appearance-none cursor-pointer transition-all outline-none focus:ring-4 focus:ring-indigo-100 ${getGradeSelectStyle(formData.scores[subject])}`}
@@ -525,11 +536,12 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
                     </div>
                     ))}
                     <div className="flex flex-col gap-1.5">
-                         <label className="text-[10px] font-bold text-rose-400 uppercase tracking-widest text-center">
+                         <label htmlFor="score-writing" className="text-[10px] font-bold text-rose-400 uppercase tracking-widest text-center">
                             作文
                         </label>
                         <div className="relative group">
                             <select 
+                                id="score-writing"
                                 value={formData.scores.writing} 
                                 onChange={(e) => handleScoreChange('writing', Number(e.target.value))} 
                                 className={`w-full h-14 rounded-xl border-2 text-center font-mono font-black text-xl shadow-sm appearance-none cursor-pointer transition-all outline-none focus:ring-4 focus:ring-rose-100 ${getWritingSelectStyle(formData.scores.writing)}`}
@@ -549,10 +561,11 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
                 <div className="rounded-[1.5rem] border border-indigo-100 bg-gradient-to-br from-indigo-50 to-white p-4">
-                    <label className={labelClass}>
+                    <label htmlFor="total-points" className={labelClass}>
                         總積分
                     </label>
                     <input
+                        id="total-points"
                         type="number"
                         step="0.1"
                         value={formData.totalPoints}
@@ -563,10 +576,11 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
                 </div>
                 
                 <div className="rounded-[1.5rem] border border-amber-100 bg-gradient-to-br from-amber-50 to-white p-4">
-                     <label className={labelClass}>
+                     <label htmlFor="total-credits" className={labelClass}>
                         總積點
                      </label>
                     <input
+                        id="total-credits"
                         type="number"
                         step="0.1"
                         value={formData.totalCredits}
@@ -596,8 +610,9 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
 
             <div className="relative z-10 space-y-6">
                 <div>
-                    <label className={labelClass}>附加說明 (選填)</label>
+                    <label htmlFor="entry-notes" className={labelClass}>附加說明 (選填)</label>
                     <textarea 
+                        id="entry-notes"
                         rows={4} 
                         value={formData.notes} 
                         onChange={(e) => handleChange('notes', e.target.value)} 
@@ -635,7 +650,12 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
              onClick={cancelStudentIdentityChange}
            />
 
-           <div className="relative w-full max-w-md overflow-hidden rounded-[2rem] bg-white shadow-2xl animate-in zoom-in-95 duration-200">
+           <div
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="student-identity-confirm-title"
+             className="relative w-full max-w-md overflow-hidden rounded-[2rem] bg-white shadow-2xl animate-in zoom-in-95 duration-200"
+           >
               <div className="relative overflow-hidden bg-[#11132b] px-6 py-6 text-white">
                  <div className="pointer-events-none absolute -right-12 -top-16 h-40 w-40 rounded-full bg-amber-400/25 blur-3xl"></div>
                  <div className="pointer-events-none absolute -bottom-20 left-8 h-40 w-40 rounded-full bg-indigo-500/20 blur-3xl"></div>
@@ -646,7 +666,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
                     </div>
                     <div className="min-w-0">
                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-200">Identity check</p>
-                       <h3 className="mt-1 text-2xl font-black tracking-tight">確認考生身分</h3>
+                       <h3 id="student-identity-confirm-title" className="mt-1 text-2xl font-black tracking-tight">確認考生身分</h3>
                        <p className="mt-1 text-xs font-medium text-slate-300">特殊身分送出前需要再次確認。</p>
                     </div>
                  </div>
@@ -697,7 +717,12 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
            />
            
            {/* Modal Card */}
-           <div className="relative flex max-h-[calc(100dvh-1rem)] w-full max-w-2xl flex-col overflow-hidden rounded-[1.5rem] bg-white shadow-2xl animate-in zoom-in-95 duration-200 sm:rounded-[2rem]">
+           <div
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="confirm-entry-title"
+             className="relative flex max-h-[calc(100dvh-1rem)] w-full max-w-2xl flex-col overflow-hidden rounded-[1.5rem] bg-white shadow-2xl animate-in zoom-in-95 duration-200 sm:rounded-[2rem]"
+           >
               <div className="relative shrink-0 overflow-hidden bg-[#11132b] px-4 py-3 text-white sm:px-6 sm:py-4">
                  <div className="pointer-events-none absolute -right-14 -top-20 h-44 w-44 rounded-full bg-indigo-500/30 blur-3xl"></div>
                  <div className="pointer-events-none absolute -bottom-20 left-10 h-40 w-40 rounded-full bg-emerald-400/20 blur-3xl"></div>
@@ -708,7 +733,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
                     </div>
                     <div className="min-w-0 flex-1">
                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-200">Final check</p>
-                       <h3 className="text-xl font-black tracking-tight sm:text-2xl">確認資料正確</h3>
+                       <h3 id="confirm-entry-title" className="text-xl font-black tracking-tight sm:text-2xl">確認資料正確</h3>
                        <p className="text-xs font-medium text-slate-300">請再次核對，送出後無法修改。</p>
                     </div>
                  </div>
@@ -818,8 +843,14 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
            />
            
            {/* Modal Card */}
-           <div className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[80vh]">
+           <div
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="school-modal-title"
+             className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[80vh]"
+           >
               <div className="bg-slate-50 p-4 border-b border-slate-100 flex items-center gap-3">
+                 <h3 id="school-modal-title" className="sr-only">選擇錄取學校</h3>
                  <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <input
@@ -827,6 +858,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
                         value={searchSchoolTerm}
                         onChange={(e) => setSearchSchoolTerm(e.target.value)}
                         placeholder={`搜尋 ${formData.region} 的學校...`}
+                        aria-label="搜尋學校"
                         className="w-full bg-white border border-slate-200 focus:border-indigo-400 rounded-xl py-3 pl-10 pr-4 text-slate-700 outline-none focus:ring-4 focus:ring-indigo-100 transition-all font-medium placeholder:text-slate-400"
                     />
                  </div>
@@ -890,8 +922,14 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
              onClick={() => setIsGroupModalOpen(false)}
            />
-           <div className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[80vh]">
+           <div
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="group-modal-title"
+             className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[80vh]"
+           >
               <div className="bg-slate-50 p-4 border-b border-slate-100 flex items-center gap-3">
+                 <h3 id="group-modal-title" className="sr-only">選擇群別分類</h3>
                  <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <input
@@ -899,6 +937,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
                         value={groupSearchTerm}
                         onChange={(e) => setGroupSearchTerm(e.target.value)}
                         placeholder="搜尋群別..."
+                        aria-label="搜尋群別"
                         className="w-full bg-white border border-slate-200 focus:border-indigo-400 rounded-xl py-3 pl-10 pr-4 text-slate-700 outline-none focus:ring-4 focus:ring-indigo-100 transition-all font-medium placeholder:text-slate-400"
                     />
                  </div>
@@ -973,8 +1012,14 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
              onClick={() => setIsDeptModalOpen(false)}
            />
-           <div className="relative bg-white w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[84vh]">
+           <div
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="department-modal-title"
+             className="relative bg-white w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[84vh]"
+           >
               <div className="bg-slate-50 p-4 border-b border-slate-100 space-y-3">
+                 <h3 id="department-modal-title" className="sr-only">選擇科系或班別</h3>
                  <div className="flex items-center gap-3">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -983,6 +1028,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
                         value={deptSearchTerm}
                         onChange={(e) => setDeptSearchTerm(e.target.value)}
                         placeholder="搜尋科系或群別..."
+                        aria-label="搜尋科系或群別"
                         className="w-full bg-white border border-slate-200 focus:border-indigo-400 rounded-xl py-3 pl-10 pr-4 text-slate-700 outline-none focus:ring-4 focus:ring-indigo-100 transition-all font-medium placeholder:text-slate-400"
                     />
                   </div>
@@ -999,6 +1045,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
                       <button
                         key={group}
                         type="button"
+                        aria-pressed={currentDeptGroup === group && !deptSearchTerm}
                         onClick={() => {
                           setActiveDeptGroup(group);
                           setDeptSearchTerm('');
@@ -1021,6 +1068,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
                       <button
                         key={group}
                         type="button"
+                        aria-pressed={currentDeptGroup === group && !deptSearchTerm}
                         onClick={() => {
                           setActiveDeptGroup(group);
                           setDeptSearchTerm('');
@@ -1129,8 +1177,14 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
              onClick={() => setIsRegionModalOpen(false)}
            />
-           <div className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[80vh]">
+           <div
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="region-modal-title"
+             className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[80vh]"
+           >
               <div className="bg-slate-50 p-4 border-b border-slate-100 flex items-center gap-3">
+                 <h3 id="region-modal-title" className="sr-only">選擇所屬區域</h3>
                  <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <input
@@ -1138,6 +1192,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
                         value={regionSearchTerm}
                         onChange={(e) => setRegionSearchTerm(e.target.value)}
                         placeholder="搜尋區域..."
+                        aria-label="搜尋區域"
                         className="w-full bg-white border border-slate-200 focus:border-indigo-400 rounded-xl py-3 pl-10 pr-4 text-slate-700 outline-none focus:ring-4 focus:ring-indigo-100 transition-all font-medium placeholder:text-slate-400"
                     />
                  </div>
