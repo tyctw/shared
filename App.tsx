@@ -217,6 +217,7 @@ const App: React.FC = () => {
       return saved ? JSON.parse(saved) : [];
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showThankYouModal, setShowThankYouModal] = useState(false);
@@ -234,16 +235,23 @@ const App: React.FC = () => {
   // Extract data fetching logic to a reusable function
   const loadData = useCallback(async (isManualRefresh = false) => {
     setIsLoading(true);
+    setLoadError(null);
     if (isManualRefresh) {
         logUserAction('refresh_data', 'User Triggered');
     }
-    
-    const data = await fetchEntries();
-    
-    if (data.length > 0) {
-       data.sort((a, b) => b.timestamp - a.timestamp);
-       setEntries(data);
+
+    try {
+      const data = await fetchEntries();
+      data.sort((a, b) => b.timestamp - a.timestamp);
+      setEntries(data);
+    } catch (error) {
+      const message = error instanceof Error
+        ? error.message
+        : '資料載入失敗，請稍後再試。';
+      setLoadError(message);
+      logUserAction('load_data_failed', message);
     }
+
     // Add a small artificial delay for better UX (skeleton visibility)
     setTimeout(() => setIsLoading(false), 800);
   }, []);
@@ -256,13 +264,16 @@ const App: React.FC = () => {
 
   const handleAcceptDisclaimer = () => {
     localStorage.setItem('cap_disclaimer_accepted', 'true');
-    setActiveTab('list');
+    handleTabChange('list');
     logUserAction('accept_disclaimer', 'agreed');
   };
 
   const handleTabChange = (tab: typeof activeTab) => {
     setActiveTab(tab);
     logUserAction('tab_change', tab);
+    window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
   };
 
   const handleAddEntry = async (newEntry: Omit<ScoreEntry, 'id' | 'timestamp'>) => {
@@ -279,7 +290,7 @@ const App: React.FC = () => {
     const success = await submitEntry(entry);
     if (success) {
       setEntries(prev => [entry, ...prev]);
-      setActiveTab('list');
+      handleTabChange('list');
       setShowThankYouModal(true);
       return;
     }
@@ -364,7 +375,7 @@ const App: React.FC = () => {
                 type="button"
                 onClick={() => {
                   setShowThankYouModal(false);
-                  setActiveTab('form');
+                  handleTabChange('form');
                 }}
                 className="rounded-2xl border border-slate-200 bg-white px-5 py-3 font-black text-slate-600 shadow-sm transition-colors hover:bg-slate-100"
               >
@@ -601,16 +612,40 @@ const App: React.FC = () => {
         
         <div className="animate-in fade-in duration-700 slide-in-from-bottom-6">
             
-            {!isLoading && entries.length === 0 && !['guide', 'disclaimer', 'privacy'].includes(activeTab) && (
+            {!isLoading && loadError && !['guide', 'disclaimer', 'privacy'].includes(activeTab) && (
+                 <div className="mb-8 overflow-hidden rounded-2xl border border-rose-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-md">
+                    <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
+                      <div className="bg-rose-100 p-3 rounded-full text-rose-600">
+                          <CloudOff className="w-6 h-6" />
+                      </div>
+                      <div className="flex-1">
+                          <h4 className="font-black text-slate-800 text-lg">資料載入失敗</h4>
+                          <p className="mt-1 text-sm font-medium leading-6 text-slate-500">
+                              {loadError}
+                          </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => loadData(true)}
+                        className="inline-flex items-center justify-center gap-2 rounded-2xl bg-rose-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-rose-100 transition-all hover:bg-rose-700 active:scale-[0.98]"
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                        重新載入
+                      </button>
+                    </div>
+                 </div>
+            )}
+
+            {!isLoading && !loadError && entries.length === 0 && !['guide', 'disclaimer', 'privacy'].includes(activeTab) && (
                  <div className="mb-8 bg-white/50 backdrop-blur-md border border-amber-200/60 rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left shadow-sm">
                     <div className="bg-amber-100 p-3 rounded-full text-amber-600">
                         <CloudOff className="w-6 h-6" />
                     </div>
                     <div>
-                        <h4 className="font-bold text-slate-800 text-lg">尚未載入資料</h4>
+                        <h4 className="font-bold text-slate-800 text-lg">目前沒有資料</h4>
                         <p className="text-slate-500 text-sm mt-1">
-                            可能是 Google Sheet 為空，或是尚未設定 API URL。<br className="hidden sm:block"/>
-                            請檢查您的 App Script 部署狀態。
+                            資料庫目前沒有可顯示的錄取分享。<br className="hidden sm:block"/>
+                            歡迎成為第一位分享者。
                         </p>
                     </div>
                  </div>
