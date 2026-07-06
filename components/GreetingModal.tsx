@@ -20,7 +20,7 @@ export default function GreetingModal() {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[90] flex items-end justify-center p-0 sm:items-center sm:p-5 animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 sm:p-5 animate-in fade-in duration-300">
       <button
         type="button"
         onClick={handleClose}
@@ -32,7 +32,7 @@ export default function GreetingModal() {
         role="dialog"
         aria-modal="true"
         aria-labelledby="greeting-title"
-        className="relative w-full max-w-xl overflow-hidden rounded-t-[2.25rem] border border-white/80 bg-white text-slate-900 shadow-[0_35px_90px_-35px_rgba(15,23,42,0.32)] ring-1 ring-slate-200/70 animate-in slide-in-from-bottom-8 duration-500 sm:rounded-[2.5rem] sm:zoom-in-95"
+        className="relative w-full max-w-xl overflow-hidden rounded-[2.25rem] border border-white/80 bg-white text-slate-900 shadow-[0_35px_90px_-35px_rgba(15,23,42,0.32)] ring-1 ring-slate-200/70 animate-in zoom-in-95 duration-500 sm:rounded-[2.5rem]"
       >
         <div className="pointer-events-none absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-indigo-50 via-sky-50 to-transparent" />
         <div className="pointer-events-none absolute inset-0 opacity-[0.45] [background-image:linear-gradient(rgba(99,102,241,.12)_1px,transparent_1px),linear-gradient(90deg,rgba(99,102,241,.12)_1px,transparent_1px)] [background-size:36px_36px]" />
