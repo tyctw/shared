@@ -7,9 +7,10 @@ import ScoreCompare from './components/ScoreCompare';
 import ShareModal from './components/ShareModal';
 import GreetingModal from './components/GreetingModal';
 import { ScoreEntry } from './types';
+import { REGIONS } from './constants';
 import { fetchEntries, submitEntry, logUserAction } from './services/apiService';
 import { ENTRY_LOCK_MESSAGE, isEntryYearLocked } from './utils/entryOpenLock';
-import { GraduationCap, BarChart3, PlusCircle, BookOpen, CloudOff, Info, Menu, X, ExternalLink, Calculator, Compass, Sparkles, RefreshCw, Home, ShieldAlert, Check, Heart, Shield, Share2, ArrowRight, MapPin, Search } from 'lucide-react';
+import { GraduationCap, BarChart3, PlusCircle, BookOpen, CloudOff, Info, Menu, X, ExternalLink, Calculator, Compass, Sparkles, RefreshCw, Home, ShieldAlert, Check, Heart, Shield, Share2, ArrowRight, MapPin, Search, Table2, ChevronDown, MailWarning } from 'lucide-react';
 
 // New Custom Loader Component
 const AppLoader = () => (
@@ -36,7 +37,8 @@ const AppLoader = () => (
   </div>
 );
 
-type ActiveTab = 'list' | 'form' | 'stats' | 'guide' | 'compare' | 'disclaimer' | 'privacy';
+type ActiveTab = 'list' | 'form' | 'stats' | 'guide' | 'compare' | 'minimums' | 'disclaimer' | 'privacy';
+const CONTACT_EMAIL = 'tyctw.analyze@gmail.com';
 
 const DisclaimerPage = ({ onBack }: { onBack: () => void }) => {
   const items = [
@@ -47,6 +49,7 @@ const DisclaimerPage = ({ onBack }: { onBack: () => void }) => {
     ['不構成升學建議', '平台提供資訊整理與經驗分享，不提供個別升學諮詢、錄取保證、志願序建議或法律責任承諾。任何升學決策仍應由使用者與家長、師長討論後自行判斷。', 'violet'],
     ['匿名分享與個資保護', '表單不要求姓名、電話或身分證字號。請勿在心得或補充說明中填寫姓名、准考證號、聯絡方式、地址、班級座號或任何可識別自己及他人的資訊。', 'indigo'],
     ['資料調整與移除', '平台可基於資料品質、隱私風險、明顯異常、惡意填寫或維運需求，調整、隱藏或移除部分資料。若你認為資料有誤，可透過頁面提供的回報方式協助更正。', 'amber'],
+    ['聯絡資訊', `若需回報資料錯誤、隱私疑慮、刪修需求或平台問題，可來信 ${CONTACT_EMAIL}，請附上可協助定位資料的年份、區域、學校與科系。`, 'emerald'],
     ['使用者自行承擔風險', '使用本平台資料所做的志願選填、升學規劃或其他決策，其結果與風險由使用者自行承擔。平台維護者不對任何直接、間接、附帶或衍生損失負責。', 'rose'],
   ];
 
@@ -205,9 +208,522 @@ const PrivacyPage = ({ onBack }: { onBack: () => void }) => (
           本頁內容可能因平台功能、資料欄位、法規環境或維運需求而調整。更新後的內容會公布於本頁，使用者持續使用本平台即表示了解並接受更新後的聲明內容。
         </p>
       </section>
+
+      <section className="space-y-3">
+        <h3 className="border-l-4 border-indigo-500 pl-3 text-lg font-black text-slate-800">9. 聯絡資訊</h3>
+        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
+          若您需要回報資料錯誤、提出刪修需求、反映隱私或版權問題，可寄信至
+          <a href={`mailto:${CONTACT_EMAIL}`} className="mx-1 font-black text-indigo-600 hover:text-indigo-700">{CONTACT_EMAIL}</a>
+          。來信時請盡量提供年份、區域、學校、科系與問題描述，方便我們定位資料。
+        </p>
+      </section>
     </section>
   </div>
 );
+
+const MinimumScoresPage = ({ entries }: { entries: ScoreEntry[] }) => {
+  const [selectedYear, setSelectedYear] = React.useState('115');
+  const [selectedRegion, setSelectedRegion] = React.useState('all');
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [isRegionModalOpen, setIsRegionModalOpen] = React.useState(false);
+  const [regionSearchTerm, setRegionSearchTerm] = React.useState('');
+  const [selectedMinimumEntry, setSelectedMinimumEntry] = React.useState<(ScoreEntry & { count: number }) | null>(null);
+  const [isMinimumNoticeOpen, setIsMinimumNoticeOpen] = React.useState(true);
+
+  const generalEntries = React.useMemo(
+    () => entries.filter(entry => (entry.studentIdentity ?? '一般生') === '一般生'),
+    [entries]
+  );
+
+  const years = React.useMemo(
+    () => Array.from(new Set(generalEntries.map(entry => String(entry.year))))
+      .sort((a, b) => Number(b) - Number(a)),
+    [generalEntries]
+  );
+
+  const regions = React.useMemo(
+    () => Array.from(new Set(generalEntries
+      .filter(entry => selectedYear === 'all' || String(entry.year) === selectedYear)
+      .map(entry => entry.region)))
+      .sort((a, b) => String(a).localeCompare(String(b), 'zh-TW')),
+    [generalEntries, selectedYear]
+  );
+
+  const regionModalOptions = React.useMemo(
+    () => REGIONS.filter(region => region.includes(regionSearchTerm)),
+    [regionSearchTerm]
+  );
+
+  const filteredEntries = React.useMemo(() => {
+    const keyword = searchTerm.trim().toLowerCase();
+
+    return generalEntries.filter(entry => {
+      const matchesYear = selectedYear === 'all' || String(entry.year) === selectedYear;
+      const matchesRegion = selectedRegion === 'all' || entry.region === selectedRegion;
+      const matchesSearch = !keyword || [
+        entry.region,
+        entry.school,
+        entry.department,
+        String(entry.year),
+      ].some(value => String(value ?? '').toLowerCase().includes(keyword));
+
+      return matchesYear && matchesRegion && matchesSearch;
+    });
+  }, [generalEntries, searchTerm, selectedRegion, selectedYear]);
+
+  const rows = React.useMemo(() => {
+    const map = new Map<string, { entry: ScoreEntry; count: number }>();
+
+    filteredEntries.forEach(entry => {
+      const key = `${entry.region}__${entry.school}`;
+      const current = map.get(key);
+      const entryCredits = entry.totalCredits ?? Number.POSITIVE_INFINITY;
+      const currentCredits = current?.entry.totalCredits ?? Number.POSITIVE_INFINITY;
+
+      if (
+        !current ||
+        entry.totalPoints < current.entry.totalPoints ||
+        (entry.totalPoints === current.entry.totalPoints && entryCredits < currentCredits)
+      ) {
+        map.set(key, { entry, count: (current?.count ?? 0) + 1 });
+        return;
+      }
+
+      current.count += 1;
+    });
+
+    return Array.from(map.values())
+      .map(({ entry, count }) => ({ ...entry, count }))
+      .sort((a, b) => {
+        const regionCompare = String(a.region).localeCompare(String(b.region), 'zh-TW');
+        if (regionCompare !== 0) return regionCompare;
+        return a.totalPoints - b.totalPoints || a.school.localeCompare(b.school, 'zh-TW');
+      });
+  }, [filteredEntries]);
+
+  const regionCount = new Set(rows.map(row => row.region)).size;
+
+  return (
+    <div className="mx-auto max-w-6xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <section className="relative overflow-hidden rounded-[2rem] bg-[#11132b] p-6 text-white shadow-[0_28px_80px_-45px_rgba(15,23,42,0.6)] sm:p-8">
+        <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-indigo-500/30 blur-[70px]" />
+        <div className="pointer-events-none absolute -bottom-24 left-1/4 h-64 w-64 rounded-full bg-emerald-500/20 blur-[80px]" />
+        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.08] px-3.5 py-2 text-xs font-bold text-indigo-100">
+              <Table2 className="h-4 w-4 text-emerald-300" />
+              各區學校最低錄取資料
+            </div>
+            <h2 className="text-3xl font-black tracking-tight sm:text-4xl">最低錄取分數總表</h2>
+            <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-slate-300">
+              僅統整一般生匿名分享資料，列出同一區域、同一學校中目前蒐集到的最低總積分紀錄。此表並不保證為該校真正最低錄取分數，請以官方簡章與正式公告為準。
+            </p>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 sm:min-w-[360px]">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.07] px-4 py-3">
+              <span className="block text-[10px] font-black uppercase tracking-widest text-indigo-300">區域</span>
+              <strong className="mt-1 block text-2xl font-black">{regionCount}</strong>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/[0.07] px-4 py-3">
+              <span className="block text-[10px] font-black uppercase tracking-widest text-indigo-300">學校</span>
+              <strong className="mt-1 block text-2xl font-black">{rows.length}</strong>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/[0.07] px-4 py-3">
+              <span className="block text-[10px] font-black uppercase tracking-widest text-indigo-300">資料</span>
+              <strong className="mt-1 block text-2xl font-black">{filteredEntries.length}</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {isMinimumNoticeOpen && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div
+            className="absolute inset-0 bg-slate-900/65 backdrop-blur-sm"
+            onClick={() => setIsMinimumNoticeOpen(false)}
+          />
+
+          <div className="relative w-full max-w-md overflow-hidden rounded-[2rem] bg-white shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="bg-amber-50 p-5 ring-1 ring-amber-100">
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-lg shadow-amber-100">
+                  <ShieldAlert className="h-6 w-6" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-600">Important notice</p>
+                  <h3 className="mt-1 text-xl font-black text-slate-900">請先了解資料限制</h3>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 p-5">
+              <p className="text-sm font-bold leading-7 text-slate-600">
+                「最低錄取分數總表」只統整目前平台蒐集到的匿名一般生分享資料，顯示的是目前資料中的最低紀錄。
+              </p>
+              <div className="rounded-2xl bg-rose-50 p-4 text-sm font-black leading-6 text-rose-600 ring-1 ring-rose-100">
+                這不代表該校實際或官方最低錄取分數，也不保證所有錄取資料都已被收錄。
+              </div>
+              <p className="text-xs font-bold leading-6 text-slate-500">
+                志願選填仍請以當年度官方簡章、招生名額、超額比序規則與學校正式公告為準。
+              </p>
+
+              <button
+                type="button"
+                onClick={() => setIsMinimumNoticeOpen(false)}
+                className="flex w-full items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-black text-white shadow-lg shadow-slate-200 transition-all hover:bg-indigo-600 active:scale-[0.98]"
+              >
+                我了解，繼續查看
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <section className="rounded-[2rem] border border-slate-100 bg-white p-4 shadow-sm sm:p-5">
+        <div className="grid gap-3 md:grid-cols-[150px_190px_1fr]">
+          <label className="block">
+            <span className="mb-2 block text-xs font-black text-slate-500">年份</span>
+            <select
+              value={selectedYear}
+              onChange={(event) => {
+                setSelectedYear(event.target.value);
+                setSelectedRegion('all');
+              }}
+              className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-bold text-slate-700 outline-none transition-all focus:border-indigo-300 focus:bg-white focus:ring-4 focus:ring-indigo-50"
+            >
+              <option value="115">115 年</option>
+              {years.filter(year => year !== '115').map(year => (
+                <option key={year} value={year}>{year} 年</option>
+              ))}
+              <option value="all">所有年份</option>
+            </select>
+          </label>
+
+          <div className="block">
+            <span className="mb-2 block text-xs font-black text-slate-500">區域</span>
+            <button
+              type="button"
+              onClick={() => {
+                setRegionSearchTerm('');
+                setIsRegionModalOpen(true);
+              }}
+              className="flex h-12 w-full items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-left text-sm font-bold text-slate-700 outline-none transition-all hover:border-indigo-200 hover:bg-white focus:border-indigo-300 focus:bg-white focus:ring-4 focus:ring-indigo-50"
+            >
+              <span className="flex min-w-0 items-center gap-2">
+                <MapPin className="h-4 w-4 shrink-0 text-indigo-500" />
+                <span className="truncate">{selectedRegion === 'all' ? '所有區域' : selectedRegion}</span>
+              </span>
+              <ChevronDown className="h-4 w-4 shrink-0 text-slate-400" />
+            </button>
+          </div>
+
+          <label className="block">
+            <span className="mb-2 block text-xs font-black text-slate-500">搜尋</span>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+              <input
+                type="search"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="搜尋學校、科系或區域"
+                className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-12 pr-4 text-sm font-bold text-slate-700 outline-none transition-all placeholder:text-slate-400 focus:border-indigo-300 focus:bg-white focus:ring-4 focus:ring-indigo-50"
+              />
+            </div>
+          </label>
+        </div>
+      </section>
+
+      <section className="overflow-hidden rounded-[2rem] border border-slate-100 bg-white shadow-[0_18px_60px_-38px_rgba(15,23,42,0.35)]">
+        {rows.length === 0 ? (
+          <div className="p-10 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+              <CloudOff className="h-7 w-7" />
+            </div>
+            <h3 className="text-xl font-black text-slate-800">尚無可統整資料</h3>
+            <p className="mt-2 text-sm font-medium text-slate-500">目前篩選條件下沒有一般生錄取分享資料可計算最低分數。</p>
+          </div>
+        ) : (
+          <>
+          <div className="grid gap-3 p-3 md:hidden">
+            {rows.map(row => (
+              <article
+                key={`${row.region}-${row.school}-mobile`}
+                role="button"
+                tabIndex={0}
+                onClick={() => setSelectedMinimumEntry(row)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    setSelectedMinimumEntry(row);
+                  }
+                }}
+                className="overflow-hidden rounded-2xl border border-slate-100 bg-white text-left shadow-sm transition-all active:scale-[0.99]"
+              >
+                <div className="border-b border-slate-100 bg-slate-50/80 p-4">
+                  <div className="min-w-0">
+                    <div className="mb-2 flex flex-wrap items-center gap-2">
+                      <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-black text-indigo-600">
+                        {row.region}
+                      </span>
+                      <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-black text-slate-500">
+                        {row.year} 年
+                      </span>
+                    </div>
+                    <h3 className="break-words text-base font-black leading-6 text-slate-900">{row.school}</h3>
+                    <p className="mt-1 break-words text-sm font-bold text-slate-500">{row.department}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 p-4">
+                  <div className="rounded-2xl bg-indigo-50 p-3 ring-1 ring-indigo-100">
+                    <span className="block text-[10px] font-black text-indigo-500">總積分</span>
+                    <strong className="mt-1 block font-mono text-2xl font-black leading-none text-indigo-700">{row.totalPoints}</strong>
+                  </div>
+                  <div className="rounded-2xl bg-amber-50 p-3 ring-1 ring-amber-100">
+                    <span className="block text-[10px] font-black text-amber-500">總積點</span>
+                    <strong className="mt-1 block font-mono text-2xl font-black leading-none text-amber-600">{row.totalCredits ?? '-'}</strong>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3 text-xs font-black text-slate-500">
+                  <span>同校一般生資料</span>
+                  <span>{row.count} 筆・點擊查看</span>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div className="hidden overflow-x-auto md:block">
+            <table className="min-w-[820px] w-full border-collapse text-left">
+              <thead>
+                <tr className="border-b border-slate-100 bg-slate-50 text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">
+                  <th className="px-5 py-4">區域</th>
+                  <th className="px-5 py-4">學校</th>
+                  <th className="px-5 py-4">最低總積分</th>
+                  <th className="px-5 py-4">總積點</th>
+                  <th className="px-5 py-4">年度</th>
+                  <th className="px-5 py-4">科系/班別</th>
+                  <th className="px-5 py-4">筆數</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {rows.map(row => (
+                  <tr
+                    key={`${row.region}-${row.school}`}
+                    tabIndex={0}
+                    onClick={() => setSelectedMinimumEntry(row)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        setSelectedMinimumEntry(row);
+                      }
+                    }}
+                    className="cursor-pointer transition-colors hover:bg-indigo-50/40 focus:bg-indigo-50/60 focus:outline-none"
+                  >
+                    <td className="whitespace-nowrap px-5 py-4 text-sm font-black text-indigo-600">{row.region}</td>
+                    <td className="px-5 py-4">
+                      <div className="font-black text-slate-900">{row.school}</div>
+                    </td>
+                    <td className="whitespace-nowrap px-5 py-4">
+                      <span className="inline-flex min-w-16 justify-center rounded-2xl bg-indigo-50 px-3 py-2 font-mono text-lg font-black text-indigo-700 ring-1 ring-indigo-100">
+                        {row.totalPoints}
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap px-5 py-4">
+                      <span className="font-mono font-black text-amber-600">{row.totalCredits ?? '-'}</span>
+                    </td>
+                    <td className="whitespace-nowrap px-5 py-4 text-sm font-bold text-slate-600">{row.year} 年</td>
+                    <td className="px-5 py-4 text-sm font-medium text-slate-600">{row.department}</td>
+                    <td className="whitespace-nowrap px-5 py-4 text-sm font-black text-slate-500">{row.count} 筆</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          </>
+        )}
+      </section>
+
+      {selectedMinimumEntry && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div
+            className="absolute inset-0 bg-slate-900/65 backdrop-blur-sm"
+            onClick={() => setSelectedMinimumEntry(null)}
+          />
+
+          <div className="relative max-h-[86vh] w-full max-w-2xl overflow-hidden rounded-[2rem] bg-white shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="flex items-start justify-between gap-4 border-b border-slate-100 bg-slate-50 p-5">
+              <div className="min-w-0">
+                <div className="mb-2 flex flex-wrap items-center gap-2">
+                  <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-black text-indigo-600">
+                    {selectedMinimumEntry.region}
+                  </span>
+                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-black text-slate-500">
+                    {selectedMinimumEntry.year} 年
+                  </span>
+                  <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-600">
+                    一般生
+                  </span>
+                </div>
+                <h3 className="break-words text-xl font-black leading-7 text-slate-900">
+                  {selectedMinimumEntry.school}
+                </h3>
+                <p className="mt-1 break-words text-sm font-bold text-slate-500">
+                  {selectedMinimumEntry.department}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedMinimumEntry(null)}
+                className="shrink-0 rounded-2xl bg-white p-2 text-slate-400 shadow-sm ring-1 ring-slate-100 transition-colors hover:text-slate-700"
+                aria-label="關閉詳細資料"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="max-h-[calc(86vh-120px)] overflow-y-auto p-5">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-2xl bg-indigo-50 p-4 ring-1 ring-indigo-100">
+                  <span className="block text-xs font-black text-indigo-500">總積分</span>
+                  <strong className="mt-1 block font-mono text-3xl font-black leading-none text-indigo-700">
+                    {selectedMinimumEntry.totalPoints}
+                  </strong>
+                </div>
+                <div className="rounded-2xl bg-amber-50 p-4 ring-1 ring-amber-100">
+                  <span className="block text-xs font-black text-amber-500">總積點</span>
+                  <strong className="mt-1 block font-mono text-3xl font-black leading-none text-amber-600">
+                    {selectedMinimumEntry.totalCredits ?? '-'}
+                  </strong>
+                </div>
+              </div>
+
+              <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-6">
+                {[
+                  ['國文', selectedMinimumEntry.scores.chinese],
+                  ['英文', selectedMinimumEntry.scores.english],
+                  ['數學', selectedMinimumEntry.scores.math],
+                  ['自然', selectedMinimumEntry.scores.nature],
+                  ['社會', selectedMinimumEntry.scores.social],
+                  ['作文', `${selectedMinimumEntry.scores.writing}級`],
+                ].map(([label, value]) => (
+                  <div key={label} className="rounded-2xl border border-slate-100 bg-white p-3 text-center shadow-sm">
+                    <span className="block text-[10px] font-black text-slate-400">{label}</span>
+                    <strong className="mt-1 block font-mono text-lg font-black text-slate-800">{value}</strong>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4">
+                <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-100">
+                  <span className="block text-xs font-black text-slate-400">同校一般生資料筆數</span>
+                  <strong className="mt-1 block text-lg font-black text-slate-700">
+                    {selectedMinimumEntry.count} 筆
+                  </strong>
+                </div>
+              </div>
+
+              {selectedMinimumEntry.notes && (
+                <div className="mt-4 rounded-2xl bg-white p-4 ring-1 ring-slate-100">
+                  <span className="block text-xs font-black text-slate-400">補充說明</span>
+                  <p className="mt-2 whitespace-pre-wrap break-words text-sm font-medium leading-6 text-slate-600">
+                    {selectedMinimumEntry.notes}
+                  </p>
+                </div>
+              )}
+
+              <p className="mt-4 text-xs font-bold leading-5 text-slate-400">
+                此彈窗顯示的是目前篩選條件下，該校一般生資料中總積分最低的來源紀錄。
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isRegionModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            onClick={() => setIsRegionModalOpen(false)}
+          />
+
+          <div className="relative flex max-h-[80vh] w-full max-w-lg flex-col overflow-hidden rounded-3xl bg-white shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3 border-b border-slate-100 bg-slate-50 p-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  value={regionSearchTerm}
+                  onChange={(event) => setRegionSearchTerm(event.target.value)}
+                  placeholder="搜尋區域..."
+                  className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-4 font-medium text-slate-700 outline-none transition-all placeholder:text-slate-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsRegionModalOpen(false)}
+                className="shrink-0 rounded-xl p-2 font-medium text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+              >
+                取消
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-indigo-200">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedRegion('all');
+                  setIsRegionModalOpen(false);
+                }}
+                className="group flex w-full items-center justify-between border-b border-slate-50 px-4 py-3 text-left font-medium text-slate-700 transition-colors last:border-0 hover:bg-indigo-50"
+              >
+                <span className="group-hover:text-indigo-700">所有區域</span>
+                {selectedRegion === 'all' && <Check className="h-4 w-4 text-indigo-500" />}
+              </button>
+
+              {regionModalOptions.length > 0 ? (
+                regionModalOptions.map(region => {
+                  const hasData = regions.includes(region);
+                  return (
+                    <button
+                      key={region}
+                      type="button"
+                      onClick={() => {
+                        setSelectedRegion(region);
+                        setIsRegionModalOpen(false);
+                      }}
+                      className="group flex w-full items-center justify-between border-b border-slate-50 px-4 py-3 text-left font-medium text-slate-700 transition-colors last:border-0 hover:bg-indigo-50"
+                    >
+                      <span className="flex items-center gap-2">
+                        <span className="group-hover:text-indigo-700">{region}</span>
+                        {!hasData && (
+                          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black text-slate-400">
+                            無資料
+                          </span>
+                        )}
+                      </span>
+                      {selectedRegion === region && <Check className="h-4 w-4 text-indigo-500" />}
+                    </button>
+                  );
+                })
+              ) : (
+                <div className="flex flex-col items-center gap-3 px-4 py-12 text-center text-sm text-slate-400">
+                  <div className="rounded-full bg-slate-50 p-4">
+                    <Search className="h-6 w-6 text-slate-300" />
+                  </div>
+                  <p>找不到符合「{regionSearchTerm}」的區域</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const App: React.FC = () => {
   const [entries, setEntries] = useState<ScoreEntry[]>([]);
@@ -221,6 +737,9 @@ const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showThankYouModal, setShowThankYouModal] = useState(false);
+  const [showFavoritesModal, setShowFavoritesModal] = useState(false);
+  const [isFormDirty, setIsFormDirty] = useState(false);
+  const [pendingNavigationTab, setPendingNavigationTab] = useState<ActiveTab | null>(null);
 
   useEffect(() => {
       localStorage.setItem('cap_favorites', JSON.stringify(favoriteIds));
@@ -262,18 +781,35 @@ const App: React.FC = () => {
     loadData();
   }, [loadData]);
 
-  const handleAcceptDisclaimer = () => {
-    localStorage.setItem('cap_disclaimer_accepted', 'true');
-    handleTabChange('list');
-    logUserAction('accept_disclaimer', 'agreed');
-  };
-
-  const handleTabChange = (tab: typeof activeTab) => {
+  const performTabChange = (tab: typeof activeTab) => {
     setActiveTab(tab);
     logUserAction('tab_change', tab);
     window.requestAnimationFrame(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
+  };
+
+  const handleTabChange = (tab: typeof activeTab) => {
+    if (activeTab === 'form' && tab !== 'form' && isFormDirty) {
+      setPendingNavigationTab(tab);
+      return;
+    }
+
+    performTabChange(tab);
+  };
+
+  const handleConfirmLeaveForm = () => {
+    if (!pendingNavigationTab) return;
+    setIsFormDirty(false);
+    const nextTab = pendingNavigationTab;
+    setPendingNavigationTab(null);
+    performTabChange(nextTab);
+  };
+
+  const handleAcceptDisclaimer = () => {
+    localStorage.setItem('cap_disclaimer_accepted', 'true');
+    handleTabChange('list');
+    logUserAction('accept_disclaimer', 'agreed');
   };
 
   const handleAddEntry = async (newEntry: Omit<ScoreEntry, 'id' | 'timestamp'>) => {
@@ -290,7 +826,8 @@ const App: React.FC = () => {
     const success = await submitEntry(entry);
     if (success) {
       setEntries(prev => [entry, ...prev]);
-      handleTabChange('list');
+      setIsFormDirty(false);
+      performTabChange('list');
       setShowThankYouModal(true);
       return;
     }
@@ -396,6 +933,92 @@ const App: React.FC = () => {
       {/* Greeting Modal */}
       <GreetingModal />
 
+      {pendingNavigationTab && (
+        <div className="fixed inset-0 z-[130] flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div
+            className="absolute inset-0 bg-slate-950/65 backdrop-blur-md"
+            onClick={() => setPendingNavigationTab(null)}
+          />
+
+          <div className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-white/70 bg-white shadow-[0_32px_100px_-25px_rgba(15,23,42,0.6)] animate-in zoom-in-95 duration-200">
+            <div className="bg-amber-50 p-5 ring-1 ring-amber-100">
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-lg shadow-amber-100">
+                  <ShieldAlert className="h-6 w-6" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-600">Unsaved changes</p>
+                  <h3 className="mt-1 text-xl font-black text-slate-900">資料尚未送出</h3>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 p-5">
+              <p className="text-sm font-bold leading-7 text-slate-600">
+                你正在填寫「分享你的錄取數據」。如果現在離開，目前尚未送出的內容可能會遺失。
+              </p>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => setPendingNavigationTab(null)}
+                  className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-600 shadow-sm transition-colors hover:bg-slate-50"
+                >
+                  繼續填寫
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmLeaveForm}
+                  className="rounded-2xl bg-rose-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-rose-100 transition-all hover:bg-rose-700 active:scale-[0.98]"
+                >
+                  放棄並離開
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showFavoritesModal && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div
+            className="absolute inset-0 bg-slate-950/65 backdrop-blur-md"
+            onClick={() => setShowFavoritesModal(false)}
+          />
+
+          <div className="relative flex max-h-[86vh] w-full max-w-5xl flex-col overflow-hidden rounded-[2rem] border border-white/70 bg-slate-50 shadow-[0_32px_100px_-25px_rgba(15,23,42,0.6)] animate-in zoom-in-95 duration-300">
+            <div className="flex items-center justify-between gap-4 border-b border-slate-200/70 bg-white p-5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-500 ring-1 ring-rose-100">
+                  <Heart className="h-5 w-5 fill-current" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-rose-500">Favorites</p>
+                  <h3 className="text-xl font-black text-slate-900">我的收藏</h3>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowFavoritesModal(false)}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-500 transition-colors hover:bg-slate-900 hover:text-white"
+                aria-label="關閉收藏"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+              <ScoreCompare
+                entries={entries}
+                favoriteIds={favoriteIds}
+                toggleFavorite={toggleFavorite}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Sidebar Overlay */}
       {isSidebarOpen && (
         <div 
@@ -453,6 +1076,26 @@ const App: React.FC = () => {
               </div>
               <ArrowRight className="ml-auto h-4 w-4 shrink-0 text-white/60 transition-transform group-hover:translate-x-1" />
             </button>
+
+            {favoriteIds.length > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSidebarOpen(false);
+                  setShowFavoritesModal(true);
+                }}
+                className="group flex w-full items-center gap-4 rounded-[1.4rem] border border-slate-200 bg-white p-4 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-200 hover:shadow-lg hover:shadow-rose-100"
+              >
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-50 text-rose-500 ring-1 ring-rose-100 transition-transform group-hover:scale-110">
+                  <Heart className="h-5 w-5" />
+                </div>
+                <div className="min-w-0">
+                  <span className="block font-black text-slate-800">查看收藏</span>
+                  <span className="mt-0.5 block text-xs font-medium text-slate-400">{favoriteIds.length} 筆收藏・落點比較</span>
+                </div>
+                <ArrowRight className="ml-auto h-4 w-4 shrink-0 text-slate-400 transition-transform group-hover:translate-x-1 group-hover:text-rose-500" />
+              </button>
+            )}
 
             <p className="px-1 pt-3 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">升學服務</p>
             <a
@@ -524,6 +1167,23 @@ const App: React.FC = () => {
         </div>
       </aside>
 
+      {favoriteIds.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setShowFavoritesModal(true)}
+          className="fixed bottom-28 right-4 z-50 flex items-center gap-2 rounded-full border border-rose-100 bg-white/90 px-4 py-3 text-sm font-black text-slate-700 shadow-[0_12px_36px_-18px_rgba(15,23,42,0.65)] backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:border-rose-200 hover:text-rose-600 md:bottom-8 md:right-8"
+          aria-label="查看收藏"
+        >
+          <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-rose-50 text-rose-500">
+            <Heart className="h-4 w-4" />
+            <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-black text-white ring-2 ring-white">
+              {favoriteIds.length}
+            </span>
+          </span>
+          <span className="hidden sm:inline">查看收藏</span>
+        </button>
+      )}
+
       {/* Floating Header (Top) */}
       <header className="fixed top-0 w-full z-40 transition-all duration-300 pt-3 px-3 sm:pt-4 sm:px-6">
         <div className="max-w-5xl mx-auto h-16 sm:h-20 flex items-center justify-between px-4 sm:px-6 bg-white/80 backdrop-blur-2xl rounded-3xl shadow-[0_4px_40px_-10px_rgba(0,0,0,0.1)] border border-white/60">
@@ -545,7 +1205,7 @@ const App: React.FC = () => {
           {/* Center: Desktop Navigation (Hidden on Mobile) */}
           <nav className="hidden md:flex items-center bg-slate-50/80 p-1.5 rounded-2xl border border-slate-100/50 shadow-[inset_0_1px_4px_rgba(0,0,0,0.02)] gap-1">
              <NavButton id="list" label="瀏覽" icon={BookOpen} />
-             <NavButton id="compare" label="收藏" icon={Heart} />
+             <NavButton id="minimums" label="最低" icon={Table2} />
              <NavButton id="stats" label="統計" icon={BarChart3} />
              <NavButton id="guide" label="說明" icon={Info} />
              <div className="w-px h-6 bg-slate-200 mx-1"></div>
@@ -600,7 +1260,7 @@ const App: React.FC = () => {
       <nav className="fixed bottom-5 left-4 right-4 z-50 md:hidden animate-in slide-in-from-bottom-6 duration-500">
          <div className="bg-white/80 backdrop-blur-2xl border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.12)] rounded-[2rem] p-2 flex justify-between items-center max-w-sm mx-auto ring-1 ring-white/60">
             <MobileNavButton id="list" label="瀏覽" icon={BookOpen} />
-            <MobileNavButton id="compare" label="收藏" icon={Heart} />
+            <MobileNavButton id="minimums" label="最低" icon={Table2} />
             <MobileNavButton id="stats" label="統計" icon={BarChart3} />
             <div className="w-px h-8 bg-slate-200/60 mx-1"></div>
             <MobileNavButton id="form" label="分享" icon={PlusCircle} />
@@ -636,7 +1296,7 @@ const App: React.FC = () => {
                  </div>
             )}
 
-            {!isLoading && !loadError && entries.length === 0 && !['guide', 'disclaimer', 'privacy'].includes(activeTab) && (
+            {!isLoading && !loadError && entries.length === 0 && !['guide', 'minimums', 'disclaimer', 'privacy'].includes(activeTab) && (
                  <div className="mb-8 bg-white/50 backdrop-blur-md border border-amber-200/60 rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left shadow-sm">
                     <div className="bg-amber-100 p-3 rounded-full text-amber-600">
                         <CloudOff className="w-6 h-6" />
@@ -672,7 +1332,7 @@ const App: React.FC = () => {
                                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-300 opacity-70"></span>
                                   <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
                                 </span>
-                                <span>114會考</span>
+                                <span>115會考</span>
                                 <span className="h-3 w-px bg-indigo-200"></span>
                                 <span className="text-slate-500">數據即時更新</span>
                             </div>
@@ -791,6 +1451,16 @@ const App: React.FC = () => {
                 </div>
             )}
 
+            {activeTab === 'minimums' && (
+                <div className="space-y-8">
+                    {isLoading ? (
+                         <AppLoader />
+                    ) : (
+                        <MinimumScoresPage entries={entries} />
+                    )}
+                </div>
+            )}
+
             {activeTab === 'stats' && (
                 <div className="space-y-8 max-w-5xl mx-auto">
                     <div className="flex items-center gap-4 mb-2">
@@ -809,7 +1479,7 @@ const App: React.FC = () => {
 
             {activeTab === 'form' && (
             <div className="max-w-4xl mx-auto">
-                <ScoreForm onSubmit={handleAddEntry} />
+                <ScoreForm onSubmit={handleAddEntry} onDirtyChange={setIsFormDirty} />
             </div>
             )}
 
@@ -840,6 +1510,13 @@ const App: React.FC = () => {
                 </div>
 
                 <div className="flex gap-4 sm:gap-6">
+                    <a
+                         href={`mailto:${CONTACT_EMAIL}`}
+                         className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors"
+                    >
+                        <MailWarning className="w-4 h-4" />
+                        <span>聯絡資訊</span>
+                    </a>
                     <button 
                          onClick={() => handleTabChange('disclaimer')}
                          className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors"
@@ -858,6 +1535,9 @@ const App: React.FC = () => {
             </div>
 
             <div className="mt-8 pt-8 border-t border-slate-200 flex flex-col items-center gap-4 text-xs font-semibold text-slate-400">
+                <a href={`mailto:${CONTACT_EMAIL}`} className="text-slate-500 transition-colors hover:text-indigo-600">
+                    聯絡信箱：{CONTACT_EMAIL}
+                </a>
                 <p>
                     Copyright © 2024-{new Date().getFullYear()} TYCTW會考落點. All rights reserved.
                 </p>

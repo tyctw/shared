@@ -70,10 +70,17 @@ const Dashboard: React.FC<DashboardProps> = ({ entries }) => {
   const stats = useMemo(() => {
       const filteredEntries = filterRegion === 'All' ? entries : entries.filter(e => e.region === filterRegion);
       const totalEntries = filteredEntries.length;
-      
-      const avgPoints = totalEntries > 0 
-        ? (filteredEntries.reduce((acc, curr) => acc + curr.totalPoints, 0) / totalEntries).toFixed(1)
-        : '0';
+
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const todayEnd = new Date(todayStart);
+      todayEnd.setDate(todayEnd.getDate() + 1);
+      const todayStartTime = todayStart.getTime();
+      const todayEndTime = todayEnd.getTime();
+      const todayNewEntries = filteredEntries.filter(entry => {
+          const timestamp = entry.timestamp < 10000000000 ? entry.timestamp * 1000 : entry.timestamp;
+          return timestamp >= todayStartTime && timestamp < todayEndTime;
+      }).length;
 
       const regionCounts: Record<string, number> = {};
       const schoolCounts: Record<string, number> = {};
@@ -175,7 +182,7 @@ const Dashboard: React.FC<DashboardProps> = ({ entries }) => {
           return data;
       });
 
-      return { totalEntries, avgPoints, topRegion, topSchool, regionData, topSchoolsList, barData, yearlyTrendData, overallTrendStr, overallTrendIcon, topSchoolsTrendData, officialTrendData };
+      return { totalEntries, todayNewEntries, topRegion, topSchool, regionData, topSchoolsList, barData, yearlyTrendData, overallTrendStr, overallTrendIcon, topSchoolsTrendData, officialTrendData };
   }, [entries, filterRegion]);
 
   const COLORS_BAR = ['#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#ec4899', '#f472b6', '#fb7185'];
@@ -222,11 +229,11 @@ const Dashboard: React.FC<DashboardProps> = ({ entries }) => {
             </div>
             <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                 <div className="p-2.5 sm:p-3 bg-emerald-50 text-emerald-600 rounded-xl">
-                    <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6" />
+                    <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
                 <div>
-                    <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase">平均總積分</p>
-                    <p className="text-xl sm:text-2xl font-black text-slate-800">{stats.avgPoints}</p>
+                    <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase">今日新增資料數</p>
+                    <p className="text-xl sm:text-2xl font-black text-slate-800">{stats.todayNewEntries}</p>
                 </div>
             </div>
             <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
@@ -238,13 +245,15 @@ const Dashboard: React.FC<DashboardProps> = ({ entries }) => {
                     <p className="text-lg sm:text-xl font-bold text-slate-800 leading-tight">{stats.topRegion}</p>
                 </div>
             </div>
-            <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                <div className="p-2.5 sm:p-3 bg-fuchsia-50 text-fuchsia-600 rounded-xl">
+            <div className="min-w-0 bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 overflow-hidden">
+                <div className="shrink-0 p-2.5 sm:p-3 bg-fuchsia-50 text-fuchsia-600 rounded-xl">
                     <Award className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <div>
+                <div className="min-w-0 w-full">
                     <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase">最多回報學校</p>
-                    <p className="text-[15px] sm:text-[17px] font-bold text-slate-800 leading-tight truncate w-full sm:w-auto" title={stats.topSchool}>{stats.topSchool}</p>
+                    <p className="max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-[15px] font-bold leading-tight text-slate-800 sm:text-[17px]" title={stats.topSchool}>
+                        {stats.topSchool}
+                    </p>
                 </div>
             </div>
         </div>
@@ -339,17 +348,17 @@ const Dashboard: React.FC<DashboardProps> = ({ entries }) => {
             {stats.topSchoolsList.length > 0 ? (
                 <div className="space-y-4">
                     {stats.topSchoolsList.map((school, index) => (
-                        <div key={school.name} className="flex items-center gap-4 group">
-                            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-black text-slate-400 text-sm group-hover:bg-emerald-100 group-hover:text-emerald-600 transition-colors">
+                        <div key={school.name} className="flex min-w-0 items-start gap-3 group sm:gap-4">
+                            <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-black text-slate-400 transition-colors group-hover:bg-emerald-100 group-hover:text-emerald-600">
                                 {index + 1}
                             </div>
-                            <div className="flex-1">
-                                <div className="flex justify-between items-center mb-1.5">
-                                    <span className="font-bold text-slate-700 flex items-center gap-2">
-                                        <School className="w-4 h-4 text-slate-400 group-hover:text-emerald-500 transition-colors" />
-                                        {school.name}
+                            <div className="min-w-0 flex-1">
+                                <div className="mb-1.5 flex items-start justify-between gap-3">
+                                    <span className="flex min-w-0 items-start gap-2 break-words font-bold leading-5 text-slate-700">
+                                        <School className="mt-0.5 h-4 w-4 shrink-0 text-slate-400 transition-colors group-hover:text-emerald-500" />
+                                        <span className="min-w-0 break-words">{school.name}</span>
                                     </span>
-                                    <span className="text-sm font-bold text-slate-500">{school.count} 筆</span>
+                                    <span className="shrink-0 whitespace-nowrap text-sm font-bold text-slate-500">{school.count} 筆</span>
                                 </div>
                                 <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
                                     <div 

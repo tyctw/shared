@@ -262,7 +262,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
             </div>
           </div>
 
-          <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(220px,1fr)_160px_170px_180px_150px]">
+          <div className="mt-4 space-y-3">
             <div className="group relative">
               <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-indigo-500" />
               <input
@@ -274,67 +274,69 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
               />
             </div>
 
-            <div className="relative">
-              <Calendar className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <select
-                value={filterYear}
-                onChange={(e) => setFilterYear(e.target.value)}
-                className="h-14 w-full appearance-none rounded-2xl border border-slate-200 bg-white pl-11 pr-10 text-sm font-black text-slate-700 shadow-sm outline-none transition-all hover:border-indigo-200 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10"
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="relative">
+                <Calendar className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <select
+                  value={filterYear}
+                  onChange={(e) => setFilterYear(e.target.value)}
+                  className="h-14 w-full min-w-0 appearance-none rounded-2xl border border-slate-200 bg-white pl-11 pr-10 text-sm font-black text-slate-700 shadow-sm outline-none transition-all hover:border-indigo-200 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10"
+                >
+                  <option value="All">所有年份</option>
+                  {YEARS.map(year => (
+                    <option key={year} value={year}>{year}年</option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsRegionModalOpen(true)}
+                className="flex h-14 w-full min-w-0 items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 text-left text-sm font-black text-slate-700 shadow-sm transition-all hover:border-indigo-200 hover:text-indigo-700 focus:border-indigo-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 active:scale-[0.98]"
               >
-                <option value="All">所有年份</option>
-                {YEARS.map(year => (
-                  <option key={year} value={year}>{year}年</option>
-                ))}
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <span className="flex min-w-0 items-center gap-2">
+                  <MapPin className="h-4 w-4 shrink-0 text-slate-400" />
+                  <span className="truncate">{filterRegion === 'All' ? '所有區域' : filterRegion}</span>
+                </span>
+                <ChevronDown className="h-4 w-4 shrink-0 text-slate-400" />
+              </button>
+
+              <div className="relative">
+                <UsersRound className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <select
+                  value={filterStudentIdentity}
+                  onChange={(e) => setFilterStudentIdentity(e.target.value)}
+                  className="h-14 w-full min-w-0 appearance-none rounded-2xl border border-slate-200 bg-white pl-11 pr-10 text-sm font-black text-slate-700 shadow-sm outline-none transition-all hover:border-indigo-200 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10"
+                >
+                  <option value="All">所有身分</option>
+                  {STUDENT_IDENTITY_FILTERS.map(identity => (
+                    <option key={identity} value={identity}>{identity}</option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              </div>
+
+              <label className={`flex h-14 w-full min-w-0 cursor-pointer items-center justify-between gap-3 rounded-2xl border px-4 text-sm font-black shadow-sm transition-all active:scale-[0.98] ${
+                groupBySchool
+                  ? 'border-indigo-200 bg-indigo-50 text-indigo-700'
+                  : 'border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:text-indigo-700'
+              }`}>
+                <span className="flex min-w-0 items-center gap-2">
+                  <School className={`h-4 w-4 shrink-0 ${groupBySchool ? 'text-indigo-600' : 'text-slate-400'}`} />
+                  <span className="truncate">同校分組</span>
+                </span>
+                <span className={`relative h-6 w-11 rounded-full transition-colors ${groupBySchool ? 'bg-indigo-600' : 'bg-slate-200'}`}>
+                  <input
+                    type="checkbox"
+                    checked={groupBySchool}
+                    onChange={(e) => setGroupBySchool(e.target.checked)}
+                    className="peer sr-only"
+                  />
+                  <span className="absolute left-1 top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-5" />
+                </span>
+              </label>
             </div>
-
-            <button
-              type="button"
-              onClick={() => setIsRegionModalOpen(true)}
-              className="flex h-14 items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 text-left text-sm font-black text-slate-700 shadow-sm transition-all hover:border-indigo-200 hover:text-indigo-700 focus:border-indigo-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 active:scale-[0.98]"
-            >
-              <span className="flex min-w-0 items-center gap-2">
-                <MapPin className="h-4 w-4 shrink-0 text-slate-400" />
-                <span className="truncate">{filterRegion === 'All' ? '所有區域' : filterRegion}</span>
-              </span>
-              <ChevronDown className="h-4 w-4 shrink-0 text-slate-400" />
-            </button>
-
-            <div className="relative">
-              <UsersRound className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <select
-                value={filterStudentIdentity}
-                onChange={(e) => setFilterStudentIdentity(e.target.value)}
-                className="h-14 w-full appearance-none rounded-2xl border border-slate-200 bg-white pl-11 pr-10 text-sm font-black text-slate-700 shadow-sm outline-none transition-all hover:border-indigo-200 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10"
-              >
-                <option value="All">所有身分</option>
-                {STUDENT_IDENTITY_FILTERS.map(identity => (
-                  <option key={identity} value={identity}>{identity}</option>
-                ))}
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            </div>
-
-            <label className={`flex h-14 cursor-pointer items-center justify-between gap-3 rounded-2xl border px-4 text-sm font-black shadow-sm transition-all active:scale-[0.98] ${
-              groupBySchool
-                ? 'border-indigo-200 bg-indigo-50 text-indigo-700'
-                : 'border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:text-indigo-700'
-            }`}>
-              <span className="flex min-w-0 items-center gap-2">
-                <School className={`h-4 w-4 shrink-0 ${groupBySchool ? 'text-indigo-600' : 'text-slate-400'}`} />
-                <span className="truncate">同校分組</span>
-              </span>
-              <span className={`relative h-6 w-11 rounded-full transition-colors ${groupBySchool ? 'bg-indigo-600' : 'bg-slate-200'}`}>
-                <input
-                  type="checkbox"
-                  checked={groupBySchool}
-                  onChange={(e) => setGroupBySchool(e.target.checked)}
-                  className="peer sr-only"
-                />
-                <span className="absolute left-1 top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-5" />
-              </span>
-            </label>
           </div>
         </div>
       </div>

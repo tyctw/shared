@@ -7,6 +7,7 @@ import { Send, Loader2, ChevronDown, User, PenTool, Search, ShieldCheck, MapPin,
 
 interface ScoreFormProps {
   onSubmit: (entry: Omit<ScoreEntry, 'id' | 'timestamp'>) => void;
+  onDirtyChange?: (isDirty: boolean) => void;
 }
 
 const STUDENT_IDENTITIES: StudentIdentity[] = [
@@ -23,7 +24,7 @@ const STUDENT_IDENTITIES: StudentIdentity[] = [
   '退伍軍人',
 ];
 
-const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
+const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
   const [formData, setFormData] = useState({
     year: YEARS[0],
     school: '',
@@ -92,11 +93,28 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
     }
   }, [formData.region, isManualSchool]);
 
+  const hasUnsavedInput = React.useMemo(() => {
+    return (
+      formData.year !== YEARS[0] ||
+      formData.region !== REGIONS[0] ||
+      formData.school.trim() !== '' ||
+      formData.department.trim() !== '' ||
+      formData.studentIdentity !== '一般生' ||
+      formData.totalPoints !== '' ||
+      formData.totalCredits !== '' ||
+      formData.notes.trim() !== '' ||
+      Object.values(formData.scores).some(score => String(score) !== '')
+    );
+  }, [formData]);
+
+  useEffect(() => {
+    onDirtyChange?.(hasUnsavedInput && !isSubmitting);
+  }, [hasUnsavedInput, isSubmitting, onDirtyChange]);
+
   // Dirty Check
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      const isDirty = formData.school !== '' || formData.totalPoints !== '' || formData.notes !== '';
-      if (isDirty && !isSubmitting) {
+      if (hasUnsavedInput && !isSubmitting) {
         e.preventDefault();
         e.returnValue = '';
       }
@@ -104,7 +122,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [formData, isSubmitting]);
+  }, [hasUnsavedInput, isSubmitting]);
 
   const handleChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -260,38 +278,32 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit }) => {
     <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8 animate-in slide-in-from-bottom-8 duration-700">
       
       {/* Header */}
-      <div className="relative overflow-hidden rounded-[2rem] bg-[#11132b] px-6 py-8 text-white shadow-[0_24px_70px_-30px_rgba(49,46,129,0.8)] sm:rounded-[2.5rem] sm:px-10 sm:py-10">
-          <div className="pointer-events-none absolute -right-16 -top-24 h-64 w-64 rounded-full bg-fuchsia-500/30 blur-[70px]"></div>
-          <div className="pointer-events-none absolute -bottom-28 left-1/4 h-64 w-64 rounded-full bg-indigo-500/30 blur-[80px]"></div>
-          <div className="pointer-events-none absolute inset-0 opacity-[0.06] [background-image:linear-gradient(rgba(255,255,255,.7)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.7)_1px,transparent_1px)] [background-size:36px_36px]"></div>
+      <div className="relative overflow-hidden rounded-[2rem] border border-indigo-100 bg-gradient-to-br from-white via-indigo-50/70 to-sky-50 px-6 py-8 text-slate-900 shadow-[0_20px_70px_-42px_rgba(15,23,42,0.35)] sm:rounded-[2.5rem] sm:px-10 sm:py-10">
+          <div className="pointer-events-none absolute -right-16 -top-24 h-64 w-64 rounded-full bg-indigo-100/80 blur-[70px]"></div>
+          <div className="pointer-events-none absolute -bottom-28 left-1/4 h-64 w-64 rounded-full bg-emerald-100/70 blur-[80px]"></div>
+          <div className="pointer-events-none absolute inset-0 opacity-[0.35] [background-image:linear-gradient(rgba(99,102,241,.12)_1px,transparent_1px),linear-gradient(90deg,rgba(99,102,241,.12)_1px,transparent_1px)] [background-size:36px_36px]"></div>
 
           <div className="relative z-10 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.08] px-3.5 py-2 text-xs font-bold text-indigo-100 backdrop-blur-md">
-                 <Sparkles className="h-3.5 w-3.5 text-amber-200" />
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-white/80 px-3.5 py-2 text-xs font-black text-indigo-600 shadow-sm backdrop-blur-md">
+                 <Sparkles className="h-3.5 w-3.5 text-amber-500" />
                  <span>你的經驗，會成為別人的方向</span>
               </div>
               <h2 className="text-3xl font-black tracking-[-0.035em] sm:text-5xl">
                  分享你的
-                 <span className="bg-gradient-to-r from-indigo-300 via-fuchsia-300 to-amber-200 bg-clip-text text-transparent">錄取數據</span>
+                 <span className="bg-gradient-to-r from-indigo-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent">錄取數據</span>
               </h2>
-              <p className="mt-3 max-w-xl text-sm font-medium leading-7 text-slate-300 sm:text-base">
+              <p className="mt-3 max-w-xl text-sm font-bold leading-7 text-slate-600 sm:text-base">
                  匿名分享會考成績與錄取結果，讓學弟妹少一點資訊焦慮，多一份選擇的底氣。
               </p>
+              <div className="mt-4 flex max-w-2xl items-start gap-2.5 rounded-2xl border border-amber-100 bg-amber-50/80 px-4 py-3 text-xs font-bold leading-6 text-amber-700 shadow-sm backdrop-blur-md sm:text-sm">
+                <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                <p>
+                  請協助回報正確資料：請依照成績單與錄取結果如實填寫，避免測試、亂填或誇大資料；也請勿留下姓名、准考證號、電話等個人資訊。
+                </p>
+              </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 sm:min-w-[310px]">
-              {[
-                ['01', '考生背景'],
-                ['02', '會考成績'],
-                ['03', '經驗分享'],
-              ].map(([step, label]) => (
-                <div key={step} className="rounded-2xl border border-white/10 bg-white/[0.07] px-3 py-3 backdrop-blur-md">
-                  <span className="block text-[10px] font-black tracking-widest text-indigo-300">{step}</span>
-                  <span className="mt-1 block whitespace-nowrap text-xs font-bold text-white/85">{label}</span>
-                </div>
-              ))}
-            </div>
           </div>
       </div>
       

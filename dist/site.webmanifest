@@ -1,7 +1,7 @@
 {
   "name": "會考錄取分享平台",
-  "short_name": "會考落點",
-  "description": "查詢歷年錄取分數、比較會考成績與匿名分享錄取結果。",
+  "short_name": "錄取分享",
+  "description": "查詢歷年高中職錄取分數、會考成績、總積分、考生身分與匿名錄取經驗分享。",
   "lang": "zh-Hant-TW",
   "start_url": "./",
   "scope": "./",

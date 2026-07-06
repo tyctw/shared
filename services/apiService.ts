@@ -164,6 +164,10 @@ const repairScoreEntries = async (items: any[]): Promise<ScoreEntry[]> => {
 // ===============================
 export const fetchEntries = async (): Promise<ScoreEntry[]> => {
   try {
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error('Supabase 環境變數尚未設定，請確認 VITE_SUPABASE_URL 與 VITE_SUPABASE_ANON_KEY。');
+    }
+
     const { data, error } = await supabase
       .from('score_entries')
       .select('*')
@@ -178,7 +182,7 @@ export const fetchEntries = async (): Promise<ScoreEntry[]> => {
     return await repairScoreEntries(data);
   } catch (error) {
     console.error('Error fetching entries from Supabase:', error);
-    return [];
+    throw error;
   }
 };
 
