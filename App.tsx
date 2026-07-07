@@ -39,6 +39,7 @@ const AppLoader = () => (
 
 type ActiveTab = 'list' | 'form' | 'stats' | 'guide' | 'compare' | 'minimums' | 'disclaimer' | 'privacy';
 const CONTACT_EMAIL = 'tyctw.analyze@gmail.com';
+type MinimumSortOption = 'region' | 'pointsAsc' | 'pointsDesc' | 'creditsAsc' | 'creditsDesc' | 'yearDesc' | 'yearAsc' | 'countDesc' | 'schoolAsc';
 
 const DisclaimerPage = ({ onBack }: { onBack: () => void }) => {
   const items = [
@@ -225,6 +226,7 @@ const MinimumScoresPage = ({ entries }: { entries: ScoreEntry[] }) => {
   const [selectedYear, setSelectedYear] = React.useState('115');
   const [selectedRegion, setSelectedRegion] = React.useState('all');
   const [searchTerm, setSearchTerm] = React.useState('');
+  const [sortOption, setSortOption] = React.useState<MinimumSortOption>('region');
   const [isRegionModalOpen, setIsRegionModalOpen] = React.useState(false);
   const [regionSearchTerm, setRegionSearchTerm] = React.useState('');
   const [selectedMinimumEntry, setSelectedMinimumEntry] = React.useState<(ScoreEntry & { count: number }) | null>(null);
@@ -292,14 +294,46 @@ const MinimumScoresPage = ({ entries }: { entries: ScoreEntry[] }) => {
       current.count += 1;
     });
 
+    const compareByDefault = (a: ScoreEntry & { count: number }, b: ScoreEntry & { count: number }) => {
+      const regionCompare = String(a.region).localeCompare(String(b.region), 'zh-TW');
+      if (regionCompare !== 0) return regionCompare;
+      return a.totalPoints - b.totalPoints || a.school.localeCompare(b.school, 'zh-TW');
+    };
+
+    const compareCredits = (a: ScoreEntry & { count: number }, b: ScoreEntry & { count: number }) => {
+      const aCredits = a.totalCredits ?? Number.POSITIVE_INFINITY;
+      const bCredits = b.totalCredits ?? Number.POSITIVE_INFINITY;
+      return aCredits - bCredits;
+    };
+
     return Array.from(map.values())
       .map(({ entry, count }) => ({ ...entry, count }))
       .sort((a, b) => {
-        const regionCompare = String(a.region).localeCompare(String(b.region), 'zh-TW');
-        if (regionCompare !== 0) return regionCompare;
-        return a.totalPoints - b.totalPoints || a.school.localeCompare(b.school, 'zh-TW');
+        const fallback = compareByDefault(a, b);
+
+        switch (sortOption) {
+          case 'pointsAsc':
+            return a.totalPoints - b.totalPoints || fallback;
+          case 'pointsDesc':
+            return b.totalPoints - a.totalPoints || fallback;
+          case 'creditsAsc':
+            return compareCredits(a, b) || fallback;
+          case 'creditsDesc':
+            return compareCredits(b, a) || fallback;
+          case 'yearDesc':
+            return Number(b.year) - Number(a.year) || fallback;
+          case 'yearAsc':
+            return Number(a.year) - Number(b.year) || fallback;
+          case 'countDesc':
+            return b.count - a.count || fallback;
+          case 'schoolAsc':
+            return a.school.localeCompare(b.school, 'zh-TW') || fallback;
+          case 'region':
+          default:
+            return fallback;
+        }
       });
-  }, [filteredEntries]);
+  }, [filteredEntries, sortOption]);
 
   const regionCount = new Set(rows.map(row => row.region)).size;
 
@@ -381,7 +415,7 @@ const MinimumScoresPage = ({ entries }: { entries: ScoreEntry[] }) => {
       )}
 
       <section className="rounded-[2rem] border border-slate-100 bg-white p-4 shadow-sm sm:p-5">
-        <div className="grid gap-3 md:grid-cols-[150px_190px_1fr]">
+        <div className="grid gap-3 md:grid-cols-[150px_190px_190px_1fr]">
           <label className="block">
             <span className="mb-2 block text-xs font-black text-slate-500">年份</span>
             <select
@@ -417,6 +451,28 @@ const MinimumScoresPage = ({ entries }: { entries: ScoreEntry[] }) => {
               <ChevronDown className="h-4 w-4 shrink-0 text-slate-400" />
             </button>
           </div>
+
+          <label className="block">
+            <span className="mb-2 block text-xs font-black text-slate-500">排序</span>
+            <div className="relative">
+              <select
+                value={sortOption}
+                onChange={(event) => setSortOption(event.target.value as MinimumSortOption)}
+                className="h-12 w-full appearance-none rounded-2xl border border-slate-200 bg-slate-50 px-4 pr-10 text-sm font-bold text-slate-700 outline-none transition-all focus:border-indigo-300 focus:bg-white focus:ring-4 focus:ring-indigo-50"
+              >
+                <option value="region">區域排序</option>
+                <option value="pointsAsc">總積分低到高</option>
+                <option value="pointsDesc">總積分高到低</option>
+                <option value="creditsAsc">總積點低到高</option>
+                <option value="creditsDesc">總積點高到低</option>
+                <option value="yearDesc">年份新到舊</option>
+                <option value="yearAsc">年份舊到新</option>
+                <option value="countDesc">資料筆數多到少</option>
+                <option value="schoolAsc">學校名稱排序</option>
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            </div>
+          </label>
 
           <label className="block">
             <span className="mb-2 block text-xs font-black text-slate-500">搜尋</span>
