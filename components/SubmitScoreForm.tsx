@@ -40,7 +40,7 @@ export const SubmitScoreForm: React.FC<SubmitScoreFormProps> = ({ onSubmited, on
 
   const [formData, setFormData] = useState({
     email: '',
-    examYear: Date.now() >= new Date('2026-06-16T12:00:00+08:00').getTime() ? '115' : '114',
+    examYear: Date.now() >= new Date('2026-07-07T10:55:00+08:00').getTime() ? '115' : '114',
     region: '',
     chineseScore: '',
     mathScore: '',
@@ -69,8 +69,8 @@ export const SubmitScoreForm: React.FC<SubmitScoreFormProps> = ({ onSubmited, on
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (formData.examYear === '115' && Date.now() < new Date('2026-06-16T12:00:00+08:00').getTime()) {
-      setError('115年度系統預計將於 2026/06/16 12:00 開放填寫');
+    if (formData.examYear === '115' && Date.now() < new Date('2026-07-07T10:55:00+08:00').getTime()) {
+      setError('115年度系統預計將於 2026/07/07 10:55 開放填寫');
       return;
     }
 
@@ -212,10 +212,10 @@ export const SubmitScoreForm: React.FC<SubmitScoreFormProps> = ({ onSubmited, on
              <option value="111">111</option>
              <option value="110">110</option>
            </select>
-           {formData.examYear === '115' && Date.now() < new Date('2026-06-16T12:00:00+08:00').getTime() && (
+           {formData.examYear === '115' && Date.now() < new Date('2026-07-07T10:55:00+08:00').getTime() && (
              <div className="mt-2 text-sm font-bold text-amber-600 flex items-start gap-1 p-2 bg-amber-50 rounded-xl border border-amber-200">
                <Info className="w-4 h-4 shrink-0 mt-0.5" />
-               <span>115年度系統預計於 2026/06/16 12:00 開放填寫資料</span>
+               <span>115年度系統預計於 2026/07/07 10:55 開放填寫資料</span>
              </div>
            )}
          </div>
@@ -359,16 +359,16 @@ export const SubmitScoreForm: React.FC<SubmitScoreFormProps> = ({ onSubmited, on
           </button>
           <button 
             type="submit" 
-            disabled={loading || (formData.examYear === '115' && Date.now() < new Date('2026-06-16T12:00:00+08:00').getTime())}
+            disabled={loading || (formData.examYear === '115' && Date.now() < new Date('2026-07-07T10:55:00+08:00').getTime())}
             className={`w-full sm:w-2/3 px-4 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 group transition-all active:scale-[0.98] disabled:opacity-70 disabled:hover:translate-y-0 disabled:active:scale-100 ${
-              (formData.examYear === '115' && Date.now() < new Date('2026-06-16T12:00:00+08:00').getTime())
+              (formData.examYear === '115' && Date.now() < new Date('2026-07-07T10:55:00+08:00').getTime())
                 ? 'bg-slate-200 text-slate-500 cursor-not-allowed shadow-none'
                 : 'bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-xl shadow-slate-900/20 hover:shadow-slate-900/30 hover:from-slate-800 hover:to-slate-700 hover:-translate-y-0.5'
             }`}
           >
             {loading ? (
               <Loader2 className="w-6 h-6 animate-spin text-slate-300" />
-            ) : (formData.examYear === '115' && Date.now() < new Date('2026-06-16T12:00:00+08:00').getTime()) ? (
+            ) : (formData.examYear === '115' && Date.now() < new Date('2026-07-07T10:55:00+08:00').getTime()) ? (
               <span className="flex items-center gap-2">
                  未開放
                  <Clock className="w-5 h-5 text-slate-400" />
