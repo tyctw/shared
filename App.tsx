@@ -41,6 +41,141 @@ type ActiveTab = 'list' | 'form' | 'stats' | 'guide' | 'compare' | 'minimums' | 
 const CONTACT_EMAIL = 'tyctw.analyze@gmail.com';
 type MinimumSortOption = 'region' | 'pointsAsc' | 'pointsDesc' | 'creditsAsc' | 'creditsDesc' | 'yearDesc' | 'yearAsc' | 'countDesc' | 'schoolAsc';
 
+const DataStreamLoader = () => (
+  <div className="flex min-h-[54vh] flex-col items-center justify-center px-4 py-14 animate-in fade-in duration-700">
+    <div className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-white/80 bg-white/72 px-6 py-8 text-center shadow-[0_28px_90px_-46px_rgba(79,70,229,0.65)] ring-1 ring-indigo-100/70 backdrop-blur-xl sm:px-10">
+      <div className="pointer-events-none absolute -left-16 -top-20 h-48 w-48 rounded-full bg-indigo-200/60 blur-3xl"></div>
+      <div className="pointer-events-none absolute -bottom-24 -right-16 h-52 w-52 rounded-full bg-rose-200/55 blur-3xl"></div>
+      <div className="data-loader-grid pointer-events-none absolute inset-0 opacity-70"></div>
+
+      <div className="relative mx-auto mb-8 h-44 w-52">
+        <div className="data-card-loader absolute left-1/2 top-1/2 w-44 -translate-x-1/2 -translate-y-1/2 rounded-[1.5rem] border border-white/80 bg-white p-4 text-left shadow-2xl shadow-indigo-200/50">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <div className="h-2 w-14 rounded-full bg-indigo-200"></div>
+              <div className="mt-2 h-3 w-24 rounded-full bg-slate-200"></div>
+            </div>
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-lg shadow-indigo-200">
+              <GraduationCap className="h-5 w-5" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2">
+            {['國', '英', '數', '自', '社', '寫'].map((label, index) => (
+              <div
+                key={label}
+                className="data-score-cell flex aspect-square flex-col items-center justify-center rounded-xl border border-indigo-50 bg-indigo-50/70"
+                style={{ animationDelay: `${index * 0.14}s` }}
+              >
+                <span className="text-[10px] font-black text-indigo-400">{label}</span>
+                <span className="mt-1 h-2 w-5 rounded-full bg-indigo-200"></span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="data-mini-card data-mini-card-a absolute left-0 top-4 rounded-2xl border border-emerald-100 bg-white/90 px-3 py-2 shadow-lg shadow-emerald-100/70">
+          <div className="h-2 w-10 rounded-full bg-emerald-300"></div>
+          <div className="mt-2 h-2 w-16 rounded-full bg-slate-200"></div>
+        </div>
+
+        <div className="data-mini-card data-mini-card-b absolute bottom-2 right-0 rounded-2xl border border-rose-100 bg-white/90 px-3 py-2 shadow-lg shadow-rose-100/70">
+          <div className="h-2 w-12 rounded-full bg-rose-300"></div>
+          <div className="mt-2 h-2 w-14 rounded-full bg-slate-200"></div>
+        </div>
+
+        <div className="data-mini-card data-mini-card-c absolute right-6 top-0 rounded-2xl border border-violet-100 bg-white/90 px-3 py-2 shadow-lg shadow-violet-100/70">
+          <div className="h-2 w-8 rounded-full bg-violet-300"></div>
+          <div className="mt-2 h-2 w-12 rounded-full bg-slate-200"></div>
+        </div>
+
+        <Sparkles className="data-loader-spark absolute right-10 top-16 h-5 w-5 text-amber-400" />
+      </div>
+
+      <div className="relative z-10 flex flex-col items-center">
+        <span className="mb-3 rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-indigo-500">
+          Syncing data
+        </span>
+        <h3 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
+          正在讀取落點資料
+        </h3>
+        <p className="mt-3 max-w-xs text-sm font-bold leading-6 text-slate-500">
+          整理最新分享紀錄與統計資訊，馬上就好。
+        </p>
+
+        <div className="mt-7 w-full max-w-xs">
+          <div className="data-loader-track h-2 overflow-hidden rounded-full bg-slate-100">
+            <div className="data-loader-bar h-full rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-rose-500"></div>
+          </div>
+          <div className="mt-4 flex items-center justify-center gap-2">
+            <span className="data-loader-pulse"></span>
+            <span className="data-loader-pulse" style={{ animationDelay: '0.18s' }}></span>
+            <span className="data-loader-pulse" style={{ animationDelay: '0.36s' }}></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const StatsInsightLoader = () => (
+  <div className="flex min-h-[46vh] flex-col items-center justify-center px-4 py-10 animate-in fade-in duration-700">
+    <div className="relative w-full max-w-xl overflow-hidden rounded-[2rem] border border-white/80 bg-white/75 p-6 shadow-[0_28px_90px_-48px_rgba(79,70,229,0.68)] ring-1 ring-indigo-100/70 backdrop-blur-xl sm:p-8">
+      <div className="pointer-events-none absolute -left-16 -top-20 h-56 w-56 rounded-full bg-sky-200/55 blur-3xl"></div>
+      <div className="pointer-events-none absolute -bottom-24 -right-16 h-56 w-56 rounded-full bg-violet-200/55 blur-3xl"></div>
+      <div className="stats-loader-grid pointer-events-none absolute inset-0"></div>
+
+      <div className="relative z-10 grid gap-6 md:grid-cols-[1fr_1.15fr] md:items-center">
+        <div className="flex flex-col items-center text-center md:items-start md:text-left">
+          <span className="mb-3 rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-indigo-500">
+            Building charts
+          </span>
+          <h3 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
+            正在生成統計圖表
+          </h3>
+          <p className="mt-3 text-sm font-bold leading-6 text-slate-500">
+            分析各區分享資料、分數分布與趨勢摘要。
+          </p>
+
+          <div className="mt-6 flex items-center gap-3">
+            <div className="stats-loader-badge flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-sky-500 text-white shadow-xl shadow-indigo-200">
+              <BarChart3 className="h-6 w-6" />
+            </div>
+            <div className="text-left">
+              <div className="h-2 w-24 rounded-full bg-slate-200"></div>
+              <div className="mt-2 h-2 w-16 rounded-full bg-indigo-200"></div>
+            </div>
+          </div>
+        </div>
+
+        <div className="stats-chart-panel relative min-h-48 overflow-hidden rounded-[1.5rem] border border-white/80 bg-white/85 p-5 shadow-xl shadow-slate-200/60">
+          <div className="mb-5 flex items-center justify-between">
+            <div>
+              <div className="h-2 w-20 rounded-full bg-slate-200"></div>
+              <div className="mt-2 h-2 w-12 rounded-full bg-indigo-200"></div>
+            </div>
+            <div className="stats-loader-ring flex h-14 w-14 items-center justify-center rounded-full">
+              <span className="h-8 w-8 rounded-full bg-white shadow-inner"></span>
+            </div>
+          </div>
+
+          <div className="stats-bar-wrap flex h-28 items-end gap-2">
+            {[62, 38, 76, 52, 88, 45, 70].map((height, index) => (
+              <span
+                key={height + index}
+                className="stats-loader-bar flex-1 rounded-t-xl bg-gradient-to-t from-indigo-500 to-sky-300"
+                style={{ height: `${height}%`, animationDelay: `${index * 0.12}s` }}
+              ></span>
+            ))}
+          </div>
+
+          <div className="stats-scan-line pointer-events-none absolute left-5 right-5"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 const DisclaimerPage = ({ onBack }: { onBack: () => void }) => {
   const items = [
     ['非官方錄取資料', '本平台內容由考生匿名、自願回報，並非教育主管機關、招生委員會或學校公布的正式錄取門檻，也不代表最低錄取標準、保證錄取分數或任何官方統計結果。', 'rose'],
@@ -221,6 +356,251 @@ const PrivacyPage = ({ onBack }: { onBack: () => void }) => (
     </section>
   </div>
 );
+
+const LegalNoticePage = ({ onBack }: { onBack: () => void }) => {
+  const noticeCards = [
+    {
+      title: '資料來源',
+      tone: 'indigo',
+      body: '本平台內容主要由使用者自願分享與公開統計整理而成，僅供升學參考與資料瀏覽使用。',
+    },
+    {
+      title: '版權歸屬',
+      tone: 'violet',
+      body: '網站版面、程式設計、整理後的呈現方式與原創文字內容，除另有標示外，均屬 CAP Score Sharing / TYCTW 團隊所有。',
+    },
+    {
+      title: '合理使用',
+      tone: 'emerald',
+      body: '歡迎分享本站連結或引用少量內容作為非商業、教育與討論用途；引用時請保留來源說明。',
+    },
+    {
+      title: '禁止事項',
+      tone: 'rose',
+      body: '未經同意，請勿大量爬取、重新包裝、商業販售、移除來源標示，或將資料用於誤導性內容。',
+    },
+  ];
+
+  const toneClass: Record<string, string> = {
+    indigo: 'bg-indigo-50 text-indigo-600 ring-indigo-100',
+    violet: 'bg-violet-50 text-violet-600 ring-violet-100',
+    emerald: 'bg-emerald-50 text-emerald-600 ring-emerald-100',
+    rose: 'bg-rose-50 text-rose-600 ring-rose-100',
+  };
+
+  return (
+    <div className="mx-auto max-w-5xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <section className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/75 p-6 shadow-[0_28px_90px_-48px_rgba(79,70,229,0.55)] ring-1 ring-indigo-100/70 backdrop-blur-xl sm:p-8">
+        <div className="pointer-events-none absolute -left-20 -top-24 h-64 w-64 rounded-full bg-indigo-200/60 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-28 -right-20 h-72 w-72 rounded-full bg-rose-200/50 blur-3xl" />
+        <div className="pointer-events-none absolute inset-0 opacity-[0.05] [background-image:linear-gradient(rgba(79,70,229,.8)_1px,transparent_1px),linear-gradient(90deg,rgba(79,70,229,.8)_1px,transparent_1px)] [background-size:30px_30px]" />
+
+        <div className="relative z-10 flex flex-col gap-7 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-2xl">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-white/80 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-indigo-500 shadow-sm">
+              <Shield className="h-3.5 w-3.5" />
+              Privacy & Copyright
+            </div>
+            <h2 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
+              隱私權與版權聲明
+            </h2>
+            <p className="mt-4 text-sm font-bold leading-7 text-slate-500 sm:text-base">
+              這裡說明本站如何保存使用偏好、呈現共享資料，以及網站內容的授權與使用界線。請以尊重資料提供者與創作者的方式使用本平台。
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onBack}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-black text-white shadow-lg shadow-slate-200 transition-all hover:-translate-y-0.5 hover:bg-indigo-600 hover:shadow-indigo-200 active:scale-[0.98] sm:w-auto"
+          >
+            <ArrowRight className="h-4 w-4 rotate-180" />
+            返回平台
+          </button>
+        </div>
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-2">
+        {noticeCards.map((item, index) => (
+          <article
+            key={item.title}
+            className="group relative overflow-hidden rounded-[1.5rem] border border-white/80 bg-white p-5 shadow-[0_18px_55px_-38px_rgba(15,23,42,0.55)] ring-1 ring-slate-100 transition-all hover:-translate-y-1 hover:shadow-[0_24px_70px_-38px_rgba(79,70,229,0.45)]"
+          >
+            <div className="pointer-events-none absolute -right-10 -top-12 h-32 w-32 rounded-full bg-indigo-100/50 blur-3xl transition-opacity group-hover:opacity-80" />
+            <div className="relative flex gap-4">
+              <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-sm font-black ring-1 ${toneClass[item.tone]}`}>
+                {String(index + 1).padStart(2, '0')}
+              </div>
+              <div>
+                <h3 className="text-lg font-black tracking-tight text-slate-850">{item.title}</h3>
+                <p className="mt-2 text-sm font-medium leading-7 text-slate-500">{item.body}</p>
+              </div>
+            </div>
+          </article>
+        ))}
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+        <article className="rounded-[1.75rem] border border-slate-100 bg-white p-6 shadow-sm sm:p-7">
+          <div className="mb-5 flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-100">
+              <BookOpen className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500">Usage notes</p>
+              <h3 className="text-xl font-black text-slate-900">使用與引用規範</h3>
+            </div>
+          </div>
+          <div className="space-y-4 text-sm font-medium leading-7 text-slate-500">
+            <p>
+              使用本站資料時，請理解所有分享內容可能受到時間、個人填寫方式與樣本數影響。本站不保證資料完全正確，也不構成錄取保證或升學建議。
+            </p>
+            <p>
+              若要截圖、引用或轉貼內容，請標明「資料來源：CAP Score Sharing」，並避免讓讀者誤以為引用內容是官方公告。
+            </p>
+          </div>
+        </article>
+
+        <article className="relative overflow-hidden rounded-[1.75rem] border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-sky-50 p-6 shadow-sm sm:p-7">
+          <Sparkles className="absolute right-6 top-6 h-5 w-5 text-amber-400" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-indigo-600 shadow-lg shadow-indigo-100">
+            <MailWarning className="h-5 w-5" />
+          </div>
+          <h3 className="mt-5 text-xl font-black text-slate-900">回報侵權或資料疑慮</h3>
+          <p className="mt-3 text-sm font-medium leading-7 text-slate-500">
+            如您認為本站內容涉及隱私、版權、錯誤資料或不當引用，請來信並附上相關頁面、截圖或可協助定位的資訊。
+          </p>
+          <a
+            href={`mailto:${CONTACT_EMAIL}`}
+            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-black text-indigo-600 shadow-sm ring-1 ring-indigo-100 transition-all hover:-translate-y-0.5 hover:bg-indigo-600 hover:text-white hover:shadow-indigo-100 sm:w-auto"
+          >
+            {CONTACT_EMAIL}
+          </a>
+        </article>
+      </section>
+
+      <section className="rounded-[1.5rem] border border-amber-100 bg-amber-50/80 p-5 text-sm font-bold leading-7 text-amber-800">
+        本聲明可能依平台功能、資料來源或營運需求調整；更新後將直接公布於本頁面。
+      </section>
+    </div>
+  );
+};
+
+const ModernDisclaimerPage = ({ onBack }: { onBack: () => void }) => {
+  const statements = [
+    {
+      title: '非官方資料',
+      body: '本站不是官方招生單位，所有錄取分享、統計與落點參考皆不代表任何學校或主管機關公告。',
+      tone: 'rose',
+    },
+    {
+      title: '僅供參考',
+      body: '資料會受到年度名額、填報志願、個人條件與樣本數影響，不能作為保證錄取或最終決策依據。',
+      tone: 'amber',
+    },
+    {
+      title: '使用者分享',
+      body: '平台內容多來自使用者自願填寫，我們會盡力整理與修正，但無法保證每筆資料完全正確。',
+      tone: 'indigo',
+    },
+    {
+      title: '請自行查證',
+      body: '正式錄取、分發、招生與報到資訊，請以各主管機關、招生簡章與學校正式公告為準。',
+      tone: 'emerald',
+    },
+  ];
+
+  const toneClass: Record<string, string> = {
+    rose: 'bg-rose-50 text-rose-600 ring-rose-100',
+    amber: 'bg-amber-50 text-amber-600 ring-amber-100',
+    indigo: 'bg-indigo-50 text-indigo-600 ring-indigo-100',
+    emerald: 'bg-emerald-50 text-emerald-600 ring-emerald-100',
+  };
+
+  return (
+    <div className="mx-auto max-w-5xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <section className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/75 p-6 shadow-[0_28px_90px_-48px_rgba(245,158,11,0.55)] ring-1 ring-amber-100/80 backdrop-blur-xl sm:p-8">
+        <div className="pointer-events-none absolute -left-20 -top-24 h-64 w-64 rounded-full bg-amber-200/55 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-28 -right-20 h-72 w-72 rounded-full bg-rose-200/50 blur-3xl" />
+        <div className="relative z-10 flex flex-col gap-7 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-2xl">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-amber-100 bg-white/85 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-amber-600 shadow-sm">
+              <ShieldAlert className="h-3.5 w-3.5" />
+              Platform Notice
+            </div>
+            <h2 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
+              免責聲明
+            </h2>
+            <p className="mt-4 text-sm font-bold leading-7 text-slate-500 sm:text-base">
+              CAP Score Sharing 以整理、分享與查詢為目的，協助學生快速理解歷年錄取經驗。請把本站視為參考工具，而不是官方結果或保證承諾。
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onBack}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-black text-white shadow-lg shadow-slate-200 transition-all hover:-translate-y-0.5 hover:bg-amber-500 hover:shadow-amber-100 active:scale-[0.98] sm:w-auto"
+          >
+            <ArrowRight className="h-4 w-4 rotate-180" />
+            返回平台
+          </button>
+        </div>
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-2">
+        {statements.map((item, index) => (
+          <article
+            key={item.title}
+            className="relative overflow-hidden rounded-[1.5rem] border border-white/80 bg-white p-5 shadow-[0_18px_55px_-38px_rgba(15,23,42,0.55)] ring-1 ring-slate-100"
+          >
+            <div className="flex gap-4">
+              <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-sm font-black ring-1 ${toneClass[item.tone]}`}>
+                {index + 1}
+              </div>
+              <div>
+                <h3 className="text-lg font-black tracking-tight text-slate-900">{item.title}</h3>
+                <p className="mt-2 text-sm font-medium leading-7 text-slate-500">{item.body}</p>
+              </div>
+            </div>
+          </article>
+        ))}
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
+        <article className="rounded-[1.75rem] border border-amber-100 bg-amber-50/85 p-6 sm:p-7">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-lg shadow-amber-100">
+            <Info className="h-5 w-5" />
+          </div>
+          <h3 className="mt-5 text-xl font-black text-slate-900">正式資訊以官方公告為準</h3>
+          <p className="mt-3 text-sm font-bold leading-7 text-amber-800">
+            遇到報名、分發、報到、放榜、複查與錄取資格等重要事項，請務必回到官方招生網站、簡章或學校公告確認。
+          </p>
+        </article>
+
+        <article className="rounded-[1.75rem] border border-slate-100 bg-white p-6 shadow-sm sm:p-7">
+          <div className="mb-5 flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-100">
+              <MailWarning className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500">Feedback</p>
+              <h3 className="text-xl font-black text-slate-900">資料錯誤回報</h3>
+            </div>
+          </div>
+          <p className="text-sm font-medium leading-7 text-slate-500">
+            若發現疑似錯誤、重複、隱私疑慮或需要刪修的資料，請附上年份、區域、學校與可定位資訊來信。
+          </p>
+          <a
+            href={`mailto:${CONTACT_EMAIL}`}
+            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-indigo-600 sm:w-auto"
+          >
+            {CONTACT_EMAIL}
+          </a>
+        </article>
+      </section>
+    </div>
+  );
+};
 
 const MinimumScoresPage = ({ entries }: { entries: ScoreEntry[] }) => {
   const [selectedYear, setSelectedYear] = React.useState('115');
@@ -1547,7 +1927,7 @@ const App: React.FC = () => {
             {activeTab === 'minimums' && (
                 <div className="space-y-8">
                     {isLoading ? (
-                         <AppLoader />
+                         <DataStreamLoader />
                     ) : (
                         <MinimumScoresPage entries={entries} />
                     )}
@@ -1563,7 +1943,7 @@ const App: React.FC = () => {
                         <h2 className="text-3xl font-black text-slate-800 tracking-tight">數據統計中心</h2>
                     </div>
                     {isLoading ? (
-                         <AppLoader />
+                         <StatsInsightLoader />
                     ) : (
                         <Dashboard entries={entries} />
                     )}
@@ -1577,11 +1957,11 @@ const App: React.FC = () => {
             )}
 
             {activeTab === 'disclaimer' && (
-              <DisclaimerPage onBack={handleAcceptDisclaimer} />
+              <ModernDisclaimerPage onBack={handleAcceptDisclaimer} />
             )}
 
             {activeTab === 'privacy' && (
-              <PrivacyPage onBack={() => handleTabChange('list')} />
+              <LegalNoticePage onBack={() => handleTabChange('list')} />
             )}
         </div>
       </main>
