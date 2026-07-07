@@ -1940,13 +1940,7 @@ const App: React.FC = () => {
             )}
 
             {activeTab === 'stats' && (
-                <div className="space-y-8 max-w-5xl mx-auto">
-                    <div className="flex items-center gap-4 mb-2">
-                        <div className="p-3 bg-white rounded-2xl shadow-sm border border-slate-100">
-                            <BarChart3 className="w-6 h-6 text-indigo-600" />
-                        </div>
-                        <h2 className="text-3xl font-black text-slate-800 tracking-tight">數據統計中心</h2>
-                    </div>
+                <div className="space-y-8 max-w-7xl mx-auto">
                     {isLoading ? (
                          <StatsInsightLoader />
                     ) : (
