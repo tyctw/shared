@@ -657,7 +657,7 @@ const MinimumScoresPage = ({ entries }: { entries: ScoreEntry[] }) => {
     const map = new Map<string, { entry: ScoreEntry; count: number }>();
 
     filteredEntries.forEach(entry => {
-      const key = `${entry.region}__${entry.school}`;
+      const key = `${entry.year}__${entry.region}__${entry.school}__${entry.department}`;
       const current = map.get(key);
       const entryCredits = entry.totalCredits ?? Number.POSITIVE_INFINITY;
       const currentCredits = current?.entry.totalCredits ?? Number.POSITIVE_INFINITY;
@@ -677,7 +677,12 @@ const MinimumScoresPage = ({ entries }: { entries: ScoreEntry[] }) => {
     const compareByDefault = (a: ScoreEntry & { count: number }, b: ScoreEntry & { count: number }) => {
       const regionCompare = String(a.region).localeCompare(String(b.region), 'zh-TW');
       if (regionCompare !== 0) return regionCompare;
-      return a.totalPoints - b.totalPoints || a.school.localeCompare(b.school, 'zh-TW');
+      return (
+        a.totalPoints - b.totalPoints ||
+        a.school.localeCompare(b.school, 'zh-TW') ||
+        a.department.localeCompare(b.department, 'zh-TW') ||
+        Number(b.year) - Number(a.year)
+      );
     };
 
     const compareCredits = (a: ScoreEntry & { count: number }, b: ScoreEntry & { count: number }) => {
@@ -884,7 +889,7 @@ const MinimumScoresPage = ({ entries }: { entries: ScoreEntry[] }) => {
           <div className="grid gap-3 p-3 md:hidden">
             {rows.map(row => (
               <article
-                key={`${row.region}-${row.school}-mobile`}
+                key={`${row.year}-${row.region}-${row.school}-${row.department}-mobile`}
                 role="button"
                 tabIndex={0}
                 onClick={() => setSelectedMinimumEntry(row)}
@@ -923,7 +928,7 @@ const MinimumScoresPage = ({ entries }: { entries: ScoreEntry[] }) => {
                 </div>
 
                 <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3 text-xs font-black text-slate-500">
-                  <span>同校一般生資料</span>
+                  <span>同校同科一般生資料</span>
                   <span>{row.count} 筆・點擊查看</span>
                 </div>
               </article>
@@ -946,7 +951,7 @@ const MinimumScoresPage = ({ entries }: { entries: ScoreEntry[] }) => {
               <tbody className="divide-y divide-slate-100">
                 {rows.map(row => (
                   <tr
-                    key={`${row.region}-${row.school}`}
+                    key={`${row.year}-${row.region}-${row.school}-${row.department}`}
                     tabIndex={0}
                     onClick={() => setSelectedMinimumEntry(row)}
                     onKeyDown={(event) => {
@@ -1054,7 +1059,7 @@ const MinimumScoresPage = ({ entries }: { entries: ScoreEntry[] }) => {
 
               <div className="mt-4">
                 <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-100">
-                  <span className="block text-xs font-black text-slate-400">同校一般生資料筆數</span>
+                  <span className="block text-xs font-black text-slate-400">同校同科一般生資料筆數</span>
                   <strong className="mt-1 block text-lg font-black text-slate-700">
                     {selectedMinimumEntry.count} 筆
                   </strong>
@@ -1071,7 +1076,7 @@ const MinimumScoresPage = ({ entries }: { entries: ScoreEntry[] }) => {
               )}
 
               <p className="mt-4 text-xs font-bold leading-5 text-slate-400">
-                此彈窗顯示的是目前篩選條件下，該校一般生資料中總積分最低的來源紀錄。
+                此彈窗顯示的是目前篩選條件下，該校同科一般生資料中總積分最低的來源紀錄。
               </p>
             </div>
           </div>
