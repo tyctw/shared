@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { Grade, Region, ScoreEntry, SubjectScores, WritingGrade } from '../types';
 import { calculateRegionalScore } from '../utils/scoreCalculator';
 import { ENTRY_LOCK_MESSAGE, isEntryYearLocked } from '../utils/entryOpenLock';
+import { moderateNotesContent } from '../utils/contentModeration';
 
 // ===============================
 // Initialize Supabase Client
@@ -196,6 +197,12 @@ export const submitEntry = async (entry: ScoreEntry): Promise<boolean> => {
       return false;
     }
 
+    const notesModeration = moderateNotesContent(entry.notes || '');
+    if (!notesModeration.isAllowed) {
+      console.warn('Score entry notes rejected:', notesModeration.reasons.join(', '));
+      return false;
+    }
+
     const { error } = await supabase
       .from('score_entries')
       .insert([
@@ -209,7 +216,7 @@ export const submitEntry = async (entry: ScoreEntry): Promise<boolean> => {
           scores: parseScoresSafely(entry.scores),
           total_points: entry.totalPoints,
           total_credits: entry.totalCredits ?? null,
-          notes: entry.notes || '',
+          notes: notesModeration.cleanedText,
           timestamp: entry.timestamp,
         }
       ]);

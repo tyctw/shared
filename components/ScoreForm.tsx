@@ -3,6 +3,7 @@ import { ScoreEntry, Region, Grade, WritingGrade, StudentIdentity } from '../typ
 import { YEARS, GRADES, WRITING_GRADES, REGIONS, DEPARTMENT_GROUPS, SCHOOLS_BY_REGION } from '../constants';
 import { calculateRegionalScore } from '../utils/scoreCalculator';
 import { ENTRY_OPEN_AT_LABEL, isEntryYearLocked } from '../utils/entryOpenLock';
+import { moderateNotesContent } from '../utils/contentModeration';
 import { Send, Loader2, ChevronDown, User, PenTool, Search, ShieldCheck, MapPin, School, GraduationCap, Trophy, FileText, Sparkles, Lock } from 'lucide-react';
 
 interface ScoreFormProps {
@@ -60,6 +61,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
   const [activeDeptGroup, setActiveDeptGroup] = useState('');
   const [isRegionModalOpen, setIsRegionModalOpen] = useState(false);
   const [regionSearchTerm, setRegionSearchTerm] = useState('');
+  const [notesModerationReasons, setNotesModerationReasons] = useState<string[]>([]);
 
   const showLockState = isEntryYearLocked(formData.year);
 
@@ -126,6 +128,11 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
   }, [hasUnsavedInput, isSubmitting]);
 
   const handleChange = (field: string, value: any) => {
+    if (field === 'notes') {
+      const moderation = moderateNotesContent(value);
+      setNotesModerationReasons(moderation.reasons);
+    }
+
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -215,6 +222,13 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
         return;
     }
 
+    const notesModeration = moderateNotesContent(formData.notes);
+    setNotesModerationReasons(notesModeration.reasons);
+    if (!notesModeration.isAllowed) {
+        alert(`附加說明含有不適合公開的內容，請修改後再送出：\n\n${notesModeration.reasons.join('、')}`);
+        return;
+    }
+
     setIsConfirmModalOpen(true);
   };
 
@@ -225,6 +239,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
     setTimeout(() => {
       onSubmit({
         ...formData,
+        notes: moderateNotesContent(formData.notes).cleanedText,
         totalPoints: Number(formData.totalPoints),
         totalCredits: formData.totalCredits ? Number(formData.totalCredits) : undefined,
       });
@@ -242,6 +257,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
       setSelectedGroup('');
       setIsManualDept(false);
       setIsManualSchool(false);
+      setNotesModerationReasons([]);
     }, 600);
   };
 
@@ -617,8 +633,18 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
                         value={formData.notes} 
                         onChange={(e) => handleChange('notes', e.target.value)} 
                         placeholder="多虧了... / 運氣不錯... / 建議學弟妹..." 
-                        className={`${inputClass} resize-none leading-relaxed h-32`} 
+                        className={`${inputClass} resize-none leading-relaxed h-32 ${notesModerationReasons.length > 0 ? 'border-rose-300 focus:border-rose-400 focus:ring-rose-100' : ''}`} 
                     />
+                    <div className="mt-2 flex items-start justify-between gap-3">
+                        <p className={`text-xs font-bold leading-5 ${notesModerationReasons.length > 0 ? 'text-rose-500' : 'text-slate-400'}`}>
+                            {notesModerationReasons.length > 0
+                                ? notesModerationReasons.join('、')
+                                : '請勿填寫姓名、電話、社群帳號、准考證號、攻擊性文字、廣告或其他不適合公開的內容。'}
+                        </p>
+                        <span className={`shrink-0 text-xs font-black ${formData.notes.length > 500 ? 'text-rose-500' : 'text-slate-400'}`}>
+                            {formData.notes.length}/500
+                        </span>
+                    </div>
                 </div>
 
                 <div className="pt-2">
