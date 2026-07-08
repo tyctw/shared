@@ -1,0 +1,56 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    # 每天台灣時間 11:00（UTC 03:00）
+    - cron: '0 3 * * *'
+
+    # 每天台灣時間 23:00（UTC 15:00）
+    - cron: '0 15 * * *'
+
+  workflow_dispatch:
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check Secrets
+        run: |
+          if [ -z "${{ secrets.VITE_SUPABASE_URL }}" ]; then
+            echo "❌ VITE_SUPABASE_URL is empty"
+            exit 1
+          fi
+
+          if [ -z "${{ secrets.VITE_SUPABASE_ANON_KEY }}" ]; then
+            echo "❌ VITE_SUPABASE_ANON_KEY is empty"
+            exit 1
+          fi
+
+          echo "✅ Secrets loaded"
+          echo "Supabase URL: ${{ secrets.VITE_SUPABASE_URL }}"
+
+      - name: Ping Supabase
+        run: |
+          URL="${{ secrets.VITE_SUPABASE_URL }}/rest/v1/scores?select=id&limit=1"
+
+          echo "Request URL:"
+          echo "$URL"
+
+          HTTP_CODE=$(curl \
+            --silent \
+            --show-error \
+            --output /dev/null \
+            --write-out "%{http_code}" \
+            --header "apikey: ${{ secrets.VITE_SUPABASE_ANON_KEY }}" \
+            --header "Authorization: Bearer ${{ secrets.VITE_SUPABASE_ANON_KEY }}" \
+            "$URL")
+
+          echo "HTTP Status: $HTTP_CODE"
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "❌ Supabase request failed."
+            exit 1
+          fi
+
+          echo "✅ Supabase is awake!"
