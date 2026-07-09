@@ -3,6 +3,7 @@ import ScoreForm from './components/ScoreForm';
 import ScoreList from './components/ScoreList';
 import Dashboard from './components/Dashboard';
 import Guide from './components/Guide';
+import AdmissionsInsights from './components/AdmissionsInsights';
 import ScoreCompare from './components/ScoreCompare';
 import ShareModal from './components/ShareModal';
 import GreetingModal from './components/GreetingModal';
@@ -37,7 +38,7 @@ const AppLoader = () => (
   </div>
 );
 
-type ActiveTab = 'list' | 'form' | 'stats' | 'guide' | 'compare' | 'minimums' | 'disclaimer' | 'privacy';
+type ActiveTab = 'list' | 'form' | 'stats' | 'guide' | 'compare' | 'minimums' | 'insights' | 'disclaimer' | 'privacy';
 const CONTACT_EMAIL = 'tyctw.analyze@gmail.com';
 type MinimumSortOption = 'region' | 'pointsAsc' | 'pointsDesc' | 'creditsAsc' | 'creditsDesc' | 'yearDesc' | 'yearAsc' | 'countDesc' | 'schoolAsc';
 
@@ -1564,6 +1565,24 @@ const App: React.FC = () => {
             )}
 
             <p className="px-1 pt-3 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">升學服務</p>
+            <button
+              type="button"
+              onClick={() => {
+                setIsSidebarOpen(false);
+                handleTabChange('insights');
+              }}
+              className="group flex w-full items-center gap-4 rounded-[1.4rem] border border-slate-200 bg-white p-4 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-200 hover:shadow-lg hover:shadow-cyan-100"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-cyan-400/15 text-cyan-600 ring-1 ring-cyan-300/20 transition-all group-hover:scale-110 group-hover:bg-cyan-500 group-hover:text-white">
+                <Compass className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="block font-black text-slate-800">會考志願策略</span>
+                <span className="mt-0.5 block text-xs font-medium text-slate-400">落點判讀、志願排序與常見問題</span>
+              </div>
+              <ArrowRight className="ml-auto h-4 w-4 shrink-0 text-slate-400 transition-transform group-hover:translate-x-1 group-hover:text-cyan-600" />
+            </button>
+
             <a
               href="https://tyctw.github.io/front/"
               target="_blank"
@@ -1678,7 +1697,7 @@ const App: React.FC = () => {
              <NavButton id="list" label="瀏覽" icon={BookOpen} />
              <NavButton id="minimums" label="最低" icon={Table2} />
              <NavButton id="stats" label="統計" icon={BarChart3} />
-             <NavButton id="guide" label="說明" icon={Info} />
+             <NavButton id="insights" label="策略" icon={Compass} />
              <div className="w-px h-6 bg-slate-200 mx-1"></div>
              <button
                  type="button"
@@ -1750,7 +1769,7 @@ const App: React.FC = () => {
         
         <div className="animate-in fade-in duration-700 slide-in-from-bottom-6">
             
-            {!isLoading && loadError && !['guide', 'disclaimer', 'privacy'].includes(activeTab) && (
+            {!isLoading && loadError && !['guide', 'insights', 'disclaimer', 'privacy'].includes(activeTab) && (
                  <div className="mb-8 overflow-hidden rounded-2xl border border-rose-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-md">
                     <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
                       <div className="bg-rose-100 p-3 rounded-full text-rose-600">
@@ -1774,7 +1793,7 @@ const App: React.FC = () => {
                  </div>
             )}
 
-            {!isLoading && !loadError && entries.length === 0 && !['guide', 'minimums', 'disclaimer', 'privacy'].includes(activeTab) && (
+            {!isLoading && !loadError && entries.length === 0 && !['guide', 'minimums', 'insights', 'disclaimer', 'privacy'].includes(activeTab) && (
                  <div className="mb-8 bg-white/50 backdrop-blur-md border border-amber-200/60 rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left shadow-sm">
                     <div className="bg-amber-100 p-3 rounded-full text-amber-600">
                         <CloudOff className="w-6 h-6" />
@@ -1791,6 +1810,10 @@ const App: React.FC = () => {
 
             {activeTab === 'guide' && (
                 <Guide onNavigate={(tab) => handleTabChange(tab)} />
+            )}
+
+            {activeTab === 'insights' && (
+                <AdmissionsInsights onNavigate={(tab) => handleTabChange(tab)} />
             )}
 
             {activeTab === 'list' && (
@@ -1981,7 +2004,7 @@ const App: React.FC = () => {
                     </p>
                 </div>
 
-                <div className="flex gap-4 sm:gap-6">
+                <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
                     <a
                          href={`mailto:${CONTACT_EMAIL}`}
                          className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors"
@@ -1989,6 +2012,13 @@ const App: React.FC = () => {
                         <MailWarning className="w-4 h-4" />
                         <span>聯絡資訊</span>
                     </a>
+                    <button 
+                         onClick={() => handleTabChange('guide')}
+                         className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors"
+                    >
+                        <Info className="w-4 h-4" />
+                        <span>說明</span>
+                    </button>
                     <button 
                          onClick={() => handleTabChange('disclaimer')}
                          className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors"
