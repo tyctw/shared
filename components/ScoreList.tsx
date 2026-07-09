@@ -82,7 +82,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
   const [filterSchool, setFilterSchool] = useState<string>('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(12);
+  const [itemsPerPage, setItemsPerPage] = useState(24);
   const [groupBySchool, setGroupBySchool] = useState<boolean>(false);
   const [cooldown, setCooldown] = useState<number>(0);
 
@@ -528,9 +528,9 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
               onChange={(e) => setItemsPerPage(Number(e.target.value))}
               className="bg-white/70 backdrop-blur-sm border border-slate-200 rounded-xl py-1.5 px-3 text-sm font-bold text-slate-600 outline-none focus:ring-2 focus:ring-indigo-100 transition-all shadow-sm cursor-pointer"
             >
-              <option value={12}>12 筆</option>
               <option value={24}>24 筆</option>
               <option value={60}>60 筆</option>
+              <option value={100}>100 筆</option>
             </select>
           </div>
 

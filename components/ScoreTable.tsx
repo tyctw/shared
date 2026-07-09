@@ -13,7 +13,7 @@ interface ScoreTableProps {
 
 export const ScoreTable: React.FC<ScoreTableProps> = ({ data, allData, sortConfig, onSort, onTogglePin, pinnedItems }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(12);
+  const [itemsPerPage, setItemsPerPage] = useState(24);
   const [reportItem, setReportItem] = useState<ScoreData | null>(null);
 
   useEffect(() => {
@@ -403,9 +403,9 @@ export const ScoreTable: React.FC<ScoreTableProps> = ({ data, allData, sortConfi
                 onChange={(e) => setItemsPerPage(Number(e.target.value))}
                 className="bg-white border border-slate-200 text-slate-700 text-sm rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 block p-2 font-bold outline-none cursor-pointer hover:border-indigo-300 transition-colors"
             >
-                <option value={12}>12</option>
                 <option value={24}>24</option>
                 <option value={60}>60</option>
+                <option value={100}>100</option>
             </select>
         </div>
 
