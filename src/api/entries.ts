@@ -2,21 +2,34 @@ import { ScoreEntry } from '../types'
 import { supabase } from '../lib/supabase'
 import { isEntryYearLocked } from '../../utils/entryOpenLock'
 
+const SUPABASE_PAGE_SIZE = 1000
+
 // ===============================
 // Fetch Entries（讀取資料）
 // ===============================
 export const fetchEntries = async (): Promise<ScoreEntry[]> => {
   try {
-    const { data, error } = await supabase
-      .from('score_entries')
-      .select('*')
+    const rows: any[] = []
 
-    if (error) {
-      console.error('Supabase error:', error)
-      return []
+    for (let from = 0; ; from += SUPABASE_PAGE_SIZE) {
+      const { data, error } = await supabase
+        .from('score_entries')
+        .select('*')
+        .range(from, from + SUPABASE_PAGE_SIZE - 1)
+
+      if (error) {
+        console.error('Supabase error:', error)
+        return []
+      }
+
+      rows.push(...(data || []))
+
+      if (!data || data.length < SUPABASE_PAGE_SIZE) {
+        break
+      }
     }
 
-    return (data || []).map((item: any) => ({
+    return rows.map((item: any) => ({
       ...item,
       scores: typeof item.scores === 'string' ? JSON.parse(item.scores) : item.scores,
       studentIdentity: item.student_identity ?? item.studentIdentity ?? '一般生',

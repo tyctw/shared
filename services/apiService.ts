@@ -9,6 +9,7 @@ import { moderateNotesContent } from '../utils/contentModeration';
 // ===============================
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const SUPABASE_PAGE_SIZE = 1000;
 
 // Create a single supabase client for interacting with your database
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -169,18 +170,27 @@ export const fetchEntries = async (): Promise<ScoreEntry[]> => {
       throw new Error('Supabase 環境變數尚未設定，請確認 VITE_SUPABASE_URL 與 VITE_SUPABASE_ANON_KEY。');
     }
 
-    const { data, error } = await supabase
-      .from('score_entries')
-      .select('*')
-      .order('timestamp', { ascending: false });
+    const rows: any[] = [];
 
-    if (error) {
-      throw error;
+    for (let from = 0; ; from += SUPABASE_PAGE_SIZE) {
+      const { data, error } = await supabase
+        .from('score_entries')
+        .select('*')
+        .order('timestamp', { ascending: false })
+        .range(from, from + SUPABASE_PAGE_SIZE - 1);
+
+      if (error) {
+        throw error;
+      }
+
+      rows.push(...(data || []));
+
+      if (!data || data.length < SUPABASE_PAGE_SIZE) {
+        break;
+      }
     }
 
-    if (!data) return [];
-
-    return await repairScoreEntries(data);
+    return await repairScoreEntries(rows);
   } catch (error) {
     console.error('Error fetching entries from Supabase:', error);
     throw error;

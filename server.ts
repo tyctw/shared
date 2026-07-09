@@ -7,6 +7,7 @@ import { ENTRY_LOCK_MESSAGE, isEntryYearLocked } from './utils/entryOpenLock';
 
 const app = express();
 const PORT = 3000;
+const SUPABASE_PAGE_SIZE = 1000;
 
 app.use(cors());
 app.use(express.json());
@@ -35,17 +36,28 @@ app.get('/api/entries', async (req, res) => {
   }
   
   try {
-    const { data, error } = await supabase
-      .from('score_entries')
-      .select('*')
-      .order('timestamp', { ascending: false });
+    const rows: any[] = [];
 
-    if (error) {
-      throw error;
+    for (let from = 0; ; from += SUPABASE_PAGE_SIZE) {
+      const { data, error } = await supabase
+        .from('score_entries')
+        .select('*')
+        .order('timestamp', { ascending: false })
+        .range(from, from + SUPABASE_PAGE_SIZE - 1);
+
+      if (error) {
+        throw error;
+      }
+
+      rows.push(...(data || []));
+
+      if (!data || data.length < SUPABASE_PAGE_SIZE) {
+        break;
+      }
     }
 
     // Parse JSON fields if necessary, depends on how they are stored
-    const formattedData = data.map((entry: any) => ({
+    const formattedData = rows.map((entry: any) => ({
       ...entry,
       scores: typeof entry.scores === 'string' ? JSON.parse(entry.scores) : entry.scores,
       studentIdentity: entry.student_identity ?? entry.studentIdentity ?? '一般生',
