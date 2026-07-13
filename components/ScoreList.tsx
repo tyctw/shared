@@ -22,6 +22,20 @@ const SUBJECT_LABELS: Record<string, string> = {
 
 const REPORT_EMAIL = import.meta.env.VITE_REPORT_EMAIL || 'tyctw.analyze@gmail.com';
 
+const hasTotalCredits = (entry: Pick<ScoreEntry, 'totalCredits'>) => typeof entry.totalCredits === 'number';
+
+const compareMinimumAdmissionEntry = (a: ScoreEntry, b: ScoreEntry) => {
+  if (a.totalPoints !== b.totalPoints) {
+    return a.totalPoints - b.totalPoints;
+  }
+
+  if (hasTotalCredits(a) && hasTotalCredits(b) && a.totalCredits !== b.totalCredits) {
+    return a.totalCredits - b.totalCredits;
+  }
+
+  return 0;
+};
+
 const STUDENT_IDENTITY_FILTERS: StudentIdentity[] = [
   '一般生',
   '低收入戶生',
@@ -115,12 +129,13 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
 
   const listTopRef = React.useRef<HTMLDivElement>(null);
 
-  const minPointsMap = React.useMemo(() => {
-    const map = new Map<string, number>();
+  const minimumAdmissionEntryMap = React.useMemo(() => {
+    const map = new Map<string, ScoreEntry>();
     entries.forEach(entry => {
       const key = `${entry.year}-${entry.school}`;
-      if (!map.has(key) || entry.totalPoints < map.get(key)!) {
-        map.set(key, entry.totalPoints);
+      const current = map.get(key);
+      if (!current || compareMinimumAdmissionEntry(entry, current) < 0) {
+        map.set(key, entry);
       }
     });
     return map;
@@ -454,7 +469,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
                       {entry.studentIdentity ?? '一般生'}
                     </span>
 
-                    {minPointsMap.get(`${entry.year}-${entry.school}`) === entry.totalPoints && (
+                    {minimumAdmissionEntryMap.get(`${entry.year}-${entry.school}`)?.id === entry.id && (
                       <span className="inline-flex items-center gap-1.5 rounded-xl bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-600 ring-1 ring-rose-100">
                         <Sparkles className="h-3.5 w-3.5" />同校同年最低錄取資料
                       </span>
