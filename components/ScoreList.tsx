@@ -29,11 +29,27 @@ const compareMinimumAdmissionEntry = (a: ScoreEntry, b: ScoreEntry) => {
     return a.totalPoints - b.totalPoints;
   }
 
-  if (hasTotalCredits(a) && hasTotalCredits(b) && a.totalCredits !== b.totalCredits) {
+  if (hasTotalCredits(a) !== hasTotalCredits(b)) {
+    return hasTotalCredits(a) ? -1 : 1;
+  }
+
+  if (hasTotalCredits(a) && hasTotalCredits(b)) {
     return a.totalCredits - b.totalCredits;
   }
 
   return 0;
+};
+
+const isMinimumAdmissionTie = (entry: ScoreEntry, minimumEntry: ScoreEntry) => {
+  if (entry.totalPoints !== minimumEntry.totalPoints) {
+    return false;
+  }
+
+  if (hasTotalCredits(minimumEntry)) {
+    return entry.totalCredits === minimumEntry.totalCredits;
+  }
+
+  return !hasTotalCredits(entry);
 };
 
 const STUDENT_IDENTITY_FILTERS: StudentIdentity[] = [
@@ -469,7 +485,10 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
                       {entry.studentIdentity ?? '一般生'}
                     </span>
 
-                    {minimumAdmissionEntryMap.get(`${entry.year}-${entry.school}`)?.id === entry.id && (
+                    {(() => {
+                      const minimumEntry = minimumAdmissionEntryMap.get(`${entry.year}-${entry.school}`);
+                      return minimumEntry && isMinimumAdmissionTie(entry, minimumEntry);
+                    })() && (
                       <span className="inline-flex items-center gap-1.5 rounded-xl bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-600 ring-1 ring-rose-100">
                         <Sparkles className="h-3.5 w-3.5" />同校同年最低錄取資料
                       </span>
