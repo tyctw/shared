@@ -42,6 +42,20 @@ type ActiveTab = 'list' | 'form' | 'stats' | 'guide' | 'compare' | 'minimums' | 
 const CONTACT_EMAIL = 'tyctw.analyze@gmail.com';
 type MinimumSortOption = 'region' | 'pointsAsc' | 'pointsDesc' | 'creditsAsc' | 'creditsDesc' | 'yearDesc' | 'yearAsc' | 'countDesc' | 'schoolAsc';
 
+const hasTotalCredits = (entry: Pick<ScoreEntry, 'totalCredits'>) => typeof entry.totalCredits === 'number';
+
+const compareMinimumAdmissionEntry = (a: ScoreEntry, b: ScoreEntry) => {
+  if (a.totalPoints !== b.totalPoints) {
+    return a.totalPoints - b.totalPoints;
+  }
+
+  if (hasTotalCredits(a) && hasTotalCredits(b) && a.totalCredits !== b.totalCredits) {
+    return a.totalCredits - b.totalCredits;
+  }
+
+  return 0;
+};
+
 const DataStreamLoader = () => (
   <div className="flex min-h-[54vh] flex-col items-center justify-center px-4 py-14 animate-in fade-in duration-700">
     <div className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-white/80 bg-white/72 px-6 py-8 text-center shadow-[0_28px_90px_-46px_rgba(79,70,229,0.65)] ring-1 ring-indigo-100/70 backdrop-blur-xl sm:px-10">
@@ -660,26 +674,25 @@ const MinimumScoresPage = ({ entries }: { entries: ScoreEntry[] }) => {
     filteredEntries.forEach(entry => {
       const key = `${entry.year}__${entry.region}__${entry.school}__${entry.department}`;
       const current = map.get(key);
-      const entryCredits = entry.totalCredits ?? Number.POSITIVE_INFINITY;
-      const currentCredits = current?.entry.totalCredits ?? Number.POSITIVE_INFINITY;
 
-      if (
-        !current ||
-        entry.totalPoints < current.entry.totalPoints ||
-        (entry.totalPoints === current.entry.totalPoints && entryCredits < currentCredits)
-      ) {
-        map.set(key, { entry, count: (current?.count ?? 0) + 1 });
+      if (!current) {
+        map.set(key, { entry, count: 1 });
         return;
       }
 
       current.count += 1;
+
+      if (compareMinimumAdmissionEntry(entry, current.entry) < 0) {
+        current.entry = entry;
+        return;
+      }
     });
 
     const compareByDefault = (a: ScoreEntry & { count: number }, b: ScoreEntry & { count: number }) => {
       const regionCompare = String(a.region).localeCompare(String(b.region), 'zh-TW');
       if (regionCompare !== 0) return regionCompare;
       return (
-        a.totalPoints - b.totalPoints ||
+        compareMinimumAdmissionEntry(a, b) ||
         a.school.localeCompare(b.school, 'zh-TW') ||
         a.department.localeCompare(b.department, 'zh-TW') ||
         Number(b.year) - Number(a.year)
