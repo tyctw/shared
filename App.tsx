@@ -617,6 +617,100 @@ const ModernDisclaimerPage = ({ onBack }: { onBack: () => void }) => {
   );
 };
 
+type LegalPageKind = 'disclaimer' | 'privacy';
+
+/**
+ * The wording below reflects the functions this site currently provides:
+ * anonymous score submissions stored in Supabase, public display of approved
+ * submissions, and preference data kept in the visitor's own browser.
+ */
+const LegalContentPage = ({ kind, onBack }: { kind: LegalPageKind; onBack: () => void }) => {
+  const isPrivacy = kind === 'privacy';
+  const title = isPrivacy ? '隱私權與版權聲明' : '免責聲明';
+  const subtitle = isPrivacy
+    ? '最後更新：2026 年 7 月 26 日'
+    : '使用本站前，請先了解資料的性質與限制。';
+
+  const sections = isPrivacy ? [
+    {
+      heading: '1. 蒐集者與適用範圍',
+      body: <>本聲明適用於「TYCTW 會考落點／CAP Score Sharing」（下稱「本平台」）之瀏覽、查詢與投稿服務。平台聯絡窗口為 <a className="font-bold text-indigo-700 underline underline-offset-2" href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>。</>,
+    },
+    {
+      heading: '2. 蒐集資料、目的與不提供的影響',
+      body: <>您瀏覽本平台時，平台不要求註冊帳號。若您主動投稿，會蒐集您填寫的會考年度、就學區、學校、科別／班別、身分別、各科成績、積分／積點、補充說明及送出時間；用途限於彙整、公開呈現、查詢、統計、維護資料品質與處理爭議。投稿完全自由；不提供資料僅會使您無法使用投稿功能，不影響瀏覽公開資料。</>,
+    },
+    {
+      heading: '3. 公開顯示與請勿填寫個人資料',
+      body: <>投稿資料可能公開供其他使用者查詢、篩選、統計與比較。請勿在任何欄位填寫姓名、電話、電子郵件、社群帳號、地址、准考證號、班級座號、照片，或其他可直接或間接辨識您或他人的資訊。若內容含有個人資料、侵權內容或不當資訊，平台得先行遮蔽、修正或移除。</>,
+    },
+    {
+      heading: '4. 保存、利用與第三方服務',
+      body: <>投稿資料保存至其不再有統計、維護、爭議處理或法令遵循之必要為止；有隱私或正確性疑慮時得提前刪除。資料由雲端資料庫服務處理與保存，可能涉及境外處理。除為提供、維護本平台、依法配合主管機關或取得您同意外，平台不出售或出租投稿資料。本站不使用廣告追蹤 Cookie；瀏覽器的 Local Storage 僅保存收藏、介面偏好及已閱讀聲明等資料，您可自行在瀏覽器設定中清除。</>,
+    },
+    {
+      heading: '5. 您的權利與申請方式',
+      body: <>如資料屬於您本人，您可依法請求查詢或閱覽、製給複製本、補充或更正、停止蒐集／處理／利用，或刪除。請寄信至上述聯絡信箱，主旨註明「個資／資料申請」，並提供能定位內容的年度、區域、學校、科別與投稿時間等資訊；為避免誤刪，平台得要求合理的身分或權利關係確認。申請將依適用法令與他人權益處理；依法得拒絕或限制者，會說明理由。</>,
+    },
+    {
+      heading: '6. 安全、外部連結與聲明更新',
+      body: <>平台採取合理的技術與管理措施保護資料，但網路傳輸與系統均無法保證絕對安全。本站如連結至其他網站或社群平台，其資料處理由各該服務負責。本聲明會因功能或法令變更而更新，更新版本自本頁公布時生效；重大變更將於網站以合理方式提示。</>,
+    },
+    {
+      heading: '7. 版權與投稿授權',
+      body: <>本站介面、文字、設計、程式與自行製作的圖表，除另有標示外，受著作權法保護。未經權利人書面同意，不得重製、改作、散布、公開傳輸或作商業利用；法律所允許的合理使用不在此限。您保有投稿內容原有權利，但投稿即表示您授權平台在營運本服務所必要範圍內，非專屬、無償地儲存、重製、編輯、匿名化、公開展示與統計使用。您應確保投稿不侵害第三人權利；若您是權利人並認為本站內容侵權，請來信提供網址／畫面、權利說明及聯絡方式，平台將依合理程序處理。</>,
+    },
+  ] : [
+    {
+      heading: '1. 非官方資訊與使用目的',
+      body: <>本平台由使用者自願、匿名投稿建立，並非教育主管機關、國中教育會考中心、招生委員會、學校或任何官方單位之網站；資料僅供經驗交流與資訊參考，不構成招生公告、錄取保證、升學建議、法律、財務或其他專業意見。</>,
+    },
+    {
+      heading: '2. 資料限制與判讀',
+      body: <>投稿可能有誤植、遺漏、重複、樣本不足、時點落差或個人情況差異。錄取結果也會受年度、志願序、超額比序、免試入學規則、身分別、招生名額及其他條件影響；單一筆資料、最低分或統計結果，均不能推論為正式門檻或預測您必然錄取。請以各招生主管機關、免試入學委員會與學校的最新正式公告為準。</>,
+    },
+    {
+      heading: '3. 使用者責任',
+      body: <>您應自行判斷資料是否適用並承擔使用結果。投稿時請如實填寫，且不得提供個人資料、虛偽內容、歧視、侮辱、廣告、惡意程式、侵害隱私或著作權之資料。您對投稿內容及其合法性負責；如因您的內容造成第三人損害或爭議，應自行負責處理。</>,
+    },
+    {
+      heading: '4. 平台管理與責任範圍',
+      body: <>平台得基於資料品質、安全、隱私、法令遵循或維運需要，審核、排序、統計、遮蔽、修正或移除內容，且不保證資料完整、正確、即時、持續可用或符合個別需求。在法令容許的最大範圍內，平台不就使用或無法使用本站、依賴使用者投稿、外部連結或第三方服務所生的間接、附帶、特殊、衍生損害或預期利益損失負責；但因故意或重大過失，或法律不得排除之責任，不受此限制。</>,
+    },
+    {
+      heading: '5. 回報、刪修與適用原則',
+      body: <>若發現錯誤、重複、個資、侵權或其他不當內容，請寄信至 <a className="font-bold text-indigo-700 underline underline-offset-2" href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>，並提供能定位的網址或年度、區域、學校、科別等資訊。平台將在合理範圍內處理。本聲明依中華民國法律解釋；如有爭議，應先以聯絡窗口協商處理。</>,
+    },
+  ];
+
+  return (
+    <div className="mx-auto max-w-4xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <section className={`rounded-[2rem] border p-6 shadow-sm sm:p-8 ${isPrivacy ? 'border-indigo-100 bg-indigo-50/50' : 'border-amber-100 bg-amber-50/60'}`}>
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-4">
+            <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-white ${isPrivacy ? 'bg-indigo-600' : 'bg-amber-500'}`}>
+              {isPrivacy ? <Shield className="h-7 w-7" /> : <ShieldAlert className="h-7 w-7" />}
+            </div>
+            <div>
+              <h2 className="text-3xl font-black tracking-tight text-slate-900">{title}</h2>
+              <p className="mt-2 text-sm font-medium leading-6 text-slate-600">{subtitle}</p>
+            </div>
+          </div>
+          <button type="button" onClick={onBack} className="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-black text-white transition-colors hover:bg-indigo-600">返回資料列表</button>
+        </div>
+      </section>
+      <section className="space-y-4 rounded-[2rem] border border-slate-100 bg-white p-5 shadow-sm sm:p-8">
+        {sections.map(section => (
+          <article key={section.heading} className="border-b border-slate-100 pb-5 last:border-0 last:pb-0">
+            <h3 className="border-l-4 border-indigo-500 pl-3 text-lg font-black text-slate-800">{section.heading}</h3>
+            <p className="mt-3 text-sm font-medium leading-7 text-slate-600">{section.body}</p>
+          </article>
+        ))}
+      </section>
+    </div>
+  );
+};
+
 const MinimumScoresPage = ({ entries }: { entries: ScoreEntry[] }) => {
   const [selectedYear, setSelectedYear] = React.useState('115');
   const [selectedRegion, setSelectedRegion] = React.useState('all');
@@ -1992,11 +2086,11 @@ const App: React.FC = () => {
             )}
 
             {activeTab === 'disclaimer' && (
-              <ModernDisclaimerPage onBack={handleAcceptDisclaimer} />
+              <LegalContentPage kind="disclaimer" onBack={handleAcceptDisclaimer} />
             )}
 
             {activeTab === 'privacy' && (
-              <LegalNoticePage onBack={() => handleTabChange('list')} />
+              <LegalContentPage kind="privacy" onBack={() => handleTabChange('list')} />
             )}
         </div>
       </main>
