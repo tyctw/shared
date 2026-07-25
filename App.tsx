@@ -133,6 +133,58 @@ const DataStreamLoader = () => (
   </div>
 );
 
+const SystemInitializingScreen = () => (
+  <div className="system-boot relative isolate flex min-h-[58vh] items-center justify-center overflow-hidden rounded-[2rem] bg-[#07111f] px-5 py-10 text-slate-100 shadow-[0_30px_100px_-45px_rgba(15,23,42,0.9)] sm:px-10">
+    <div className="system-boot-grid absolute inset-0 opacity-70" />
+    <div className="system-boot-orb system-boot-orb-one" />
+    <div className="system-boot-orb system-boot-orb-two" />
+    <div className="system-boot-scan absolute inset-x-0 h-px" />
+
+    <div className="relative z-10 w-full max-w-xl">
+      <div className="mb-7 flex items-center justify-between text-[10px] font-black tracking-[0.22em] text-cyan-200/70">
+        <span>CAP / DATA TERMINAL</span>
+        <span className="system-boot-online inline-flex items-center gap-2"><i />ONLINE</span>
+      </div>
+
+      <div className="rounded-[1.75rem] border border-cyan-200/15 bg-slate-950/45 p-5 shadow-2xl shadow-cyan-950/30 backdrop-blur-xl sm:p-8">
+        <div className="flex items-center gap-5">
+          <div className="system-boot-core relative grid h-16 w-16 shrink-0 place-items-center rounded-2xl border border-cyan-200/40 bg-cyan-300/10">
+            <div className="absolute inset-2 rounded-xl border border-cyan-100/25" />
+            <GraduationCap className="relative h-7 w-7 text-cyan-100" />
+          </div>
+          <div>
+            <p className="text-[10px] font-black tracking-[0.28em] text-cyan-300">SYSTEM INITIALIZING</p>
+            <h2 className="mt-2 text-2xl font-black tracking-tight text-white sm:text-3xl">正在建立資料連線</h2>
+            <p className="mt-2 text-sm font-medium text-slate-400">正在同步匿名錄取資料與平台設定。</p>
+          </div>
+        </div>
+
+        <div className="mt-8 space-y-3">
+          {[
+            ['驗證安全連線', 'SECURE CHANNEL', 'done'],
+            ['載入資料索引', 'INDEXING RECORDS', 'active'],
+            ['準備分析介面', 'RENDER QUEUED', 'wait'],
+          ].map(([label, state, status]) => (
+            <div key={state} className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.035] px-3 py-3">
+              <span className={`system-boot-status system-boot-status-${status}`} />
+              <span className="flex-1 text-sm font-bold text-slate-200">{label}</span>
+              <span className="text-[9px] font-black tracking-[0.18em] text-slate-500">{state}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-8">
+          <div className="mb-2 flex justify-between text-[10px] font-black tracking-[0.18em] text-cyan-200/80">
+            <span>LOADING MODULES</span><span>SYNCING</span>
+          </div>
+          <div className="h-1.5 overflow-hidden rounded-full bg-white/10"><div className="system-boot-progress h-full rounded-full" /></div>
+        </div>
+      </div>
+      <p className="mt-5 text-center text-[10px] font-bold tracking-[0.16em] text-slate-500">PLEASE WAIT — DO NOT REFRESH</p>
+    </div>
+  </div>
+);
+
 const StatsInsightLoader = () => (
   <div className="flex min-h-[46vh] flex-col items-center justify-center px-4 py-10 animate-in fade-in duration-700">
     <div className="relative w-full max-w-xl overflow-hidden rounded-[2rem] border border-white/80 bg-white/75 p-6 shadow-[0_28px_90px_-48px_rgba(79,70,229,0.68)] ring-1 ring-indigo-100/70 backdrop-blur-xl sm:p-8">
@@ -2062,7 +2114,7 @@ const App: React.FC = () => {
             {activeTab === 'minimums' && (
                 <div className="space-y-8">
                     {isLoading ? (
-                         <DataStreamLoader />
+                         <SystemInitializingScreen />
                     ) : (
                         <MinimumScoresPage entries={entries} />
                     )}
@@ -2112,13 +2164,6 @@ const App: React.FC = () => {
                 </div>
 
                 <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
-                    <a
-                         href={`mailto:${CONTACT_EMAIL}`}
-                         className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors"
-                    >
-                        <MailWarning className="w-4 h-4" />
-                        <span>聯絡資訊</span>
-                    </a>
                     <button 
                          onClick={() => handleTabChange('guide')}
                          className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors"
