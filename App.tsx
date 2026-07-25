@@ -1400,7 +1400,6 @@ const App: React.FC = () => {
       return saved ? JSON.parse(saved) : [];
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [showSystemBoot, setShowSystemBoot] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -1546,7 +1545,6 @@ const App: React.FC = () => {
 
   return (
     <div className="font-sans text-slate-900 selection:bg-indigo-200 selection:text-indigo-900 overflow-x-hidden min-h-screen">
-      {showSystemBoot && <SystemBootOverlay ready={!isLoading} onComplete={() => setShowSystemBoot(false)} />}
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-xl focus:bg-slate-900 focus:px-4 focus:py-3 focus:text-sm focus:font-black focus:text-white focus:shadow-xl"
