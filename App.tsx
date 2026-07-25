@@ -185,6 +185,72 @@ const SystemInitializingScreen = () => (
   </div>
 );
 
+const SystemBootOverlay = ({ ready, onComplete }: { ready: boolean; onComplete: () => void }) => {
+  const [progress, setProgress] = useState(12);
+
+  useEffect(() => {
+    if (ready) {
+      setProgress(100);
+      const completionTimer = window.setTimeout(onComplete, 180);
+      return () => window.clearTimeout(completionTimer);
+    }
+
+    const timer = window.setInterval(() => {
+      setProgress(currentProgress => Math.min(86, currentProgress + Math.max(1, Math.round((86 - currentProgress) / 7))));
+    }, 110);
+    return () => window.clearInterval(timer);
+  }, [ready, onComplete]);
+
+  const stage = progress < 32 ? 'CONNECTING' : progress < 72 ? 'SYNCHRONIZING' : 'READYING INTERFACE';
+  const completeSteps = [progress >= 18, progress >= 52, progress >= 84];
+
+  return (
+    <div className="system-boot-overlay fixed inset-0 z-[300] grid place-items-center overflow-hidden bg-[#050b16] p-5 text-white">
+      <div className="system-boot-stars absolute inset-0" />
+      <div className="system-boot-radar absolute left-1/2 top-1/2 h-[36rem] w-[36rem] -translate-x-1/2 -translate-y-1/2 rounded-full" />
+      <div className="system-boot-beam absolute left-1/2 top-0 h-full w-px -translate-x-1/2" />
+      <div className="relative z-10 w-full max-w-md">
+        <div className="mb-8 flex items-center justify-between text-[10px] font-black tracking-[0.24em] text-cyan-100/65">
+          <span>CAP SCORE / v1.0</span>
+          <span className="system-boot-online inline-flex items-center gap-2"><i />LIVE</span>
+        </div>
+
+        <div className="relative mx-auto grid h-52 w-52 place-items-center">
+          <div className="system-boot-ring system-boot-ring-outer absolute inset-0 rounded-full" />
+          <div className="system-boot-ring system-boot-ring-inner absolute inset-5 rounded-full" />
+          <div className="system-boot-ring-dash absolute inset-2 rounded-full" />
+          <div className="system-boot-emblem relative grid h-28 w-28 place-items-center rounded-[2rem] border border-cyan-100/30 bg-cyan-300/[0.08] shadow-[0_0_55px_rgba(34,211,238,0.24)] backdrop-blur-sm">
+            <GraduationCap className="h-11 w-11 text-cyan-50" strokeWidth={1.4} />
+          </div>
+        </div>
+
+        <div className="mt-7 text-center">
+          <p className="text-[11px] font-black tracking-[0.34em] text-cyan-300">SYSTEM INITIALIZING</p>
+          <h1 className="mt-3 text-3xl font-black tracking-tight text-white">資料平台啟動中</h1>
+          <p className="mt-3 text-xs font-bold tracking-[0.16em] text-slate-400">{stage}</p>
+        </div>
+
+        <div className="mt-9 rounded-[1.5rem] border border-white/10 bg-white/[0.045] p-4 shadow-2xl backdrop-blur-xl">
+          <div className="mb-4 flex items-end justify-between">
+            <span className="text-[10px] font-black tracking-[0.18em] text-slate-400">SYSTEM LOAD</span>
+            <span className="text-3xl font-black tabular-nums text-cyan-100">{String(progress).padStart(2, '0')}<small className="ml-0.5 text-sm text-cyan-400">%</small></span>
+          </div>
+          <div className="h-2 overflow-hidden rounded-full bg-white/10 p-[2px]">
+            <div className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400 shadow-[0_0_16px_rgba(34,211,238,.8)] transition-all duration-100" style={{ width: `${progress}%` }} />
+          </div>
+          <div className="mt-5 grid grid-cols-3 gap-2">
+            {['CONNECT', 'VERIFY', 'LAUNCH'].map((label, index) => (
+              <div key={label} className={`rounded-xl border px-2 py-2 text-center text-[9px] font-black tracking-[0.12em] ${completeSteps[index] ? 'border-cyan-300/40 bg-cyan-300/10 text-cyan-100' : 'border-white/5 bg-white/[0.025] text-slate-600'}`}>
+                <span className="mr-1">{completeSteps[index] ? '✓' : '○'}</span>{label}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const StatsInsightLoader = () => (
   <div className="flex min-h-[46vh] flex-col items-center justify-center px-4 py-10 animate-in fade-in duration-700">
     <div className="relative w-full max-w-xl overflow-hidden rounded-[2rem] border border-white/80 bg-white/75 p-6 shadow-[0_28px_90px_-48px_rgba(79,70,229,0.68)] ring-1 ring-indigo-100/70 backdrop-blur-xl sm:p-8">
@@ -1334,6 +1400,7 @@ const App: React.FC = () => {
       return saved ? JSON.parse(saved) : [];
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [showSystemBoot, setShowSystemBoot] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -1372,8 +1439,7 @@ const App: React.FC = () => {
       logUserAction('load_data_failed', message);
     }
 
-    // Add a small artificial delay for better UX (skeleton visibility)
-    setTimeout(() => setIsLoading(false), 800);
+    setIsLoading(false);
   }, []);
 
   // Initial load
@@ -1480,6 +1546,7 @@ const App: React.FC = () => {
 
   return (
     <div className="font-sans text-slate-900 selection:bg-indigo-200 selection:text-indigo-900 overflow-x-hidden min-h-screen">
+      {showSystemBoot && <SystemBootOverlay ready={!isLoading} onComplete={() => setShowSystemBoot(false)} />}
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-xl focus:bg-slate-900 focus:px-4 focus:py-3 focus:text-sm focus:font-black focus:text-white focus:shadow-xl"

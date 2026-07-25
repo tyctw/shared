@@ -324,3 +324,24 @@
 @media (prefers-reduced-motion: reduce) {
   .system-boot-grid, .system-boot-orb, .system-boot-scan, .system-boot-core, .system-boot-online i, .system-boot-status-active, .system-boot-progress { animation-duration: .01ms; animation-iteration-count: 1; }
 }
+
+/* Full-screen boot sequence */
+.system-boot-overlay { background: radial-gradient(circle at 50% 42%, #102d47 0%, #081321 32%, #050b16 68%); }
+.system-boot-stars { opacity: .55; background-image: radial-gradient(circle, rgba(186, 230, 253, .85) 1px, transparent 1.4px), radial-gradient(circle, rgba(103, 232, 249, .38) 1px, transparent 1.4px); background-position: 0 0, 30px 33px; background-size: 74px 74px, 113px 113px; mask-image: radial-gradient(ellipse at center, black, transparent 78%); animation: system-stars 12s linear infinite; }
+.system-boot-radar { border: 1px solid rgba(103, 232, 249, .12); box-shadow: inset 0 0 110px rgba(34, 211, 238, .09), 0 0 80px rgba(34, 211, 238, .06); background: repeating-radial-gradient(circle, transparent 0 64px, rgba(103, 232, 249, .08) 65px 66px); animation: system-radar 9s linear infinite; }
+.system-boot-radar::before { content: ""; position: absolute; inset: 50% auto auto 50%; width: 50%; height: 1px; transform-origin: left center; background: linear-gradient(90deg, rgba(103, 232, 249, .72), transparent); box-shadow: 0 0 19px rgba(34, 211, 238, .8); animation: system-radar-sweep 3.4s linear infinite; }
+.system-boot-beam { opacity: .36; background: linear-gradient(transparent, rgba(103, 232, 249, .75), transparent); filter: blur(.4px); animation: system-beam 2.6s ease-in-out infinite; }
+.system-boot-ring { border: 1px solid rgba(165, 243, 252, .25); box-shadow: 0 0 38px rgba(34, 211, 238, .1); }
+.system-boot-ring-outer { border-top-color: #67e8f9; border-right-color: transparent; animation: system-spin 6s linear infinite; }
+.system-boot-ring-inner { border-bottom-color: #818cf8; border-left-color: transparent; animation: system-spin 4.6s linear infinite reverse; }
+.system-boot-ring-dash { border: 1px dashed rgba(186, 230, 253, .45); animation: system-spin 13s linear infinite; }
+.system-boot-emblem::after { content: ""; position: absolute; inset: 9px; border-radius: 1.2rem; border: 1px solid rgba(165, 243, 252, .18); animation: system-emblem 2.2s ease-in-out infinite; }
+@keyframes system-stars { to { background-position: 74px 74px, -83px 146px; } }
+@keyframes system-radar { to { transform: translate(-50%, -50%) rotate(360deg); } }
+@keyframes system-radar-sweep { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes system-beam { 50% { opacity: .88; transform: scaleY(.62); } }
+@keyframes system-spin { to { transform: rotate(360deg); } }
+@keyframes system-emblem { 50% { inset: 15px; opacity: .42; } }
+@media (prefers-reduced-motion: reduce) {
+  .system-boot-stars, .system-boot-radar, .system-boot-radar::before, .system-boot-beam, .system-boot-ring, .system-boot-emblem::after { animation-duration: .01ms; animation-iteration-count: 1; }
+}
