@@ -22,11 +22,13 @@ export const LinkCard: React.FC<LinkCardProps> = ({ link }) => {
   const categoryIndex = Math.max(0, Object.values(RegionCategory).indexOf(link.category));
   const theme = categoryThemes[categoryIndex] ?? categoryThemes[4];
 
-  const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     if (new Date() < TARGET_DATE) {
       event.preventDefault();
       setIsModalOpen(true);
+      return;
     }
+    window.open(link.url, '_blank', 'noopener,noreferrer');
   };
 
   const handleConfirmRedirect = () => {
@@ -35,7 +37,7 @@ export const LinkCard: React.FC<LinkCardProps> = ({ link }) => {
   };
 
   return <>
-    <article className={`group relative flex h-full flex-col overflow-hidden rounded-[1.7rem] border border-slate-200/80 bg-white p-1 shadow-[0_10px_30px_-20px_rgba(15,23,42,.3)] transition duration-300 hover:-translate-y-1.5 hover:shadow-xl ${theme.glow}`}>
+    <article role="link" tabIndex={0} aria-label={`前往${link.name}官方免試入學系統`} onClick={handleClick} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); handleClick(event as unknown as React.MouseEvent<HTMLElement>); } }} className={`group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-[1.7rem] border border-slate-200/80 bg-white p-1 shadow-[0_10px_30px_-20px_rgba(15,23,42,.3)] transition duration-300 hover:-translate-y-1.5 hover:shadow-xl focus:outline-none focus-visible:ring-4 focus-visible:ring-indigo-200 ${theme.glow}`}>
       <div className={`h-1.5 w-full rounded-full bg-gradient-to-r ${theme.accent}`} />
       <div className="relative flex flex-1 flex-col overflow-hidden rounded-[1.35rem] px-5 pb-5 pt-5 sm:px-6 sm:pb-6">
         <div className={`pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full ${theme.soft} opacity-80 blur-2xl transition duration-500 group-hover:scale-125`} />
@@ -44,7 +46,7 @@ export const LinkCard: React.FC<LinkCardProps> = ({ link }) => {
             <span className={`inline-flex items-center gap-1.5 text-[11px] font-black tracking-[0.14em] ${theme.ink}`}><MapPin className="h-4 w-4" />就學區入口</span>
             <span className={`rounded-full bg-white/80 px-2.5 py-1 text-[10px] font-black ${theme.ink}`}>官方系統</span>
           </div>
-          <h3 className="mt-3 text-3xl font-black leading-none tracking-tight text-slate-950 sm:text-[2rem]">{link.name}</h3>
+          <h3 className="mt-3 font-['Noto_Sans_TC'] text-3xl font-black leading-none tracking-tight text-slate-900 sm:text-[2rem]">{link.name}</h3>
         </div>
 
         <div className="relative mt-6 rounded-2xl border border-slate-100 bg-slate-50/80 p-4">
@@ -54,9 +56,9 @@ export const LinkCard: React.FC<LinkCardProps> = ({ link }) => {
           <div className="mt-3 flex flex-wrap items-center gap-2"><span className="mr-1 text-[10px] font-black tracking-[0.12em] text-slate-400">服務項目</span>{link.tags.map(tag => <span key={tag} className={`rounded-lg bg-white px-2.5 py-1.5 text-[11px] font-black ${theme.ink} ring-1 ${theme.ring}`}>#{tag}</span>)}</div>
         </div>
 
-        <a href={link.url} target="_blank" rel="noopener noreferrer" onClick={handleClick} className={`relative mt-6 flex items-center justify-between rounded-2xl bg-slate-900 px-4 py-3.5 text-sm font-black text-white shadow-lg shadow-slate-900/10 transition duration-300 ${theme.button} focus:outline-none focus-visible:ring-4 focus-visible:ring-slate-200`}>
+        <div className={`relative mt-6 flex items-center justify-between rounded-2xl bg-slate-900 px-4 py-3.5 text-sm font-black text-white shadow-lg shadow-slate-900/10 transition duration-300 ${theme.button}`}>
           <span>前往網站</span><span className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/15 transition-transform duration-300 group-hover:translate-x-0.5"><ArrowUpRight className="h-4 w-4" /></span>
-        </a>
+        </div>
       </div>
     </article>
 
