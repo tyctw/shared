@@ -1857,6 +1857,23 @@ const App: React.FC = () => {
               </div>
               <ExternalLink className="ml-auto h-4 w-4 shrink-0 text-slate-600 transition-colors group-hover:text-emerald-300" />
             </a>
+
+            <a
+              href="https://tyctw.github.io/spare/support/"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => logUserAction('external_link', 'small_support')}
+              className="group flex items-center gap-4 rounded-[1.4rem] border border-rose-200 bg-rose-50/50 p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-300 hover:shadow-lg hover:shadow-rose-100"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-500/15 text-rose-500 ring-1 ring-rose-300/20 transition-all group-hover:scale-110 group-hover:bg-rose-500 group-hover:text-white">
+                <Heart className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="block font-black text-slate-800">小額支持</span>
+                <span className="mt-0.5 block text-xs font-medium text-slate-400">支持平台持續維護</span>
+              </div>
+              <ExternalLink className="ml-auto h-4 w-4 shrink-0 text-slate-600 transition-colors group-hover:text-rose-500" />
+            </a>
           </nav>
           
           <div className="relative z-10 mt-auto pt-8">
@@ -2229,6 +2246,16 @@ const App: React.FC = () => {
                 </div>
 
                 <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
+                    <a
+                         href="https://tyctw.github.io/spare/support/"
+                         target="_blank"
+                         rel="noopener noreferrer"
+                         onClick={() => logUserAction('external_link', 'small_support')}
+                         className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-rose-600 transition-colors"
+                    >
+                        <Heart className="w-4 h-4" />
+                        <span>小額支持</span>
+                    </a>
                     <button 
                          onClick={() => handleTabChange('guide')}
                          className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors"
