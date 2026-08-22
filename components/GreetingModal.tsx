@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowRight, Award, GraduationCap, Sparkles, Star, X } from 'lucide-react';
+import { ArrowRight, Check, GraduationCap, Sparkles, X } from 'lucide-react';
 
 export default function GreetingModal() {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,6 +12,22 @@ export default function GreetingModal() {
     }
   }, []);
 
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') handleClose();
+    };
+
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      window.addEventListener('keydown', handleEscape);
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen]);
+
   const handleClose = () => {
     setIsOpen(false);
     localStorage.setItem('hasSeenGreeting_115', 'true');
@@ -20,11 +36,11 @@ export default function GreetingModal() {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 sm:p-5 animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
       <button
         type="button"
         onClick={handleClose}
-        className="absolute inset-0 h-full w-full cursor-default bg-slate-200/65 backdrop-blur-md"
+        className="absolute inset-0 h-full w-full cursor-default bg-slate-950/60 backdrop-blur-sm"
         aria-label="關閉祝福彈窗"
       />
 
@@ -32,66 +48,60 @@ export default function GreetingModal() {
         role="dialog"
         aria-modal="true"
         aria-labelledby="greeting-title"
-        className="relative w-full max-w-xl overflow-hidden rounded-[2.25rem] border border-white/80 bg-white text-slate-900 shadow-[0_35px_90px_-35px_rgba(15,23,42,0.32)] ring-1 ring-slate-200/70 animate-in zoom-in-95 duration-500 sm:rounded-[2.5rem]"
+        className="relative w-full max-w-[34rem] overflow-hidden rounded-[2rem] bg-[#fffaf0] text-[#3b1e16] shadow-[0_32px_100px_-26px_rgba(23,10,6,0.72)] animate-in zoom-in-95 slide-in-from-bottom-4 duration-500 sm:rounded-[2.5rem]"
       >
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-indigo-50 via-sky-50 to-transparent" />
-        <div className="pointer-events-none absolute inset-0 opacity-[0.45] [background-image:linear-gradient(rgba(99,102,241,.12)_1px,transparent_1px),linear-gradient(90deg,rgba(99,102,241,.12)_1px,transparent_1px)] [background-size:36px_36px]" />
+        <div className="absolute inset-x-0 top-0 h-2 bg-gradient-to-r from-[#8d191b] via-[#d24a2e] to-[#8d191b]" />
+        <div className="pointer-events-none absolute -left-28 -top-28 h-72 w-72 rounded-full bg-[#f5ce7a]/45 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-32 -right-24 h-72 w-72 rounded-full bg-[#b92520]/10 blur-3xl" />
+        <div className="pointer-events-none absolute inset-0 opacity-[0.045] [background-image:radial-gradient(#8d191b_1px,transparent_1px)] [background-size:15px_15px]" />
 
         <button
           type="button"
           onClick={handleClose}
-          className="absolute right-4 top-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white/80 text-slate-500 shadow-sm backdrop-blur-md transition hover:rotate-90 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
+          className="absolute right-4 top-5 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-[#7c3024]/10 bg-white/70 text-[#8d191b] shadow-sm backdrop-blur transition hover:rotate-90 hover:bg-[#8d191b] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#d59a36] focus:ring-offset-2"
           aria-label="關閉"
         >
           <X className="h-5 w-5" />
         </button>
 
-        <div className="relative z-10 px-6 pb-7 pt-9 text-center sm:px-10 sm:pb-10 sm:pt-11">
-          <div className="relative mx-auto mb-7 w-fit">
-            <div className="absolute inset-0 scale-150 rounded-full bg-indigo-200/55 blur-2xl" />
-            <div className="relative flex h-24 w-24 rotate-3 items-center justify-center rounded-[2rem] border border-white bg-gradient-to-br from-indigo-400 to-sky-400 shadow-xl shadow-indigo-200/70">
-              <GraduationCap className="h-12 w-12 -rotate-3 text-white" />
-            </div>
-            <span className="absolute -left-4 top-0 flex h-8 w-8 items-center justify-center rounded-full bg-amber-200 text-amber-700 shadow-lg shadow-amber-100">
-              <Star className="h-4 w-4 fill-current" />
-            </span>
-            <span className="absolute -bottom-2 -right-4 flex h-9 w-9 items-center justify-center rounded-full bg-white text-indigo-600 shadow-lg shadow-slate-200 ring-1 ring-slate-100">
-              <Award className="h-5 w-5" />
-            </span>
-          </div>
-
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50/80 px-3.5 py-2 text-xs font-bold text-indigo-700 backdrop-blur-md">
-            <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+        <div className="relative px-6 pb-6 pt-7 text-center sm:px-10 sm:pb-7 sm:pt-8">
+          <div className="mx-auto mb-3 flex w-fit items-center gap-2 rounded-full border border-[#d9ae60]/55 bg-[#fff3d7] px-3.5 py-1.5 text-xs font-black tracking-[0.14em] text-[#8d191b] shadow-sm">
+            <Sparkles className="h-3.5 w-3.5 text-[#c7891f]" />
             115 會考祝福
+            <Sparkles className="h-3.5 w-3.5 text-[#c7891f]" />
           </div>
 
-          <h2 id="greeting-title" className="text-3xl font-black leading-tight tracking-[-0.04em] sm:text-4xl">
+          <div className="relative mx-auto mb-3 flex h-20 w-20 items-center justify-center rounded-full border-[5px] border-[#f9e5ad] bg-[#a7211d] shadow-[0_12px_25px_-10px_rgba(126,25,21,0.6)] sm:h-24 sm:w-24">
+            <span className="absolute inset-1 rounded-full border border-[#f4c968]/70" />
+            <span className="relative font-serif text-2xl font-black tracking-[0.12em] text-[#ffe7a4] sm:text-3xl">捷報</span>
+          </div>
+
+          <p className="mb-1 text-xs font-bold tracking-[0.32em] text-[#a7211d]/75">115 國中教育會考</p>
+          <h2 id="greeting-title" className="font-serif text-3xl font-black leading-[1.15] tracking-[0.08em] text-[#7e1915] sm:text-[2.25rem]">
             祝各位考生
-            <span className="mt-1 block bg-gradient-to-r from-indigo-600 via-sky-500 to-amber-500 bg-clip-text text-transparent">
-              金榜題名
-            </span>
+            <span className="mt-1 block bg-gradient-to-r from-[#a7211d] via-[#d24a2e] to-[#b7791f] bg-clip-text text-transparent">金榜題名</span>
           </h2>
 
-          <p className="mx-auto mt-5 max-w-md text-sm font-medium leading-7 text-slate-600 sm:text-base">
-            願每一份努力都有漂亮的回音。放榜前後都記得穩住節奏，帶著準備好的自己，走向最適合的下一站。
-          </p>
-
-          <div className="mt-7 grid grid-cols-3 gap-2 text-center">
-            {['穩定發揮', '順利錄取', '前程似錦'].map(item => (
-              <div key={item} className="rounded-2xl border border-slate-200 bg-white/75 px-2 py-3 text-xs font-bold text-slate-600 shadow-sm backdrop-blur-md">
-                {item}
-              </div>
-            ))}
+          <div className="mx-auto mt-3 max-w-md border-y border-[#d9ae60]/45 py-3">
+            <p className="text-sm font-medium leading-7 text-[#633c30] sm:text-[0.95rem]">
+              願每一份努力都有漂亮的回音。放榜前後都記得穩住節奏，帶著準備好的自己，走向最適合的下一站。
+            </p>
           </div>
 
           <button
             type="button"
             onClick={handleClose}
-            className="group mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-6 py-4 text-sm font-black text-white shadow-xl shadow-slate-300 transition-all hover:-translate-y-0.5 hover:bg-indigo-600 active:scale-[0.98]"
+            className="group mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#8d191b] via-[#b52b22] to-[#8d191b] px-6 py-3.5 text-sm font-black tracking-wide text-white shadow-[0_12px_24px_-12px_rgba(126,25,21,0.85)] transition-all hover:-translate-y-0.5 hover:shadow-[0_18px_28px_-12px_rgba(126,25,21,0.8)] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#d59a36] focus:ring-offset-2"
           >
-            開始查詢落點
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/15"><Check className="h-3.5 w-3.5" /></span>
+            帶著祝福，開始查詢
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </button>
+
+          <div className="mt-3 flex items-center justify-center gap-2 text-[11px] font-medium text-[#8d6554]">
+            <GraduationCap className="h-3.5 w-3.5 text-[#b7791f]" />
+            願你走向屬於自己的燦爛未來
+          </div>
         </div>
       </section>
     </div>

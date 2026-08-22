@@ -2,7 +2,6 @@ import React from 'react';
 import {
   AlertTriangle,
   ArrowRight,
-  BarChart3,
   BookOpenCheck,
   CheckCircle2,
   ClipboardList,
@@ -11,9 +10,7 @@ import {
   HelpCircle,
   Layers3,
   LineChart,
-  Map,
   Search,
-  ShieldCheck,
   Target,
 } from 'lucide-react';
 
@@ -75,6 +72,21 @@ const AdmissionsInsights: React.FC<AdmissionsInsightsProps> = ({ onNavigate }) =
     },
   ];
 
+  const featureStory = [
+    {
+      heading: '先把分數放回自己的脈絡，而不是急著替它下結論',
+      body: '會考成績公布後，許多學生最先做的事，是搜尋某一校系「最低要幾分」。但志願選填真正需要回答的，往往不是一個單一數字，而是：這個分數放在今年的招生名額、自己的區域、身分別與志願順序中，可能落在哪個位置。歷年資料能提供方向，卻不能取代當年度的簡章與正式公告。',
+    },
+    {
+      heading: '資料看得越細，越能避開單筆成績帶來的誤判',
+      body: '同一所學校、同一個科別，可能因為區域、招生管道、特殊身分或積分細項不同，而出現不小的差距。比起只記住一筆「有人以多少分錄取」，更值得觀察的是資料是否集中、樣本是否足夠，以及近兩到三年是否呈現持續升溫或回落。當資料偏少時，應該把它視為線索，而非答案。',
+    },
+    {
+      heading: '志願表不是排行榜，而是一份關於未來三年的選擇',
+      body: '分數相近的校系，課程方向、通勤時間、社團資源、實作設備與升學出口可能完全不同。建議把真正想讀的選項放在前段，並以安全、相近、挑戰三個層次配置。這樣做不是保守或冒險二選一，而是同時保留理想與可行性，讓最後的選擇更貼近自己的生活。',
+    },
+  ];
+
   return (
     <div className="mx-auto max-w-6xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <section className="relative overflow-hidden rounded-[2rem] bg-slate-950 px-6 py-10 text-white shadow-[0_28px_80px_-45px_rgba(15,23,42,0.7)] sm:px-10 sm:py-12">
@@ -111,6 +123,48 @@ const AdmissionsInsights: React.FC<AdmissionsInsightsProps> = ({ onNavigate }) =
           </div>
         </div>
       </section>
+
+      <article className="overflow-hidden rounded-[2rem] border border-slate-100 bg-white shadow-sm">
+        <div className="border-b border-slate-100 px-6 py-6 sm:px-9 sm:py-8">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-black">
+            <span className="rounded-full bg-cyan-50 px-3 py-1.5 text-cyan-700">志願選填專題</span>
+            <span className="text-slate-400">會考升學觀察</span>
+            <span className="text-slate-300">｜</span>
+            <span className="text-slate-400">閱讀時間約 4 分鐘</span>
+          </div>
+          <h3 className="mt-5 max-w-4xl text-2xl font-black leading-tight tracking-tight text-slate-900 sm:text-4xl">
+            分數公布後，如何把「我能填哪裡」變成更有把握的志願選擇？
+          </h3>
+          <p className="mt-4 max-w-3xl text-base font-medium leading-8 text-slate-500">
+            在填下第一個志願前，先用資料理解風險、用興趣確認方向，再為自己留下一條穩定而有選擇感的路。
+          </p>
+        </div>
+
+        <div className="grid gap-8 px-6 py-7 sm:px-9 sm:py-9 lg:grid-cols-[minmax(0,1fr)_220px]">
+          <div className="space-y-7">
+            <p className="border-l-4 border-cyan-500 pl-4 text-lg font-bold leading-8 text-slate-700">
+              志願選填不是猜題，也不是把所有校系照分數由高到低排一遍。真正重要的是理解資料的範圍、限制與自己的優先順序。
+            </p>
+            {featureStory.map(({ heading, body }, index) => (
+              <section key={heading}>
+                <p className="mb-2 text-xs font-black tracking-[0.18em] text-cyan-600">POINT {String(index + 1).padStart(2, '0')}</p>
+                <h4 className="text-xl font-black leading-8 text-slate-900">{heading}</h4>
+                <p className="mt-3 text-[15px] font-medium leading-8 text-slate-600">{body}</p>
+              </section>
+            ))}
+          </div>
+
+          <aside className="h-fit rounded-[1.5rem] bg-slate-950 p-5 text-white">
+            <p className="text-[10px] font-black tracking-[0.2em] text-cyan-300">編輯提醒</p>
+            <p className="mt-3 text-sm font-bold leading-7 text-slate-100">
+              平台資料適合用來比較趨勢與建立志願組合；實際招生名額、比序規則與錄取結果，請以當年度官方資料為準。
+            </p>
+            <button type="button" onClick={() => onNavigate('list')} className="mt-5 inline-flex items-center gap-2 text-sm font-black text-cyan-300 hover:text-white">
+              查看同校系資料 <ArrowRight className="h-4 w-4" />
+            </button>
+          </aside>
+        </div>
+      </article>
 
       <section className="grid gap-4 lg:grid-cols-3">
         {strategyCards.map(({ icon: Icon, title, body, action, tab }) => (
@@ -178,34 +232,6 @@ const AdmissionsInsights: React.FC<AdmissionsInsightsProps> = ({ onNavigate }) =
             ))}
           </div>
         </article>
-      </section>
-
-      <section className="grid gap-5 md:grid-cols-3">
-        {[
-          {
-            icon: BarChart3,
-            title: '資料不是保證',
-            text: '分享資料能幫助判斷趨勢，但不等於官方錄取結果。最後仍要以簡章、招生名額與正式榜單為準。',
-          },
-          {
-            icon: Map,
-            title: '地區會影響選填',
-            text: '同樣分數在不同區域的選擇密度不同，跨區、交通與住宿都會改變志願排序。',
-          },
-          {
-            icon: ShieldCheck,
-            title: '保留個資安全',
-            text: '分享成績時避免填入姓名、電話、准考證號或社群帳號，讓資料有用也更安全。',
-          },
-        ].map(({ icon: Icon, title, text }) => (
-          <article key={title} className="rounded-[1.5rem] border border-slate-100 bg-white p-5 shadow-sm">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-              <Icon className="h-5 w-5" />
-            </div>
-            <h3 className="mt-4 font-black text-slate-900">{title}</h3>
-            <p className="mt-2 text-sm font-medium leading-6 text-slate-500">{text}</p>
-          </article>
-        ))}
       </section>
 
       <section className="rounded-[2rem] border border-slate-100 bg-white p-6 shadow-sm sm:p-7">

@@ -305,7 +305,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
               />
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
               <div className="relative">
                 <Calendar className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <select
@@ -425,7 +425,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
               key={entry.id}
               className="group relative flex h-full flex-col overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white shadow-[0_12px_40px_-24px_rgba(15,23,42,0.3)] transition-all duration-500 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-[0_24px_60px_-28px_rgba(79,70,229,0.38)]"
             >
-              <div className="relative overflow-hidden border-b border-slate-100 bg-gradient-to-br from-white via-indigo-50/70 to-sky-50 px-5 pb-7 pt-5 text-slate-900 sm:px-6">
+              <div className="relative overflow-hidden border-b border-slate-100 bg-gradient-to-br from-white via-indigo-50/70 to-sky-50 px-5 pb-5 pt-4 text-slate-900 sm:px-6">
                 <div className="pointer-events-none absolute -right-12 -top-16 h-44 w-44 rounded-full border-[28px] border-indigo-100/55"></div>
                 <div className="pointer-events-none absolute -bottom-20 left-1/4 h-40 w-40 rounded-full bg-sky-100/80 blur-[55px]"></div>
 
@@ -472,16 +472,15 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
                   </div>
                 </div>
 
-                <div className="relative z-10 mt-6">
-                  <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500">Admission record</p>
-                  <h3 className="text-2xl font-black leading-tight tracking-tight text-slate-900 sm:text-[1.7rem]">{entry.school}</h3>
+                <div className="relative z-10 mt-4">
+                  <h3 className="text-xl font-black leading-tight tracking-tight text-slate-900 sm:text-2xl">{entry.school}</h3>
 
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-xl bg-white/85 px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm ring-1 ring-slate-200">
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-xl bg-white/85 px-3 py-1 text-xs font-bold text-slate-600 shadow-sm ring-1 ring-slate-200">
                       <School className="h-3.5 w-3.5 text-indigo-500" />{entry.department}
                     </span>
 
-                    <span className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-600 ring-1 ring-indigo-100">
+                    <span className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-600 ring-1 ring-indigo-100">
                       {entry.studentIdentity ?? '一般生'}
                     </span>
 
@@ -489,7 +488,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
                       const minimumEntry = minimumAdmissionEntryMap.get(`${entry.year}-${entry.school}`);
                       return minimumEntry && isMinimumAdmissionTie(entry, minimumEntry);
                     })() && (
-                      <span className="inline-flex items-center gap-1.5 rounded-xl bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-600 ring-1 ring-rose-100">
+                      <span className="inline-flex items-center gap-1.5 rounded-xl bg-rose-50 px-3 py-1 text-xs font-bold text-rose-600 ring-1 ring-rose-100">
                         <Sparkles className="h-3.5 w-3.5" />同校同年最低錄取資料
                       </span>
                     )}
@@ -498,12 +497,12 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
               </div>
 
               <div className="-mt-3 grid grid-cols-2 gap-3 px-5 sm:px-6">
-                <div className="relative z-10 rounded-2xl border border-indigo-100 bg-white p-4 shadow-[0_12px_30px_-18px_rgba(79,70,229,0.55)]">
+                <div className="relative z-10 rounded-2xl border border-indigo-100 bg-white p-3 shadow-[0_12px_30px_-18px_rgba(79,70,229,0.55)]">
                   <span className="text-[10px] font-black uppercase tracking-[0.18em] text-indigo-400">總積分</span>
                   <strong className="mt-1 block text-3xl font-black tracking-tight text-indigo-700">{entry.totalPoints}</strong>
                 </div>
 
-                <div className="relative z-10 rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50 to-white p-4 shadow-[0_12px_30px_-18px_rgba(245,158,11,0.5)]">
+                <div className="relative z-10 rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50 to-white p-3 shadow-[0_12px_30px_-18px_rgba(245,158,11,0.5)]">
                   <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.18em] text-amber-500">
                     <Sparkles className="h-3 w-3" />總積點
                   </span>
@@ -511,16 +510,16 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
                 </div>
               </div>
 
-              <div className="flex flex-1 flex-col px-5 pb-5 pt-5 sm:px-6 sm:pb-6">
+              <div className="flex flex-1 flex-col px-5 pb-4 pt-4 sm:px-6 sm:pb-5">
                 <div className="grid grid-cols-6 gap-1.5 rounded-2xl border border-slate-100 bg-slate-50 p-2">
                   {(['chinese', 'english', 'math', 'nature', 'social'] as const).map(sub => (
-                    <div key={sub} className={`flex min-w-0 flex-col items-center justify-center rounded-xl border px-1 py-2.5 ${getGradeStyle(entry.scores[sub])}`}>
+                    <div key={sub} className={`flex min-w-0 flex-col items-center justify-center rounded-xl border px-1 py-2 ${getGradeStyle(entry.scores[sub])}`}>
                       <span className="mb-1 text-[9px] font-black opacity-60">{SUBJECT_LABELS[sub]}</span>
                       <span className="whitespace-nowrap font-mono text-sm font-black leading-none">{entry.scores[sub]}</span>
                     </div>
                   ))}
 
-                  <div className={`flex min-w-0 flex-col items-center justify-center rounded-xl border px-1 py-2.5 ${getWritingStyle(entry.scores.writing)}`}>
+                  <div className={`flex min-w-0 flex-col items-center justify-center rounded-xl border px-1 py-2 ${getWritingStyle(entry.scores.writing)}`}>
                     <span className="mb-1 text-[9px] font-black opacity-60">作文</span>
                     <span className="whitespace-nowrap font-mono text-sm font-black leading-none">
                       {entry.scores.writing}
@@ -530,15 +529,32 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
                 </div>
 
                 {entry.notes && (
-                  <div className="relative mt-4 rounded-2xl border border-slate-100 bg-white p-4 pl-11 shadow-sm">
-                    <div className="absolute left-4 top-4 flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-50 text-indigo-400">
-                      <Quote className="h-3.5 w-3.5 rotate-180" />
+                  <div className="mt-3 rounded-[1.2rem] border border-slate-100 bg-white p-3 shadow-[0_8px_24px_-18px_rgba(15,23,42,0.28)]">
+                    <div className="flex items-start gap-2.5">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-400">
+                        <Quote className="h-3.5 w-3.5 rotate-180" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-bold leading-6 text-slate-600">
+                          {entry.notes.length > 10 ? `${entry.notes.slice(0, 10)}…` : entry.notes}
+                        </p>
+                        {entry.notes.length > 10 && (
+                          <details className="group mt-0.5">
+                            <summary className="cursor-pointer list-none text-right text-sm font-black text-indigo-600 transition-colors hover:text-violet-600">
+                              <span className="group-open:hidden">查看完整說明</span>
+                              <span className="hidden group-open:inline">收起完整說明</span>
+                            </summary>
+                            <p className="mt-3 whitespace-pre-wrap border-t border-indigo-50 pt-3 text-sm font-medium leading-7 text-slate-600">
+                              {entry.notes}
+                            </p>
+                          </details>
+                        )}
+                      </div>
                     </div>
-                    <p className="text-sm font-medium leading-6 text-slate-600">{entry.notes}</p>
                   </div>
                 )}
 
-                <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-4 text-[10px] font-bold text-slate-400">
+                <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-3 text-[10px] font-bold text-slate-400">
                   <span className="flex items-center gap-1.5">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
                     匿名考生分享

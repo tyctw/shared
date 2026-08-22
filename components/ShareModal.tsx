@@ -117,9 +117,6 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
             <h3 id="share-modal-title" className="text-2xl font-black tracking-tight sm:text-3xl">
               一起找到理想落點
             </h3>
-            <p className="mt-2 max-w-md text-sm font-medium leading-relaxed text-indigo-100 sm:text-base">
-              掃描 QR Code 或選擇社群平台，讓更多考生看見真實的錄取經驗。
-            </p>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-[220px_1fr] sm:gap-5">

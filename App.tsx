@@ -11,7 +11,7 @@ import { ScoreEntry } from './types';
 import { REGIONS } from './constants';
 import { fetchEntries, submitEntry, logUserAction } from './services/apiService';
 import { ENTRY_LOCK_MESSAGE, isEntryYearLocked } from './utils/entryOpenLock';
-import { GraduationCap, BarChart3, PlusCircle, BookOpen, CloudOff, Info, Menu, X, ExternalLink, Calculator, Compass, Sparkles, RefreshCw, Home, ShieldAlert, Check, Heart, Shield, Share2, ArrowRight, MapPin, Search, Table2, ChevronDown, MailWarning } from 'lucide-react';
+import { GraduationCap, BarChart3, PlusCircle, BookOpen, CloudOff, Info, Menu, X, ExternalLink, Calculator, Compass, Sparkles, RefreshCw, Home, ShieldAlert, Check, Heart, Shield, Share2, ArrowRight, MapPin, Search, Table2, ChevronLeft, ChevronDown, Instagram, AtSign, MailWarning } from 'lucide-react';
 
 // New Custom Loader Component
 const AppLoader = () => (
@@ -38,7 +38,7 @@ const AppLoader = () => (
   </div>
 );
 
-type ActiveTab = 'list' | 'form' | 'stats' | 'guide' | 'compare' | 'minimums' | 'insights' | 'disclaimer' | 'privacy';
+type ActiveTab = 'list' | 'form' | 'stats' | 'guide' | 'compare' | 'favorites' | 'minimums' | 'insights' | 'disclaimer' | 'privacy';
 const CONTACT_EMAIL = 'tyctw.analyze@gmail.com';
 type MinimumSortOption = 'region' | 'pointsAsc' | 'pointsDesc' | 'creditsAsc' | 'creditsDesc' | 'yearDesc' | 'yearAsc' | 'countDesc' | 'schoolAsc';
 
@@ -1402,6 +1402,8 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [mobileMenuCategory, setMobileMenuCategory] = useState<'lookup' | 'planning' | 'community' | null>(null);
+  const [isHeaderCompact, setIsHeaderCompact] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showThankYouModal, setShowThankYouModal] = useState(false);
   const [showFavoritesModal, setShowFavoritesModal] = useState(false);
@@ -1411,6 +1413,13 @@ const App: React.FC = () => {
   useEffect(() => {
       localStorage.setItem('cap_favorites', JSON.stringify(favoriteIds));
   }, [favoriteIds]);
+
+  useEffect(() => {
+    const updateHeader = () => setIsHeaderCompact(window.scrollY > 24);
+    updateHeader();
+    window.addEventListener('scroll', updateHeader, { passive: true });
+    return () => window.removeEventListener('scroll', updateHeader);
+  }, []);
 
   const toggleFavorite = (id: string) => {
       setFavoriteIds(prev => 
@@ -1507,13 +1516,13 @@ const App: React.FC = () => {
       type="button"
       onClick={() => handleTabChange(id)}
       aria-current={activeTab === id ? 'page' : undefined}
-      className={`relative px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 group ${
+      className={`relative px-4 py-2.5 rounded-full text-sm font-black transition-all duration-300 flex items-center gap-2 group ${
         activeTab === id 
-          ? 'bg-white text-indigo-700 shadow-sm border border-slate-200/60 scale-100' 
-          : 'text-slate-500 hover:text-indigo-600 hover:bg-slate-100/50 scale-95 hover:scale-100 border border-transparent'
+          ? 'bg-slate-100 text-slate-900 shadow-none border border-transparent scale-100' 
+          : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50 scale-100 border border-transparent'
       }`}
     >
-      <Icon className={`w-4 h-4 ${activeTab === id ? 'text-indigo-600' : 'group-hover:text-indigo-500 text-slate-400'}`} />
+      <Icon className={`hidden w-4 h-4 ${activeTab === id ? 'text-indigo-600' : 'group-hover:text-indigo-500 text-slate-400'}`} />
       <span>{label}</span>
       {activeTab === id && (
           <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-indigo-500 rounded-full md:opacity-100 opacity-0 hidden"></span>
@@ -1542,6 +1551,14 @@ const App: React.FC = () => {
         )}
     </button>
   );
+
+  const mobileMenuItems: Array<{ id: ActiveTab; label: string; icon: any; tone: string }> = [
+    { id: 'list', label: '瀏覽錄取資料', icon: BookOpen, tone: 'bg-indigo-100 text-indigo-600' },
+    { id: 'minimums', label: '各校最低分數', icon: Table2, tone: 'bg-sky-100 text-sky-600' },
+    { id: 'stats', label: '會考統計資料', icon: BarChart3, tone: 'bg-violet-100 text-violet-600' },
+    { id: 'insights', label: '會考志願策略', icon: Compass, tone: 'bg-amber-100 text-amber-600' },
+    { id: 'form', label: '分享錄取結果', icon: PlusCircle, tone: 'bg-rose-100 text-rose-600' },
+  ];
 
   return (
     <div className="font-sans text-slate-900 selection:bg-indigo-200 selection:text-indigo-900 overflow-x-hidden min-h-screen">
@@ -1713,49 +1730,121 @@ const App: React.FC = () => {
       {/* Sidebar Overlay */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-[60] animate-in fade-in duration-300"
+          className="fixed inset-0 z-[60] bg-slate-950/90 backdrop-blur-md animate-in fade-in duration-300 md:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
-      {/* Sidebar Panel */}
+      {/* Full-screen mobile menu */}
       <aside 
-        className={`fixed right-0 top-0 z-[70] h-full w-[90vw] max-w-[390px] overflow-hidden border-l border-white/80 bg-slate-50 shadow-[-24px_0_80px_-30px_rgba(15,23,42,0.25)] transition-transform duration-500 cubic-bezier(0.16,1,0.3,1) ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        aria-label="手機功能選單"
+        className={`fixed inset-0 z-[70] overflow-y-auto bg-transparent px-3 pb-3 pt-4 transition-all duration-500 cubic-bezier(0.16,1,0.3,1) md:hidden ${isSidebarOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'}`}
       >
-        <div className="relative flex h-full flex-col overflow-y-auto px-5 pb-6 pt-5 sm:px-7 sm:pt-7">
-          <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-violet-200/70 blur-[80px]"></div>
-          <div className="pointer-events-none absolute -bottom-32 left-0 h-72 w-72 rounded-full bg-indigo-100/80 blur-[90px]"></div>
-          <div className="pointer-events-none absolute inset-0 opacity-[0.035] [background-image:linear-gradient(rgba(79,70,229,.8)_1px,transparent_1px),linear-gradient(90deg,rgba(79,70,229,.8)_1px,transparent_1px)] [background-size:32px_32px]"></div>
-
-          <div className="relative z-10 mb-7 flex items-start justify-between">
-            <div>
-              <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl border border-indigo-100 bg-white text-indigo-600 shadow-sm">
-                <Compass className="h-5 w-5" />
-              </div>
-              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-indigo-500">Student tools</p>
-              <h2 className="mt-1 text-3xl font-black tracking-tight text-slate-900">升學工具箱</h2>
-              <p className="mt-2 max-w-[260px] text-sm font-medium leading-6 text-slate-500">
-                查榜、分析、探索與分享，一站找到需要的升學工具。
-              </p>
+        <div className="mx-auto max-w-xl">
+          <div className="mb-6 flex items-center gap-2">
+            <div className="flex h-14 flex-1 items-center justify-between rounded-[1.75rem] bg-white px-5 shadow-xl shadow-black/20">
+              <button type="button" onClick={() => { setIsSidebarOpen(false); handleTabChange('list'); }} className="flex items-center gap-3" aria-label="回到瀏覽首頁">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-white"><GraduationCap className="h-5 w-5" /></span>
+                <span className="text-sm font-black text-slate-800">會考錄取分享平台</span>
+              </button>
+              <Sparkles className="h-5 w-5 text-indigo-500" />
             </div>
             <button 
               onClick={() => setIsSidebarOpen(false)}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition-all hover:rotate-90 hover:bg-slate-900 hover:text-white"
+              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[1.35rem] bg-indigo-600 text-white shadow-lg shadow-indigo-950/30 transition-transform active:scale-95"
               aria-label="關閉功能選單"
             >
-              <X className="h-5 w-5" />
+              <X className="h-7 w-7" />
             </button>
           </div>
 
-          <nav className="relative z-10 space-y-3">
-            <p className="px-1 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">站內功能</p>
+          <nav className="rounded-[2rem] bg-white p-3 shadow-2xl shadow-black/20">
+            {mobileMenuCategory === null ? (
+              <>
+                <p className="px-4 pb-3 pt-2 text-[11px] font-black tracking-[0.18em] text-slate-400">功能分類</p>
+                <div className="space-y-2">
+                  {[
+                    { id: 'lookup' as const, title: '查詢資料', description: '錄取資料、最低分數與查榜', icon: Search, tone: 'bg-sky-100 text-sky-600' },
+                    { id: 'planning' as const, title: '分析規劃', description: '統計、志願策略與落點分析', icon: Compass, tone: 'bg-violet-100 text-violet-600' },
+                    { id: 'community' as const, title: '分享與收藏', description: '分享結果、收藏與支持平台', icon: Heart, tone: 'bg-rose-100 text-rose-600' },
+                  ].map(({ id, title, description, icon: Icon, tone }) => (
+                    <button key={id} type="button" onClick={() => setMobileMenuCategory(id)} className="group flex w-full items-center gap-4 rounded-[1.45rem] bg-slate-50 px-5 py-4 text-left transition-all hover:bg-slate-100">
+                      <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${tone}`}><Icon className="h-5 w-5" /></span>
+                      <span className="min-w-0"><span className="block text-base font-black text-slate-800">{title}</span><span className="mt-0.5 block text-xs font-medium text-slate-400">{description}</span></span>
+                      <ArrowRight className="ml-auto h-4 w-4 text-slate-400 transition-transform group-hover:translate-x-1" />
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2 px-2 pb-3 pt-1">
+                  <button type="button" onClick={() => setMobileMenuCategory(null)} className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-700" aria-label="返回功能分類"><ChevronLeft className="h-5 w-5" /></button>
+                  <div>
+                    <p className="text-[11px] font-black tracking-[0.18em] text-slate-400">功能分類</p>
+                    <h2 className="text-lg font-black text-slate-800">{mobileMenuCategory === 'lookup' ? '查詢資料' : mobileMenuCategory === 'planning' ? '分析規劃' : '分享與收藏'}</h2>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {mobileMenuCategory === 'lookup' && (
+                    <>
+                      {mobileMenuItems.filter(({ id }) => id === 'list' || id === 'minimums').map(({ id, label, icon: Icon, tone }) => (
+                        <button key={id} type="button" onClick={() => { setIsSidebarOpen(false); handleTabChange(id); }} className="group flex w-full items-center justify-between rounded-[1.45rem] bg-slate-50 px-5 py-3 text-left hover:bg-slate-100"><span className="text-base font-black text-slate-800">{label}</span><span className={`flex h-12 w-12 items-center justify-center rounded-full ${tone}`}><Icon className="h-5 w-5" /></span></button>
+                      ))}
+                      <a href="https://tyctw.github.io/front/" target="_blank" rel="noopener noreferrer" onClick={() => logUserAction('external_link', 'exam_results')} className="group flex items-center justify-between rounded-[1.45rem] bg-slate-50 px-5 py-3"><span className="text-base font-black text-slate-800">會考查榜</span><span className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-600"><Search className="h-5 w-5" /></span></a>
+                    </>
+                  )}
+                  {mobileMenuCategory === 'planning' && (
+                    <>
+                      {mobileMenuItems.filter(({ id }) => id === 'stats' || id === 'insights').map(({ id, label, icon: Icon, tone }) => (
+                        <button key={id} type="button" onClick={() => { setIsSidebarOpen(false); handleTabChange(id); }} className="group flex w-full items-center justify-between rounded-[1.45rem] bg-slate-50 px-5 py-3 text-left hover:bg-slate-100"><span className="text-base font-black text-slate-800">{label}</span><span className={`flex h-12 w-12 items-center justify-center rounded-full ${tone}`}><Icon className="h-5 w-5" /></span></button>
+                      ))}
+                      <a href="https://tyctw.github.io/spare/" target="_blank" rel="noopener noreferrer" onClick={() => logUserAction('external_link', 'spare_analysis')} className="group flex items-center justify-between rounded-[1.45rem] bg-slate-50 px-5 py-3"><span className="text-base font-black text-slate-800">落點分析</span><span className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100 text-indigo-600"><Calculator className="h-5 w-5" /></span></a>
+                      <a href="https://tyctw.github.io/Navigation/" target="_blank" rel="noopener noreferrer" onClick={() => logUserAction('external_link', 'navigation_info')} className="group flex items-center justify-between rounded-[1.45rem] bg-slate-50 px-5 py-3"><span className="text-base font-black text-slate-800">更多資訊</span><span className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600"><ExternalLink className="h-5 w-5" /></span></a>
+                    </>
+                  )}
+                  {mobileMenuCategory === 'community' && (
+                    <>
+                      {mobileMenuItems.filter(({ id }) => id === 'form').map(({ id, label, icon: Icon, tone }) => (
+                        <button key={id} type="button" onClick={() => { setIsSidebarOpen(false); handleTabChange(id); }} className="group flex w-full items-center justify-between rounded-[1.45rem] bg-slate-50 px-5 py-3 text-left hover:bg-slate-100"><span className="text-base font-black text-slate-800">{label}</span><span className={`flex h-12 w-12 items-center justify-center rounded-full ${tone}`}><Icon className="h-5 w-5" /></span></button>
+                      ))}
+                      <button type="button" onClick={() => { setIsSidebarOpen(false); setShowShareModal(true); }} className="group flex w-full items-center justify-between rounded-[1.45rem] bg-slate-50 px-5 py-3 text-left hover:bg-slate-100"><span className="text-base font-black text-slate-800">分享這個網站</span><span className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100 text-indigo-600"><Share2 className="h-5 w-5" /></span></button>
+                      {favoriteIds.length > 0 && <button type="button" onClick={() => { setIsSidebarOpen(false); handleTabChange('favorites'); }} className="group flex w-full items-center justify-between rounded-[1.45rem] bg-slate-50 px-5 py-3 text-left hover:bg-slate-100"><span className="text-base font-black text-slate-800">查看收藏</span><span className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-100 text-rose-600"><Heart className="h-5 w-5" /></span></button>}
+                    </>
+                  )}
+                </div>
+              </>
+            )}
+          </nav>
+
+          <nav className="hidden rounded-[2rem] bg-white p-3 shadow-2xl shadow-black/20">
+            <p className="px-4 pb-3 pt-2 text-[11px] font-black tracking-[0.18em] text-slate-400">快速前往</p>
+            <div className="space-y-2">
+              {mobileMenuItems.map(({ id, label, icon: Icon, tone }) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => { setIsSidebarOpen(false); handleTabChange(id); }}
+                  aria-current={activeTab === id ? 'page' : undefined}
+                  className={`group flex w-full items-center justify-between rounded-[1.45rem] px-5 py-3 text-left transition-all ${activeTab === id ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-50 text-slate-800 hover:bg-slate-100'}`}
+                >
+                  <span className="text-base font-black">{label}</span>
+                  <span className={`flex h-12 w-12 items-center justify-center rounded-full ${tone} transition-transform group-hover:scale-105`}>
+                    <Icon className="h-5 w-5" />
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-5 border-t border-slate-100 pt-4">
+              <p className="px-4 pb-2 text-[11px] font-black tracking-[0.18em] text-slate-400">更多服務</p>
             <button
               type="button"
               onClick={() => {
                 setIsSidebarOpen(false);
                 setShowShareModal(true);
               }}
-              className="group relative flex w-full items-center gap-4 overflow-hidden rounded-[1.4rem] border border-white/15 bg-gradient-to-br from-indigo-500 to-violet-600 p-4 text-left shadow-lg shadow-indigo-950/30 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
+              className="group relative flex w-full items-center gap-4 overflow-hidden rounded-[1.4rem] bg-gradient-to-br from-indigo-500 to-violet-600 p-4 text-left shadow-lg shadow-indigo-950/30 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
             >
               <div className="absolute -right-8 -top-10 h-28 w-28 rounded-full border-[18px] border-white/10"></div>
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15 text-white ring-1 ring-white/20 transition-transform duration-300 group-hover:scale-110">
@@ -1773,7 +1862,7 @@ const App: React.FC = () => {
                 type="button"
                 onClick={() => {
                   setIsSidebarOpen(false);
-                  setShowFavoritesModal(true);
+                  handleTabChange('favorites');
                 }}
                 className="group flex w-full items-center gap-4 rounded-[1.4rem] border border-slate-200 bg-white p-4 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-200 hover:shadow-lg hover:shadow-rose-100"
               >
@@ -1788,7 +1877,6 @@ const App: React.FC = () => {
               </button>
             )}
 
-            <p className="px-1 pt-3 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">升學服務</p>
             <button
               type="button"
               onClick={() => {
@@ -1874,19 +1962,33 @@ const App: React.FC = () => {
               </div>
               <ExternalLink className="ml-auto h-4 w-4 shrink-0 text-slate-600 transition-colors group-hover:text-rose-500" />
             </a>
+            </div>
           </nav>
-          
-          <div className="relative z-10 mt-auto pt-8">
+
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            <a href="https://www.instagram.com/exam.tw/" target="_blank" rel="noopener noreferrer" onClick={() => logUserAction('external_link', 'instagram')} className="flex flex-col items-center gap-1.5 rounded-2xl border border-white/70 bg-white/90 px-2 py-3 text-slate-700 shadow-sm transition-colors hover:bg-white">
+              <Instagram className="h-5 w-5 text-fuchsia-300" />
+              <span className="text-[10px] font-black">Instagram</span>
+            </a>
+            <a href="https://www.threads.com/@exam.tw" target="_blank" rel="noopener noreferrer" onClick={() => logUserAction('external_link', 'threads')} className="flex flex-col items-center gap-1.5 rounded-2xl border border-white/70 bg-white/90 px-2 py-3 text-slate-700 shadow-sm transition-colors hover:bg-white">
+              <AtSign className="h-5 w-5 text-slate-700" />
+              <span className="text-[10px] font-black">Threads</span>
+            </a>
+            <a href="https://tyctw.github.io/spare/support/" target="_blank" rel="noopener noreferrer" onClick={() => logUserAction('external_link', 'small_support')} className="flex flex-col items-center gap-1.5 rounded-2xl border border-white/70 bg-white/90 px-2 py-3 text-slate-700 shadow-sm transition-colors hover:bg-white">
+              <Heart className="h-5 w-5 text-rose-300" />
+              <span className="text-[10px] font-black">小額支持</span>
+            </a>
+          </div>
+
+          <div className="mt-2 text-center">
             <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
               <div className="flex items-center gap-3">
                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
                    <GraduationCap className="h-4 w-4" />
                  </div>
                  <div>
-                   <p className="text-xs font-black text-slate-800">CAP Score Sharing</p>
-                   <p className="text-[10px] font-medium text-slate-400">Made for students, by students.</p>
+                   <p className="text-sm font-black text-slate-800">TW 會考落點分析</p>
                  </div>
-                 <span className="ml-auto rounded-full bg-emerald-400/10 px-2 py-1 text-[9px] font-black text-emerald-300">ONLINE</span>
               </div>
             </div>
           </div>
@@ -1896,8 +1998,8 @@ const App: React.FC = () => {
       {favoriteIds.length > 0 && (
         <button
           type="button"
-          onClick={() => setShowFavoritesModal(true)}
-          className="fixed bottom-28 right-4 z-50 flex items-center gap-2 rounded-full border border-rose-100 bg-white/90 px-4 py-3 text-sm font-black text-slate-700 shadow-[0_12px_36px_-18px_rgba(15,23,42,0.65)] backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:border-rose-200 hover:text-rose-600 md:bottom-8 md:right-8"
+          onClick={() => handleTabChange('favorites')}
+          className="fixed bottom-28 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-transparent text-sm font-black text-slate-700 transition-all hover:-translate-y-0.5 hover:text-rose-600 md:bottom-8 md:right-8"
           aria-label="查看收藏"
         >
           <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-rose-50 text-rose-500">
@@ -1911,8 +2013,8 @@ const App: React.FC = () => {
       )}
 
       {/* Floating Header (Top) */}
-      <header className="fixed top-0 w-full z-40 transition-all duration-300 pt-3 px-3 sm:pt-4 sm:px-6">
-        <div className="max-w-5xl mx-auto h-16 sm:h-20 flex items-center justify-between px-4 sm:px-6 bg-white/80 backdrop-blur-2xl rounded-3xl shadow-[0_4px_40px_-10px_rgba(0,0,0,0.1)] border border-white/60">
+      <header className={`fixed top-0 z-40 w-full transition-all duration-300 ${isHeaderCompact ? 'px-0 pt-0' : 'px-3 pt-3 sm:px-6 sm:pt-4'}`}>
+        <div className={`mx-auto flex h-16 max-w-5xl items-center justify-between border border-white/60 bg-white/80 px-4 backdrop-blur-2xl transition-all duration-300 sm:h-20 sm:max-w-7xl sm:px-6 ${isHeaderCompact ? 'max-w-none rounded-none shadow-[0_8px_30px_-18px_rgba(15,23,42,0.3)] sm:max-w-none sm:rounded-b-3xl' : 'rounded-3xl shadow-[0_4px_40px_-10px_rgba(0,0,0,0.1)]'}`}>
           
           {/* Left: Logo */}
           <button
@@ -1934,19 +2036,19 @@ const App: React.FC = () => {
           </button>
 
           {/* Center: Desktop Navigation (Hidden on Mobile) */}
-          <nav aria-label="主要導覽" className="hidden md:flex items-center bg-slate-50/80 p-1.5 rounded-2xl border border-slate-100/50 shadow-[inset_0_1px_4px_rgba(0,0,0,0.02)] gap-1">
+          <nav aria-label="主要導覽" className="hidden md:flex items-center gap-1">
              <NavButton id="list" label="瀏覽" icon={BookOpen} />
              <NavButton id="minimums" label="最低" icon={Table2} />
              <NavButton id="stats" label="統計" icon={BarChart3} />
              <NavButton id="insights" label="策略" icon={Compass} />
-             <div className="w-px h-6 bg-slate-200 mx-1"></div>
+             <div className="mx-1 h-6 w-px bg-slate-200"></div>
              <button
                  type="button"
                  onClick={() => setShowShareModal(true)}
                  aria-label="分享這個網站"
-                 className="relative px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 group text-slate-500 hover:text-indigo-600 hover:bg-slate-100/50 scale-95 hover:scale-100 border border-transparent"
+                 className="relative flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-black text-slate-700 transition-all duration-300 hover:bg-slate-50 hover:text-slate-900"
              >
-                 <Share2 className="w-4 h-4 group-hover:text-indigo-500 text-slate-400" />
+                 <Share2 className="hidden w-4 h-4 text-slate-400 group-hover:text-indigo-500" />
                  <span>分享</span>
              </button>
           </nav>
@@ -1982,7 +2084,10 @@ const App: React.FC = () => {
             {/* Menu Button */}
             <button 
                 type="button"
-                onClick={() => setIsSidebarOpen(true)}
+                onClick={() => {
+                  setMobileMenuCategory(null);
+                  setIsSidebarOpen(true);
+                }}
                 aria-label="開啟更多功能"
                 aria-expanded={isSidebarOpen}
                 className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors md:hidden"
@@ -2109,11 +2214,6 @@ const App: React.FC = () => {
                                 </button>
                             </div>
 
-                            <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-semibold text-slate-500">
-                                <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-400" />匿名分享</span>
-                                <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-400" />各區自動計分</span>
-                                <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-400" />免費查詢</span>
-                            </div>
                         </div>
 
                         <div className="relative hidden min-h-[390px] lg:block" aria-hidden="true">
@@ -2193,6 +2293,48 @@ const App: React.FC = () => {
                 </div>
             )}
 
+            {activeTab === 'favorites' && (
+                <div className="mx-auto max-w-6xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <section className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-rose-600 via-pink-600 to-violet-700 px-6 py-8 text-white shadow-[0_24px_70px_-35px_rgba(190,24,93,0.7)] sm:px-9 sm:py-10">
+                        <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full border-[32px] border-white/10" />
+                        <div className="pointer-events-none absolute -bottom-24 left-1/3 h-48 w-48 rounded-full bg-white/10 blur-3xl" />
+                        <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+                            <div>
+                                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/25">
+                                    <Heart className="h-7 w-7 fill-white text-white" />
+                                </div>
+                                <p className="text-xs font-black tracking-[0.2em] text-rose-100">MY COLLECTION</p>
+                                <h2 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">我的收藏</h2>
+                                <p className="mt-3 max-w-xl text-sm font-medium leading-7 text-rose-50 sm:text-base">
+                                    將想比較的錄取資料留在這裡，回頭整理學校、科系與分數區間時更方便。
+                                </p>
+                            </div>
+                            <div className="rounded-2xl border border-white/20 bg-white/10 px-5 py-4 backdrop-blur-sm">
+                                <span className="block text-3xl font-black">{favoriteIds.length}</span>
+                                <span className="mt-1 block text-xs font-bold text-rose-100">筆已收藏資料</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section className="rounded-[2rem] border border-slate-100 bg-white p-5 shadow-sm sm:p-7">
+                        <div className="mb-6 flex flex-col gap-3 border-b border-slate-100 pb-5 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <p className="text-[11px] font-black tracking-[0.18em] text-rose-500">SAVED FOR COMPARISON</p>
+                                <h3 className="mt-1 text-xl font-black text-slate-900">保留值得比較的落點</h3>
+                            </div>
+                            <button type="button" onClick={() => handleTabChange('list')} className="inline-flex items-center gap-2 self-start rounded-full bg-slate-100 px-4 py-2 text-sm font-black text-slate-700 transition-colors hover:bg-slate-900 hover:text-white sm:self-auto">
+                                繼續瀏覽資料 <ArrowRight className="h-4 w-4" />
+                            </button>
+                        </div>
+                        <ScoreCompare
+                            entries={entries}
+                            favoriteIds={favoriteIds}
+                            toggleFavorite={toggleFavorite}
+                        />
+                    </section>
+                </div>
+            )}
+            
             {activeTab === 'minimums' && (
                 <div className="space-y-8">
                     {isLoading ? (
@@ -2229,65 +2371,50 @@ const App: React.FC = () => {
         </div>
       </main>
       
-      <footer className="py-12 pb-36 md:pb-12 mt-12 bg-white/60 border-t border-slate-200/60 backdrop-blur-md">
-        <div className="max-w-6xl mx-auto px-4 md:px-8">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-12 text-center md:text-left">
-                <div className="flex flex-col items-center md:items-start gap-3">
-                    <div className="flex items-center gap-3 opacity-80 hover:opacity-100 transition-opacity duration-300">
-                        <div className="bg-gradient-to-tr from-indigo-100 to-purple-100 p-2.5 rounded-xl border border-white shadow-sm">
-                            <GraduationCap className="w-6 h-6 text-indigo-600" />
-                        </div>
-                        <span className="font-black text-slate-800 tracking-tight text-xl">CAP Score Sharing</span>
-                    </div>
-                    <p className="text-slate-500 text-sm font-medium">
-                        台灣國中會考落點分享平台，由學生自發維護。<br className="hidden md:block" />
-                        Made for Students, by Students.
-                    </p>
-                </div>
+      <footer className="relative mt-12 overflow-hidden bg-slate-950 pb-28 pt-8 text-white md:pb-12 md:pt-12">
+        <div className="pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full bg-indigo-600/25 blur-[110px]" />
+        <div className="pointer-events-none absolute -right-24 bottom-0 h-72 w-72 rounded-full bg-cyan-500/20 blur-[110px]" />
+        <div className="pointer-events-none absolute inset-0 opacity-[0.06] [background-image:linear-gradient(rgba(255,255,255,.8)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.8)_1px,transparent_1px)] [background-size:32px_32px]" />
 
-                <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
-                    <a
-                         href="https://tyctw.github.io/spare/support/"
-                         target="_blank"
-                         rel="noopener noreferrer"
-                         onClick={() => logUserAction('external_link', 'small_support')}
-                         className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-rose-600 transition-colors"
-                    >
-                        <Heart className="w-4 h-4" />
-                        <span>小額支持</span>
-                    </a>
-                    <button 
-                         onClick={() => handleTabChange('guide')}
-                         className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors"
-                    >
-                        <Info className="w-4 h-4" />
-                        <span>說明</span>
-                    </button>
-                    <button 
-                         onClick={() => handleTabChange('disclaimer')}
-                         className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors"
-                    >
-                        <ShieldAlert className="w-4 h-4" />
-                        <span>免責聲明</span>
-                    </button>
-                    <button 
-                         onClick={() => handleTabChange('privacy')}
-                         className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors"
-                    >
-                        <Shield className="w-4 h-4" />
-                        <span>隱私權與版權聲明</span>
-                    </button>
-                </div>
+        <div className="relative mx-auto max-w-6xl px-5 md:px-8">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-7 sm:grid-cols-2 lg:grid-cols-[1.35fr_0.8fr_0.8fr_0.9fr]">
+            <div className="col-span-2 lg:col-span-1">
+              <button type="button" onClick={() => handleTabChange('list')} className="flex items-center gap-3 text-left">
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-indigo-600"><GraduationCap className="h-6 w-6" /></span>
+                <span className="text-xl font-black tracking-tight">TW 會考落點分析</span>
+              </button>
+              <p className="mt-4 max-w-xs text-sm font-medium leading-7 text-slate-400">整合學生分享資料，協助考生以更有脈絡的方式看懂落點與志願選擇。</p>
+              <a href={`mailto:${CONTACT_EMAIL}`} className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-cyan-200 transition-colors hover:text-white">
+                聯絡我們 <ArrowRight className="h-4 w-4" />
+              </a>
             </div>
 
-            <div className="mt-8 pt-8 border-t border-slate-200 flex flex-col items-center gap-4 text-xs font-semibold text-slate-400">
-                <a href={`mailto:${CONTACT_EMAIL}`} className="text-slate-500 transition-colors hover:text-indigo-600">
-                    聯絡信箱：{CONTACT_EMAIL}
-                </a>
-                <p>
-                    Copyright © 2024-{new Date().getFullYear()} TYCTW會考落點. All rights reserved.
-                </p>
+            <div>
+              <h3 className="text-sm font-black text-white">快速前往</h3>
+              <div className="mt-4 flex flex-col items-start gap-3 text-sm font-medium text-slate-400">
+                <button onClick={() => handleTabChange('list')} className="transition-colors hover:text-cyan-200">瀏覽錄取資料</button>
+                <button onClick={() => handleTabChange('minimums')} className="transition-colors hover:text-cyan-200">各校最低分數</button>
+                <button onClick={() => handleTabChange('stats')} className="transition-colors hover:text-cyan-200">會考統計資料</button>
+                <button onClick={() => handleTabChange('insights')} className="transition-colors hover:text-cyan-200">會考志願策略</button>
+              </div>
             </div>
+
+            <div>
+              <h3 className="text-sm font-black text-white">平台資訊</h3>
+              <div className="mt-4 flex flex-col items-start gap-3 text-sm font-medium text-slate-400">
+                <button onClick={() => handleTabChange('guide')} className="transition-colors hover:text-cyan-200">使用說明</button>
+                <button onClick={() => handleTabChange('disclaimer')} className="transition-colors hover:text-cyan-200">免責聲明</button>
+                <button onClick={() => handleTabChange('privacy')} className="transition-colors hover:text-cyan-200">隱私權與版權聲明</button>
+                <a href="https://tyctw.github.io/spare/support/" target="_blank" rel="noopener noreferrer" onClick={() => logUserAction('external_link', 'small_support')} className="transition-colors hover:text-rose-200">小額支持</a>
+              </div>
+            </div>
+
+          </div>
+
+          <div className="mt-7 flex flex-col gap-3 border-t border-white/10 pt-5 text-xs font-medium text-slate-500 sm:mt-10 sm:pt-6 sm:flex-row sm:items-center sm:justify-between">
+            <p>Copyright © 2024-{new Date().getFullYear()} TW 會考落點分析</p>
+            <p>資料僅供參考，實際資訊以當年度官方公告為準。</p>
+          </div>
         </div>
       </footer>
 
