@@ -7,6 +7,7 @@ import AdmissionsInsights from './components/AdmissionsInsights';
 import ScoreCompare from './components/ScoreCompare';
 import ShareModal from './components/ShareModal';
 import GreetingModal from './components/GreetingModal';
+import MobileMenu from './components/MobileMenu';
 import { ScoreEntry } from './types';
 import { REGIONS } from './constants';
 import { fetchEntries, submitEntry, logUserAction } from './services/apiService';
@@ -1402,7 +1403,6 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [mobileMenuCategory, setMobileMenuCategory] = useState<'lookup' | 'planning' | 'community' | null>(null);
   const [isHeaderCompact, setIsHeaderCompact] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showThankYouModal, setShowThankYouModal] = useState(false);
@@ -1536,14 +1536,14 @@ const App: React.FC = () => {
       type="button"
       onClick={() => handleTabChange(id)}
       aria-current={activeTab === id ? 'page' : undefined}
-      className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 relative transition-all duration-300 ${
-        activeTab === id ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'
+      className={`relative flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl py-1 transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 ${
+        activeTab === id ? 'text-indigo-600' : 'text-slate-600 hover:text-indigo-600'
       }`}
     >
         <div className={`p-1.5 rounded-xl transition-all duration-300 ${activeTab === id ? 'bg-indigo-50 translate-y-[-2px]' : ''}`}>
            <Icon className={`w-6 h-6 ${activeTab === id ? 'stroke-[2.5px]' : 'stroke-2'}`} />
         </div>
-        <span className={`text-[10px] font-bold transition-all duration-300 ${activeTab === id ? 'opacity-100 translate-y-0' : 'opacity-60 translate-y-1'}`}>
+        <span className="text-[11px] font-bold">
             {label}
         </span>
         {activeTab === id && (
@@ -1551,14 +1551,6 @@ const App: React.FC = () => {
         )}
     </button>
   );
-
-  const mobileMenuItems: Array<{ id: ActiveTab; label: string; icon: any; tone: string }> = [
-    { id: 'list', label: '瀏覽錄取資料', icon: BookOpen, tone: 'bg-indigo-100 text-indigo-600' },
-    { id: 'minimums', label: '各校最低分數', icon: Table2, tone: 'bg-sky-100 text-sky-600' },
-    { id: 'stats', label: '會考統計資料', icon: BarChart3, tone: 'bg-violet-100 text-violet-600' },
-    { id: 'insights', label: '會考志願策略', icon: Compass, tone: 'bg-amber-100 text-amber-600' },
-    { id: 'form', label: '分享錄取結果', icon: PlusCircle, tone: 'bg-rose-100 text-rose-600' },
-  ];
 
   return (
     <div className="font-sans text-slate-900 selection:bg-indigo-200 selection:text-indigo-900 overflow-x-hidden min-h-screen">
@@ -1727,273 +1719,24 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {/* Sidebar Overlay */}
-      {isSidebarOpen && (
-        <div 
-          className="fixed inset-0 z-[60] bg-slate-950/90 backdrop-blur-md animate-in fade-in duration-300 md:hidden"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
-
-      {/* Full-screen mobile menu */}
-      <aside 
-        aria-label="手機功能選單"
-        className={`fixed inset-0 z-[70] overflow-y-auto bg-transparent px-3 pb-3 pt-4 transition-all duration-500 cubic-bezier(0.16,1,0.3,1) md:hidden ${isSidebarOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'}`}
-      >
-        <div className="mx-auto max-w-xl">
-          <div className="mb-6 flex items-center gap-2">
-            <div className="flex h-14 flex-1 items-center justify-between rounded-[1.75rem] bg-white px-5 shadow-xl shadow-black/20">
-              <button type="button" onClick={() => { setIsSidebarOpen(false); handleTabChange('list'); }} className="flex items-center gap-3" aria-label="回到瀏覽首頁">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-white"><GraduationCap className="h-5 w-5" /></span>
-                <span className="text-sm font-black text-slate-800">會考錄取分享平台</span>
-              </button>
-              <Sparkles className="h-5 w-5 text-indigo-500" />
-            </div>
-            <button 
-              onClick={() => setIsSidebarOpen(false)}
-              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[1.35rem] bg-indigo-600 text-white shadow-lg shadow-indigo-950/30 transition-transform active:scale-95"
-              aria-label="關閉功能選單"
-            >
-              <X className="h-7 w-7" />
-            </button>
-          </div>
-
-          <nav className="rounded-[2rem] bg-white p-3 shadow-2xl shadow-black/20">
-            {mobileMenuCategory === null ? (
-              <>
-                <p className="px-4 pb-3 pt-2 text-[11px] font-black tracking-[0.18em] text-slate-400">功能分類</p>
-                <div className="space-y-2">
-                  {[
-                    { id: 'lookup' as const, title: '查詢資料', description: '錄取資料、最低分數與查榜', icon: Search, tone: 'bg-sky-100 text-sky-600' },
-                    { id: 'planning' as const, title: '分析規劃', description: '統計、志願策略與落點分析', icon: Compass, tone: 'bg-violet-100 text-violet-600' },
-                    { id: 'community' as const, title: '分享與收藏', description: '分享結果、收藏與支持平台', icon: Heart, tone: 'bg-rose-100 text-rose-600' },
-                  ].map(({ id, title, description, icon: Icon, tone }) => (
-                    <button key={id} type="button" onClick={() => setMobileMenuCategory(id)} className="group flex w-full items-center gap-4 rounded-[1.45rem] bg-slate-50 px-5 py-4 text-left transition-all hover:bg-slate-100">
-                      <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${tone}`}><Icon className="h-5 w-5" /></span>
-                      <span className="min-w-0"><span className="block text-base font-black text-slate-800">{title}</span><span className="mt-0.5 block text-xs font-medium text-slate-400">{description}</span></span>
-                      <ArrowRight className="ml-auto h-4 w-4 text-slate-400 transition-transform group-hover:translate-x-1" />
-                    </button>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="flex items-center gap-2 px-2 pb-3 pt-1">
-                  <button type="button" onClick={() => setMobileMenuCategory(null)} className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-700" aria-label="返回功能分類"><ChevronLeft className="h-5 w-5" /></button>
-                  <div>
-                    <p className="text-[11px] font-black tracking-[0.18em] text-slate-400">功能分類</p>
-                    <h2 className="text-lg font-black text-slate-800">{mobileMenuCategory === 'lookup' ? '查詢資料' : mobileMenuCategory === 'planning' ? '分析規劃' : '分享與收藏'}</h2>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  {mobileMenuCategory === 'lookup' && (
-                    <>
-                      {mobileMenuItems.filter(({ id }) => id === 'list' || id === 'minimums').map(({ id, label, icon: Icon, tone }) => (
-                        <button key={id} type="button" onClick={() => { setIsSidebarOpen(false); handleTabChange(id); }} className="group flex w-full items-center justify-between rounded-[1.45rem] bg-slate-50 px-5 py-3 text-left hover:bg-slate-100"><span className="text-base font-black text-slate-800">{label}</span><span className={`flex h-12 w-12 items-center justify-center rounded-full ${tone}`}><Icon className="h-5 w-5" /></span></button>
-                      ))}
-                      <a href="https://tyctw.github.io/front/" target="_blank" rel="noopener noreferrer" onClick={() => logUserAction('external_link', 'exam_results')} className="group flex items-center justify-between rounded-[1.45rem] bg-slate-50 px-5 py-3"><span className="text-base font-black text-slate-800">會考查榜</span><span className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-600"><Search className="h-5 w-5" /></span></a>
-                    </>
-                  )}
-                  {mobileMenuCategory === 'planning' && (
-                    <>
-                      {mobileMenuItems.filter(({ id }) => id === 'stats' || id === 'insights').map(({ id, label, icon: Icon, tone }) => (
-                        <button key={id} type="button" onClick={() => { setIsSidebarOpen(false); handleTabChange(id); }} className="group flex w-full items-center justify-between rounded-[1.45rem] bg-slate-50 px-5 py-3 text-left hover:bg-slate-100"><span className="text-base font-black text-slate-800">{label}</span><span className={`flex h-12 w-12 items-center justify-center rounded-full ${tone}`}><Icon className="h-5 w-5" /></span></button>
-                      ))}
-                      <a href="https://tyctw.github.io/spare/" target="_blank" rel="noopener noreferrer" onClick={() => logUserAction('external_link', 'spare_analysis')} className="group flex items-center justify-between rounded-[1.45rem] bg-slate-50 px-5 py-3"><span className="text-base font-black text-slate-800">落點分析</span><span className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100 text-indigo-600"><Calculator className="h-5 w-5" /></span></a>
-                      <a href="https://tyctw.github.io/Navigation/" target="_blank" rel="noopener noreferrer" onClick={() => logUserAction('external_link', 'navigation_info')} className="group flex items-center justify-between rounded-[1.45rem] bg-slate-50 px-5 py-3"><span className="text-base font-black text-slate-800">更多資訊</span><span className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600"><ExternalLink className="h-5 w-5" /></span></a>
-                    </>
-                  )}
-                  {mobileMenuCategory === 'community' && (
-                    <>
-                      {mobileMenuItems.filter(({ id }) => id === 'form').map(({ id, label, icon: Icon, tone }) => (
-                        <button key={id} type="button" onClick={() => { setIsSidebarOpen(false); handleTabChange(id); }} className="group flex w-full items-center justify-between rounded-[1.45rem] bg-slate-50 px-5 py-3 text-left hover:bg-slate-100"><span className="text-base font-black text-slate-800">{label}</span><span className={`flex h-12 w-12 items-center justify-center rounded-full ${tone}`}><Icon className="h-5 w-5" /></span></button>
-                      ))}
-                      <button type="button" onClick={() => { setIsSidebarOpen(false); setShowShareModal(true); }} className="group flex w-full items-center justify-between rounded-[1.45rem] bg-slate-50 px-5 py-3 text-left hover:bg-slate-100"><span className="text-base font-black text-slate-800">分享這個網站</span><span className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100 text-indigo-600"><Share2 className="h-5 w-5" /></span></button>
-                      {favoriteIds.length > 0 && <button type="button" onClick={() => { setIsSidebarOpen(false); handleTabChange('favorites'); }} className="group flex w-full items-center justify-between rounded-[1.45rem] bg-slate-50 px-5 py-3 text-left hover:bg-slate-100"><span className="text-base font-black text-slate-800">查看收藏</span><span className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-100 text-rose-600"><Heart className="h-5 w-5" /></span></button>}
-                    </>
-                  )}
-                </div>
-              </>
-            )}
-          </nav>
-
-          <nav className="hidden rounded-[2rem] bg-white p-3 shadow-2xl shadow-black/20">
-            <p className="px-4 pb-3 pt-2 text-[11px] font-black tracking-[0.18em] text-slate-400">快速前往</p>
-            <div className="space-y-2">
-              {mobileMenuItems.map(({ id, label, icon: Icon, tone }) => (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => { setIsSidebarOpen(false); handleTabChange(id); }}
-                  aria-current={activeTab === id ? 'page' : undefined}
-                  className={`group flex w-full items-center justify-between rounded-[1.45rem] px-5 py-3 text-left transition-all ${activeTab === id ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-50 text-slate-800 hover:bg-slate-100'}`}
-                >
-                  <span className="text-base font-black">{label}</span>
-                  <span className={`flex h-12 w-12 items-center justify-center rounded-full ${tone} transition-transform group-hover:scale-105`}>
-                    <Icon className="h-5 w-5" />
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            <div className="mt-5 border-t border-slate-100 pt-4">
-              <p className="px-4 pb-2 text-[11px] font-black tracking-[0.18em] text-slate-400">更多服務</p>
-            <button
-              type="button"
-              onClick={() => {
-                setIsSidebarOpen(false);
-                setShowShareModal(true);
-              }}
-              className="group relative flex w-full items-center gap-4 overflow-hidden rounded-[1.4rem] bg-gradient-to-br from-indigo-500 to-violet-600 p-4 text-left shadow-lg shadow-indigo-950/30 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
-            >
-              <div className="absolute -right-8 -top-10 h-28 w-28 rounded-full border-[18px] border-white/10"></div>
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15 text-white ring-1 ring-white/20 transition-transform duration-300 group-hover:scale-110">
-                <Share2 className="h-5 w-5" />
-              </div>
-              <div className="min-w-0">
-                <span className="block font-black text-white">分享這個網站</span>
-                <span className="mt-0.5 block text-xs font-medium text-indigo-100">QR Code・LINE・社群分享</span>
-              </div>
-              <ArrowRight className="ml-auto h-4 w-4 shrink-0 text-white/60 transition-transform group-hover:translate-x-1" />
-            </button>
-
-            {favoriteIds.length > 0 && (
-              <button
-                type="button"
-                onClick={() => {
-                  setIsSidebarOpen(false);
-                  handleTabChange('favorites');
-                }}
-                className="group flex w-full items-center gap-4 rounded-[1.4rem] border border-slate-200 bg-white p-4 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-200 hover:shadow-lg hover:shadow-rose-100"
-              >
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-50 text-rose-500 ring-1 ring-rose-100 transition-transform group-hover:scale-110">
-                  <Heart className="h-5 w-5" />
-                </div>
-                <div className="min-w-0">
-                  <span className="block font-black text-slate-800">查看收藏</span>
-                  <span className="mt-0.5 block text-xs font-medium text-slate-400">{favoriteIds.length} 筆收藏・落點比較</span>
-                </div>
-                <ArrowRight className="ml-auto h-4 w-4 shrink-0 text-slate-400 transition-transform group-hover:translate-x-1 group-hover:text-rose-500" />
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={() => {
-                setIsSidebarOpen(false);
-                handleTabChange('insights');
-              }}
-              className="group flex w-full items-center gap-4 rounded-[1.4rem] border border-slate-200 bg-white p-4 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-200 hover:shadow-lg hover:shadow-cyan-100"
-            >
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-cyan-400/15 text-cyan-600 ring-1 ring-cyan-300/20 transition-all group-hover:scale-110 group-hover:bg-cyan-500 group-hover:text-white">
-                <Compass className="h-5 w-5" />
-              </div>
-              <div className="min-w-0">
-                <span className="block font-black text-slate-800">會考志願策略</span>
-                <span className="mt-0.5 block text-xs font-medium text-slate-400">落點判讀、志願排序與常見問題</span>
-              </div>
-              <ArrowRight className="ml-auto h-4 w-4 shrink-0 text-slate-400 transition-transform group-hover:translate-x-1 group-hover:text-cyan-600" />
-            </button>
-
-            <a
-              href="https://tyctw.github.io/front/"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => logUserAction('external_link', 'exam_results')}
-              className="group flex items-center gap-4 rounded-[1.4rem] border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-amber-200 hover:shadow-lg hover:shadow-amber-100"
-            >
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-400/15 text-amber-300 ring-1 ring-amber-300/15 transition-all group-hover:scale-110 group-hover:bg-amber-400 group-hover:text-slate-950">
-                <Search className="h-5 w-5" />
-              </div>
-              <div className="min-w-0">
-                <span className="block font-black text-slate-800">會考查榜</span>
-                <span className="mt-0.5 block text-xs font-medium text-slate-400">錄取榜單・快速查詢</span>
-              </div>
-              <ExternalLink className="ml-auto h-4 w-4 shrink-0 text-slate-600 transition-colors group-hover:text-amber-300" />
-            </a>
-
-            <a 
-              href="https://tyctw.github.io/spare/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              onClick={() => logUserAction('external_link', 'spare_analysis')}
-              className="group flex items-center gap-4 rounded-[1.4rem] border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-100"
-            >
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-indigo-400/15 text-indigo-300 ring-1 ring-indigo-300/15 transition-all group-hover:scale-110 group-hover:bg-indigo-400 group-hover:text-slate-950">
-                <Calculator className="h-5 w-5" />
-              </div>
-              <div className="min-w-0">
-                 <span className="block font-black text-slate-800">落點分析</span>
-                 <span className="mt-0.5 block text-xs font-medium text-slate-400">精準預測・歷年比對</span>
-              </div>
-              <ExternalLink className="ml-auto h-4 w-4 shrink-0 text-slate-600 transition-colors group-hover:text-indigo-300" />
-            </a>
-
-            <a 
-              href="https://tyctw.github.io/Navigation/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              onClick={() => logUserAction('external_link', 'navigation_info')}
-              className="group flex items-center gap-4 rounded-[1.4rem] border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-100"
-            >
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-400/15 text-emerald-300 ring-1 ring-emerald-300/15 transition-all group-hover:scale-110 group-hover:bg-emerald-400 group-hover:text-slate-950">
-                <Compass className="h-5 w-5" />
-              </div>
-              <div className="min-w-0">
-                 <span className="block font-black text-slate-800">更多資訊</span>
-                 <span className="mt-0.5 block text-xs font-medium text-slate-400">升學導航・校系介紹</span>
-              </div>
-              <ExternalLink className="ml-auto h-4 w-4 shrink-0 text-slate-600 transition-colors group-hover:text-emerald-300" />
-            </a>
-
-            <a
-              href="https://tyctw.github.io/spare/support/"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => logUserAction('external_link', 'small_support')}
-              className="group flex items-center gap-4 rounded-[1.4rem] border border-rose-200 bg-rose-50/50 p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-300 hover:shadow-lg hover:shadow-rose-100"
-            >
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-500/15 text-rose-500 ring-1 ring-rose-300/20 transition-all group-hover:scale-110 group-hover:bg-rose-500 group-hover:text-white">
-                <Heart className="h-5 w-5" />
-              </div>
-              <div className="min-w-0">
-                <span className="block font-black text-slate-800">小額支持</span>
-                <span className="mt-0.5 block text-xs font-medium text-slate-400">支持平台持續維護</span>
-              </div>
-              <ExternalLink className="ml-auto h-4 w-4 shrink-0 text-slate-600 transition-colors group-hover:text-rose-500" />
-            </a>
-            </div>
-          </nav>
-
-          <div className="mt-3 grid grid-cols-3 gap-2">
-            <a href="https://www.instagram.com/exam.tw/" target="_blank" rel="noopener noreferrer" onClick={() => logUserAction('external_link', 'instagram')} className="flex flex-col items-center gap-1.5 rounded-2xl border border-white/70 bg-white/90 px-2 py-3 text-slate-700 shadow-sm transition-colors hover:bg-white">
-              <Instagram className="h-5 w-5 text-fuchsia-300" />
-              <span className="text-[10px] font-black">Instagram</span>
-            </a>
-            <a href="https://www.threads.com/@exam.tw" target="_blank" rel="noopener noreferrer" onClick={() => logUserAction('external_link', 'threads')} className="flex flex-col items-center gap-1.5 rounded-2xl border border-white/70 bg-white/90 px-2 py-3 text-slate-700 shadow-sm transition-colors hover:bg-white">
-              <AtSign className="h-5 w-5 text-slate-700" />
-              <span className="text-[10px] font-black">Threads</span>
-            </a>
-            <a href="https://tyctw.github.io/spare/support/" target="_blank" rel="noopener noreferrer" onClick={() => logUserAction('external_link', 'small_support')} className="flex flex-col items-center gap-1.5 rounded-2xl border border-white/70 bg-white/90 px-2 py-3 text-slate-700 shadow-sm transition-colors hover:bg-white">
-              <Heart className="h-5 w-5 text-rose-300" />
-              <span className="text-[10px] font-black">小額支持</span>
-            </a>
-          </div>
-
-          <div className="mt-2 text-center">
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-              <div className="flex items-center gap-3">
-                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                   <GraduationCap className="h-4 w-4" />
-                 </div>
-                 <div>
-                   <p className="text-sm font-black text-slate-800">TW 會考落點分析</p>
-                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </aside>
+      <MobileMenu
+        isOpen={isSidebarOpen}
+        activeTab={activeTab}
+        favoriteCount={favoriteIds.length}
+        onClose={() => setIsSidebarOpen(false)}
+        onNavigate={(tab) => {
+          setIsSidebarOpen(false);
+          handleTabChange(tab);
+        }}
+        onShare={() => {
+          setIsSidebarOpen(false);
+          setShowShareModal(true);
+        }}
+        onExternalLink={(name) => {
+          logUserAction('external_link', name);
+          setIsSidebarOpen(false);
+        }}
+      />
 
       {favoriteIds.length > 0 && (
         <button
@@ -2062,7 +1805,7 @@ const App: React.FC = () => {
                 onClick={() => handleTabChange('form')}
                 aria-current={activeTab === 'form' ? 'page' : undefined}
                 className={`
-                    relative group flex items-center justify-center gap-1.5 sm:gap-2 
+                    relative group hidden items-center justify-center gap-1.5 sm:gap-2 md:flex
                     overflow-hidden rounded-full
                     px-4 py-2 sm:px-6 sm:py-2.5
                     font-black text-xs sm:text-sm tracking-wide transition-all duration-300 active:scale-95
@@ -2085,12 +1828,11 @@ const App: React.FC = () => {
             <button 
                 type="button"
                 onClick={() => {
-                  setMobileMenuCategory(null);
                   setIsSidebarOpen(true);
                 }}
                 aria-label="開啟更多功能"
                 aria-expanded={isSidebarOpen}
-                className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors md:hidden"
+                className="flex h-11 w-11 items-center justify-center rounded-xl text-slate-600 transition-colors hover:bg-indigo-50 hover:text-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 md:hidden"
                 title="更多功能"
             >
                 <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -2100,7 +1842,7 @@ const App: React.FC = () => {
       </header>
 
       {/* Floating Bottom Navigation (Mobile Only) */}
-      <nav aria-label="手機主要導覽" className="fixed bottom-5 left-4 right-4 z-50 md:hidden animate-in slide-in-from-bottom-6 duration-500">
+      <nav aria-label="手機主要導覽" className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] left-3 right-3 z-50 animate-in slide-in-from-bottom-6 duration-500 md:hidden">
          <div className="bg-white/80 backdrop-blur-2xl border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.12)] rounded-[2rem] p-2 flex justify-between items-center max-w-sm mx-auto ring-1 ring-white/60">
             <MobileNavButton id="list" label="瀏覽" icon={BookOpen} />
             <MobileNavButton id="minimums" label="最低" icon={Table2} />
