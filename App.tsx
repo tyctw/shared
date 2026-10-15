@@ -1472,10 +1472,25 @@ const App: React.FC = () => {
   }, [favoriteIds]);
 
   useEffect(() => {
-    const updateHeader = () => setIsHeaderCompact(window.scrollY > 24);
+    let frame: number | null = null;
+    const updateHeader = () => {
+      const scrollY = window.scrollY;
+      // Separate thresholds keep small scroll movements from repeatedly toggling the header.
+      setIsHeaderCompact(current => current ? scrollY > 16 : scrollY > 48);
+    };
+    const onScroll = () => {
+      if (frame !== null) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = null;
+        updateHeader();
+      });
+    };
     updateHeader();
-    window.addEventListener('scroll', updateHeader, { passive: true });
-    return () => window.removeEventListener('scroll', updateHeader);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      if (frame !== null) window.cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', onScroll);
+    };
   }, []);
 
   const toggleFavorite = (id: string) => {
@@ -1597,10 +1612,10 @@ const App: React.FC = () => {
         handleTabChange(id);
       }}
       aria-current={activeTab === id ? 'page' : undefined}
-      className={`relative px-4 py-2.5 rounded-full text-sm font-black transition-all duration-300 flex items-center gap-2 group ${
+      className={`relative px-4 py-2.5 rounded-full text-sm font-black transition-colors duration-200 flex items-center gap-2 group ${
         activeTab === id 
-          ? 'bg-slate-100 text-slate-900 shadow-none border border-transparent scale-100' 
-          : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50 scale-100 border border-transparent'
+          ? 'bg-slate-100 text-slate-900 shadow-none border border-transparent' 
+          : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50 border border-transparent'
       }`}
     >
       <Icon className={`hidden w-4 h-4 ${activeTab === id ? 'text-indigo-600' : 'group-hover:text-indigo-500 text-slate-400'}`} />
@@ -1823,26 +1838,27 @@ const App: React.FC = () => {
         }}
       />
 
-      {favoriteIds.length > 0 && (
-        <button
-          type="button"
-          onClick={() => handleTabChange('favorites')}
-          className="fixed bottom-28 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-transparent text-sm font-black text-slate-700 transition-all hover:-translate-y-0.5 hover:text-rose-600 md:bottom-8 md:right-8"
-          aria-label="查看收藏"
+      {favoriteIds.length > 0 && activeTab !== 'favorites' && !isSidebarOpen && (
+        <a
+          href={pageHref('favorites', routeBase.current)}
+          onClick={(event) => handlePageLinkClick(event, 'favorites')}
+          className="favorites-fab"
+          aria-label={`查看收藏，共 ${favoriteIds.length} 筆`}
+          title={`查看 ${favoriteIds.length} 筆已收藏資料`}
         >
-          <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-rose-50 text-rose-500">
-            <Heart className="h-4 w-4" />
-            <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-black text-white ring-2 ring-white">
-              {favoriteIds.length}
-            </span>
+          <span className="favorites-fab-icon" aria-hidden="true">
+            <Heart className="h-4 w-4 fill-current" />
           </span>
-          <span className="hidden sm:inline">查看收藏</span>
-        </button>
+          <span className="favorites-fab-label">查看收藏</span>
+          <span className="favorites-fab-count" aria-hidden="true">
+            {favoriteIds.length > 99 ? '99+' : favoriteIds.length}
+          </span>
+        </a>
       )}
 
       {/* Floating Header (Top) */}
-      <header className={`fixed top-0 z-40 w-full transition-all duration-300 ${isHeaderCompact ? 'px-0 pt-0' : 'px-3 pt-3 sm:px-6 sm:pt-4'}`}>
-        <div className={`mx-auto flex h-16 max-w-5xl items-center justify-between border border-white/60 bg-white/80 px-4 backdrop-blur-2xl transition-all duration-300 sm:h-20 sm:max-w-7xl sm:px-6 ${isHeaderCompact ? 'max-w-none rounded-none shadow-[0_8px_30px_-18px_rgba(15,23,42,0.3)] sm:max-w-none sm:rounded-b-3xl' : 'rounded-3xl shadow-[0_4px_40px_-10px_rgba(0,0,0,0.1)]'}`}>
+      <header className={`site-header fixed top-0 z-40 w-full ${isHeaderCompact ? 'site-header--compact' : ''} ${isHeaderCompact ? 'px-0 pt-0' : 'px-3 pt-3 sm:px-6 sm:pt-4'}`}>
+        <div className={`site-header-shell mx-auto flex h-16 items-center justify-between border border-white/60 bg-white/80 px-4 backdrop-blur-2xl sm:h-20 sm:px-6 ${isHeaderCompact ? 'rounded-none shadow-[0_8px_30px_-18px_rgba(15,23,42,0.3)] sm:rounded-b-3xl' : 'rounded-3xl shadow-[0_4px_40px_-10px_rgba(0,0,0,0.1)]'}`}>
           
           {/* Left: Logo */}
           <button
@@ -1851,9 +1867,9 @@ const App: React.FC = () => {
             onClick={() => handleTabChange('list')}
             aria-label="回到瀏覽首頁"
           >
-            <div className="relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-xl sm:rounded-2xl shadow-md group-hover:shadow-indigo-500/30 transition-all duration-300 group-hover:scale-[1.02]">
+            <div className="relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-xl sm:rounded-2xl shadow-md group-hover:shadow-indigo-500/30 transition-shadow duration-200">
                 <div className="absolute inset-[2px] bg-white rounded-[10px] sm:rounded-[14px] z-0"></div>
-                <GraduationCap className="relative z-10 w-5 h-5 sm:w-6 sm:h-6 text-indigo-600 group-hover:rotate-12 transition-transform duration-500" />
+                <GraduationCap className="relative z-10 w-5 h-5 sm:w-6 sm:h-6 text-indigo-600 " />
             </div>
             <div className="flex flex-col">
                 <h1 className="text-lg sm:text-xl font-black text-slate-800 tracking-tight leading-none mb-0.5">
@@ -1874,7 +1890,7 @@ const App: React.FC = () => {
                  type="button"
                  onClick={() => setShowShareModal(true)}
                  aria-label="分享這個網站"
-                 className="relative flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-black text-slate-700 transition-all duration-300 hover:bg-slate-50 hover:text-slate-900"
+                 className="relative flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-black text-slate-700 transition-colors duration-200 hover:bg-slate-50 hover:text-slate-900"
              >
                  <Share2 className="hidden w-4 h-4 text-slate-400 group-hover:text-indigo-500" />
                  <span>分享</span>
@@ -1893,19 +1909,14 @@ const App: React.FC = () => {
                     relative group hidden items-center justify-center gap-1.5 sm:gap-2 md:flex
                     overflow-hidden rounded-full
                     px-4 py-2 sm:px-6 sm:py-2.5
-                    font-black text-xs sm:text-sm tracking-wide transition-all duration-300 active:scale-95
+                    font-black text-xs sm:text-sm tracking-wide transition-[background-color,box-shadow] duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500
                     ${activeTab === 'form' 
                         ? 'bg-slate-800 text-white shadow-md' 
-                        : 'bg-gradient-to-tr from-indigo-600 to-purple-600 text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:-translate-y-0.5 border border-white/20'
+                        : 'bg-gradient-to-tr from-indigo-600 to-purple-600 text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/30 border border-white/20'
                     }
                 `}
             >
-                {/* Shiny hover effect */}
-                {activeTab !== 'form' && (
-                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                )}
-                
-                <PlusCircle className={`w-4 h-4 sm:w-5 sm:h-5 relative z-10 ${activeTab !== 'form' ? 'group-hover:rotate-180 transition-transform duration-700' : ''}`} />
+                <PlusCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span className="relative z-10"><span className="hidden sm:inline">新增</span>分享</span>
             </a>
 

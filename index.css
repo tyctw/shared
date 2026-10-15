@@ -345,3 +345,86 @@
 @media (prefers-reduced-motion: reduce) {
   .system-boot-stars, .system-boot-radar, .system-boot-radar::before, .system-boot-beam, .system-boot-ring, .system-boot-emblem::after { animation-duration: .01ms; animation-iteration-count: 1; }
 }
+
+
+/* Keep the collection shortcut clear of mobile navigation and device safe areas. */
+.favorites-fab {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: calc(max(1rem, env(safe-area-inset-bottom)) + 5.75rem);
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: .625rem;
+  min-height: 3.25rem;
+  max-width: calc(100vw - 2rem);
+  padding: .5rem .875rem .5rem .625rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: #fff;
+  color: #334155;
+  text-decoration: none;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, .10);
+  transition: border-color .15s, box-shadow .15s, background-color .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.favorites-fab:hover {
+  border-color: #fda4af;
+  background: #fffafb;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, .14);
+}
+.favorites-fab:active { background: #fff1f2; }
+.favorites-fab:focus-visible { outline: 3px solid #6366f1; outline-offset: 4px; }
+.favorites-fab-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  background: #fff1f2;
+  color: #e11d48;
+}
+.favorites-fab-label { font-size: .8125rem; font-weight: 600; white-space: nowrap; }
+.favorites-fab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 .375rem;
+  border-radius: 999px;
+  background: #ffe4e6;
+  color: #be123c;
+  font-size: .6875rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+@media (min-width: 768px) {
+  .favorites-fab {
+    right: max(2rem, env(safe-area-inset-right));
+    bottom: max(2rem, env(safe-area-inset-bottom));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .favorites-fab { transition: none; }
+}
+
+
+/* Header motion stays brief and only animates properties that actually change. */
+.site-header { transition: padding 200ms ease-out; }
+.site-header-shell {
+  width: 100%;
+  max-width: 80rem;
+  transition: max-width 200ms ease-out, border-radius 200ms ease-out, box-shadow 200ms ease-out;
+}
+.site-header--compact .site-header-shell { max-width: 100%; }
+@media (prefers-reduced-motion: reduce) {
+  .site-header,
+  .site-header * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
