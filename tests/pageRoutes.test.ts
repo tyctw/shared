@@ -13,7 +13,9 @@ test('each route round-trips at root and GitHub Pages deployment base', () => {
   }
 });
 
-test('original home URL remains an alias for the score list', () => {
+test('the list uses the site root as its canonical URL', () => {
+  assert.equal(pageHref('list', '/'), '/');
+  assert.equal(pageHref('list', '/shared/'), '/shared/');
   assert.deepEqual(resolvePageRoute('/'), { tab: 'list', base: '/' });
   assert.deepEqual(resolvePageRoute('/shared/'), { tab: 'list', base: '/shared/' });
   assert.deepEqual(resolvePageRoute('/shared/index.html'), { tab: 'list', base: '/shared/' });
@@ -43,4 +45,16 @@ test('each article resolves independently under root and subdirectory deployment
 
 test('unknown article retains its parent route for a useful not-found page', () => {
   assert.deepEqual(resolvePageRoute('/shared/insights/missing/'), { tab: 'insights', base: '/shared/', articleSlug: 'missing' });
+});
+
+
+test('old score addresses normalize to the root without becoming a deployment base', () => {
+  for (const base of ['/', '/shared/']) {
+    for (const alias of ['score', 'scores']) {
+      const route = resolvePageRoute(`${base}${alias}/`);
+      assert.deepEqual(route, { tab: 'list', base });
+      assert.equal(pageHref(route.tab, route.base), base);
+      assert.deepEqual(resolvePageRoute(`${base}${alias}/index.html`), route);
+    }
+  }
 });

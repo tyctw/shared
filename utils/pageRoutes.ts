@@ -1,7 +1,7 @@
 import { ALL_STRATEGY_ARTICLES } from '../data/strategyArticles';
 
 export const PAGE_ROUTES = {
-  list: { path: 'scores', title: '瀏覽錄取資料' },
+  list: { path: '', title: '瀏覽錄取資料' },
   minimums: { path: 'minimums', title: '各校最低分數' },
   stats: { path: 'statistics', title: '會考統計資料' },
   insights: { path: 'insights', title: '會考志願策略' },
@@ -23,6 +23,8 @@ export function resolvePageRoute(pathname: string): PageRoute {
     parts.pop();
     return { tab: 'insights', base: `/${parts.length ? `${parts.join('/')}/` : ''}`, articleSlug };
   }
+  // Old list URLs now resolve to the site's root.
+  if (['score', 'scores'].includes(parts[parts.length - 1])) parts.pop();
   const route = Object.entries(PAGE_ROUTES).find(([, value]) => value.path === parts[parts.length - 1]);
   if (route) parts.pop();
   return { tab: (route?.[0] as ActiveTab | undefined) ?? 'list', base: `/${parts.length ? `${parts.join('/')}/` : ''}` };
@@ -36,6 +38,7 @@ export function resolveInitialPageRoute(pathname: string, hash: string): PageRou
 }
 
 export function pageHref(tab: ActiveTab, base: string, articleSlug?: string): string {
+  if (tab === 'list') return base;
   return `${base}${PAGE_ROUTES[tab].path}/${tab === 'insights' && articleSlug ? `${encodeURIComponent(articleSlug)}/` : ''}`;
 }
 export const articleHref = (slug: string, base: string) => pageHref('insights', base, slug);

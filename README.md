@@ -25,7 +25,7 @@ View your app in AI Studio: https://ai.studio/apps/drive/1YhBSkxVj8QKwOdtCXGbYi_
 
 | 頁面 | 路徑（相對於網站根目錄） |
 | --- | --- |
-| 瀏覽錄取資料 | `scores/`（原根目錄仍可使用） |
+| 瀏覽錄取資料 | 網站根目錄 `/`（正式站為 `/shared/`） |
 | 各校最低分數 | `minimums/` |
 | 會考統計資料 | `statistics/` |
 | 會考志願策略 | `insights/` |
@@ -68,3 +68,5 @@ GitHub Pages 部署範例：`https://tyctw.github.io/shared/statistics/`。
 - `insights/score-to-choice/`：原置頂入門專題
 
 支援站內導覽、上一頁／下一頁、文章目錄、直接開啟與重新整理。舊的 `insights/#article-代稱` 連結會在載入後改用獨立路徑。建置會產生六個文章入口，設定各自的標題、描述與分享網址，並以 `../../` 對應 GitHub Pages 子目錄資源。
+
+錄取資料列表使用網站根目錄，不再新增 `/scores/`。舊的 `score/` 與 `scores/` 入口僅作返回根目錄的相容轉址；其他頁面的獨立路徑維持不變。

@@ -9,8 +9,8 @@ const routes = [
   ...ALL_STRATEGY_ARTICLES.map(article => ({ path: `insights/${article.slug}`, ...getPageMetadata('insights', article.slug) })),
 ];
 for (const { path, title, description } of routes) {
-  const url = `https://tyctw.github.io/shared/${path}/`;
-  const base = '../'.repeat(path.split('/').length);
+  const url = `https://tyctw.github.io/shared/${path ? `${path}/` : ''}`;
+  const base = path ? '../'.repeat(path.split('/').length) : './';
   const pageTitle = escapeHtml(`${title}｜會考錄取分享平台`);
   const page = html
     .replace('<head>', `<head>\n    <base href="${base}" />`)
@@ -28,3 +28,9 @@ for (const { path, title, description } of routes) {
   await writeFile(`dist/${path}/index.html`, page);
 }
 console.log(`Created ${routes.length} page entry files.`);
+
+// Keep previously shared list URLs usable while all active links point to the root.
+for (const alias of ['score', 'scores']) {
+  await mkdir(`dist/${alias}`, { recursive: true });
+  await writeFile(`dist/${alias}/index.html`, `<!doctype html><html lang="zh-TW"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0;url=../"><link rel="canonical" href="https://tyctw.github.io/shared/"><title>返回會考錄取分享平台</title></head><body><a href="../">返回錄取資料首頁</a></body></html>`);
+}
