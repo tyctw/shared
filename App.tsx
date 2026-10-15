@@ -1,3 +1,6 @@
+import LegalContentPage from './components/LegalContentPage';
+import { LEGAL_CONTACT_EMAIL } from './data/legalContent';
+import { useEntryYears } from './hooks/useEntryYears';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import ScoreForm from './components/ScoreForm';
 import ScoreList from './components/ScoreList';
@@ -11,7 +14,7 @@ import MobileMenu from './components/MobileMenu';
 import { ScoreEntry } from './types';
 import { REGIONS } from './constants';
 import { fetchEntries, submitEntry, logUserAction } from './services/apiService';
-import { ENTRY_LOCK_MESSAGE, isEntryYearLocked } from './utils/entryOpenLock';
+import { getEntryLockMessage, isEntryYearLocked } from './utils/entryOpenLock';
 import { GraduationCap, BarChart3, PlusCircle, BookOpen, CloudOff, Info, Menu, X, ExternalLink, Calculator, Compass, Sparkles, RefreshCw, Home, ShieldAlert, Check, Heart, Shield, Share2, ArrowRight, MapPin, Search, Table2, ChevronLeft, ChevronDown, Instagram, AtSign, MailWarning } from 'lucide-react';
 
 // New Custom Loader Component
@@ -40,7 +43,7 @@ const AppLoader = () => (
 );
 
 import { PAGE_ROUTES, resolvePageRoute, pageHref, type ActiveTab } from './utils/pageRoutes';
-const CONTACT_EMAIL = 'tyctw.analyze@gmail.com';
+const CONTACT_EMAIL = LEGAL_CONTACT_EMAIL;
 type MinimumSortOption = 'region' | 'pointsAsc' | 'pointsDesc' | 'creditsAsc' | 'creditsDesc' | 'yearDesc' | 'yearAsc' | 'countDesc' | 'schoolAsc';
 
 const hasTotalCredits = (entry: Pick<ScoreEntry, 'totalCredits'>) => typeof entry.totalCredits === 'number';
@@ -310,528 +313,9 @@ const StatsInsightLoader = () => (
   </div>
 );
 
-const DisclaimerPage = ({ onBack }: { onBack: () => void }) => {
-  const items = [
-    ['非官方錄取資料', '本平台內容由考生匿名、自願回報，並非教育主管機關、招生委員會或學校公布的正式錄取門檻，也不代表最低錄取標準、保證錄取分數或任何官方統計結果。', 'rose'],
-    ['資料可能存在誤差', '回報內容可能因記憶落差、輸入錯誤、不同招生管道、特殊身分、超額比序、志願序或年度規則差異而產生偏差。平台會盡力維護資料品質，但無法逐筆查核真實性。', 'indigo'],
-    ['官方資訊優先', '選填志願前，請務必查閱當年度免試入學簡章、招生名額、超額比序規則、各區招生公告與學校正式資訊；若平台內容與官方資訊不同，應以官方公告為準。', 'amber'],
-    ['判讀方式限制', '單筆資料不應被視為錄取門檻。建議同時比較同年度、同區域、同校科、多筆相近條件資料，並留意特殊身分、科系差異與積分制度變化。', 'emerald'],
-    ['不構成升學建議', '平台提供資訊整理與經驗分享，不提供個別升學諮詢、錄取保證、志願序建議或法律責任承諾。任何升學決策仍應由使用者與家長、師長討論後自行判斷。', 'violet'],
-    ['匿名分享與個資保護', '表單不要求姓名、電話或身分證字號。請勿在心得或補充說明中填寫姓名、准考證號、聯絡方式、地址、班級座號或任何可識別自己及他人的資訊。', 'indigo'],
-    ['資料調整與移除', '平台可基於資料品質、隱私風險、明顯異常、惡意填寫或維運需求，調整、隱藏或移除部分資料。若你認為資料有誤，可透過頁面提供的回報方式協助更正。', 'amber'],
-    ['聯絡資訊', `若需回報資料錯誤、隱私疑慮、刪修需求或平台問題，可來信 ${CONTACT_EMAIL}，請附上可協助定位資料的年份、區域、學校與科系。`, 'emerald'],
-    ['使用者自行承擔風險', '使用本平台資料所做的志願選填、升學規劃或其他決策，其結果與風險由使用者自行承擔。平台維護者不對任何直接、間接、附帶或衍生損失負責。', 'rose'],
-  ];
-
-  const toneClass: Record<string, string> = {
-    rose: 'bg-rose-50 text-rose-500',
-    indigo: 'bg-indigo-50 text-indigo-500',
-    amber: 'bg-amber-50 text-amber-600',
-    emerald: 'bg-emerald-50 text-emerald-600',
-    violet: 'bg-violet-50 text-violet-600',
-  };
-
-  return (
-    <div className="mx-auto max-w-4xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <section className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-amber-50 via-white to-orange-50 p-6 shadow-[0_18px_60px_-35px_rgba(15,23,42,0.35)] ring-1 ring-amber-100 sm:p-8">
-        <div className="pointer-events-none absolute -right-10 -top-14 h-40 w-40 rounded-full border-[24px] border-amber-100/70" />
-        <div className="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-lg shadow-amber-200">
-              <ShieldAlert className="h-7 w-7" />
-            </div>
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-600">Platform notice</p>
-              <h2 className="mt-1 text-3xl font-black tracking-tight text-slate-900">免責聲明</h2>
-              <p className="mt-2 text-sm font-medium leading-6 text-slate-500">使用本平台資料前，請先了解資料來源、使用限制與判讀原則。</p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onBack}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-black text-white shadow-lg shadow-slate-200 transition-all hover:bg-indigo-600 active:scale-[0.98]"
-          >
-            <ArrowRight className="h-4 w-4 rotate-180" />
-            返回瀏覽資料
-          </button>
-        </div>
-      </section>
-
-      <section className="grid gap-3">
-        {items.map(([title, body, tone], index) => (
-          <article key={title} className="flex gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-            <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm font-black ${toneClass[tone]}`}>
-              {index + 1}
-            </div>
-            <div>
-              <h3 className="font-black text-slate-800">{title}</h3>
-              <p className="mt-1 text-sm font-medium leading-6 text-slate-500">{body}</p>
-            </div>
-          </article>
-        ))}
-      </section>
-    </div>
-  );
-};
-
-const PrivacyPage = ({ onBack }: { onBack: () => void }) => (
-  <div className="mx-auto max-w-4xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-    <section className="relative overflow-hidden rounded-[2rem] border border-indigo-100 bg-white p-6 shadow-[0_18px_60px_-35px_rgba(15,23,42,0.35)] sm:p-8">
-      <div className="pointer-events-none absolute -right-12 -top-16 h-44 w-44 rounded-full bg-indigo-100/80 blur-3xl" />
-      <div className="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-start gap-4">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-200">
-            <Shield className="h-7 w-7" />
-          </div>
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500">Privacy & Copyright</p>
-            <h2 className="mt-1 text-3xl font-black tracking-tight text-slate-900">隱私權與版權聲明</h2>
-            <p className="mt-2 text-sm font-medium leading-6 text-slate-500">說明資料蒐集方式、瀏覽器儲存、資料風險與版權使用規範。</p>
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={onBack}
-          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-black text-white shadow-lg shadow-slate-200 transition-all hover:bg-indigo-600 active:scale-[0.98]"
-        >
-          <ArrowRight className="h-4 w-4 rotate-180" />
-          返回瀏覽資料
-        </button>
-      </div>
-    </section>
-
-    <section className="space-y-4 rounded-[2rem] border border-slate-100 bg-white p-5 shadow-sm sm:p-8">
-      <section className="space-y-3">
-        <h3 className="border-l-4 border-indigo-500 pl-3 text-lg font-black text-slate-800">1. 資料蒐集與使用</h3>
-        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
-          本平台（CAP Score Sharing）為匿名性質的資料分享平台。當您填寫並送出分數分享表單時，我們會蒐集您自願提供的會考年份、就學區、錄取學校、科系或班別、考生身分、各科成績、總積分、總積點與補充說明等內容。
-          這些資料將用於公開呈現、統計整理、篩選查詢與協助其他考生判讀歷年錄取經驗。
-        </p>
-        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
-          本平台表單<span className="font-bold text-rose-500">不要求</span>姓名、身分證字號、電話、地址、准考證號、學號、班級座號或其他可直接識別個人的資料。請勿主動在心得或補充欄位填入自己或他人的個人資料。
-        </p>
-      </section>
-
-      <section className="space-y-3">
-        <h3 className="border-l-4 border-indigo-500 pl-3 text-lg font-black text-slate-800">2. 瀏覽器儲存與使用紀錄</h3>
-        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
-          為了提供更好的使用體驗，本網站會使用 Local Storage 儲存您的收藏名單、已閱讀免責聲明狀態等偏好設定。這些資料主要存放於您的瀏覽器中，用於讓您下次回到網站時保留操作狀態。
-        </p>
-        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
-          若您清除瀏覽器資料、更換裝置或使用無痕模式，這些本機偏好設定可能會消失。本平台不會以本機收藏資料識別您的真實身分。
-        </p>
-      </section>
-
-      <section className="space-y-3">
-        <h3 className="border-l-4 border-rose-500 pl-3 text-lg font-black text-slate-800">3. 公開資料與匿名風險</h3>
-        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
-          您送出的錄取資料可能會在網站上公開展示，供其他使用者查詢、篩選、比較或分享。雖然平台不要求直接識別個資，但若您在補充說明中留下足以辨識身分的內容，仍可能造成個資外洩風險。
-        </p>
-        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
-          若發現資料含有個人資訊、錯誤內容、冒用或不當文字，平台可視情況進行修正、隱藏或刪除。使用者也可透過資料卡片上的回報方式協助我們維護資料品質。
-        </p>
-      </section>
-
-      <section className="space-y-3">
-        <h3 className="border-l-4 border-indigo-500 pl-3 text-lg font-black text-slate-800">4. 第三方服務與資料傳輸</h3>
-        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
-          本平台可能使用第三方服務提供資料庫、網站部署、分析或分享功能，例如雲端資料庫、網站主機、瀏覽器分享 API 或外部社群分享連結。當您使用這些功能時，相關服務可能依其自身政策處理必要的技術資料。
-        </p>
-        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
-          若您透過 LINE、社群平台、Email 或其他外部工具分享本站內容，該分享行為將受外部平台的服務條款與隱私政策約束。
-        </p>
-      </section>
-
-      <section className="space-y-3">
-        <h3 className="border-l-4 border-indigo-500 pl-3 text-lg font-black text-slate-800">5. 資料保存、修正與刪除</h3>
-        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
-          為維持歷年資料參考價值，您自願送出的匿名錄取資料可能會被保存於資料庫中，直到平台維運者判斷不再需要、資料明顯錯誤、涉及隱私風險或使用者提出合理刪修需求。
-        </p>
-        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
-          因本平台採匿名分享設計，若您未提供可驗證的資料識別資訊，平台可能無法確認特定資料是否由您本人提交。回報刪修時，請提供資料卡片中可見的年份、區域、學校、科系與錯誤原因，協助我們定位資料。
-        </p>
-      </section>
-
-      <section className="space-y-3">
-        <h3 className="border-l-4 border-amber-500 pl-3 text-lg font-black text-slate-800">6. 使用者責任</h3>
-        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
-          使用者應確保提交內容盡可能真實、完整且不侵害他人權益。請勿提交虛假資料、惡意攻擊、歧視性文字、廣告、個資、侵犯著作權內容或任何違反法律與善良風俗的資訊。
-        </p>
-        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
-          若使用者因提交不當內容造成第三方權益受損或法律爭議，應由提交者自行負責；平台可基於安全與維運需求移除相關內容。
-        </p>
-      </section>
-
-      <section className="space-y-3">
-        <h3 className="border-l-4 border-indigo-500 pl-3 text-lg font-black text-slate-800">7. 版權聲明 (Copyright)</h3>
-        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
-          本網站的原始程式碼、介面設計、網站架構、視覺排版、資料整理方式與文字內容，除另有標示外，皆受相關智慧財產權保護。未經授權，不得冒名、抄襲、販售、批量轉載或以誤導方式二次發布。
-        </p>
-        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
-          若您引用本站資料作為非商業討論、心得分享或教育參考，請註明資料來源「TYCTW會考落點分享平台」或「會考錄取分享平台」，並避免將匿名回報資料包裝成官方錄取門檻。
-        </p>
-      </section>
-
-      <section className="space-y-3">
-        <h3 className="border-l-4 border-indigo-500 pl-3 text-lg font-black text-slate-800">8. 條款更新</h3>
-        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
-          本頁內容可能因平台功能、資料欄位、法規環境或維運需求而調整。更新後的內容會公布於本頁，使用者持續使用本平台即表示了解並接受更新後的聲明內容。
-        </p>
-      </section>
-
-      <section className="space-y-3">
-        <h3 className="border-l-4 border-indigo-500 pl-3 text-lg font-black text-slate-800">9. 聯絡資訊</h3>
-        <p className="pl-4 text-sm font-medium leading-7 text-slate-500">
-          若您需要回報資料錯誤、提出刪修需求、反映隱私或版權問題，可寄信至
-          <a href={`mailto:${CONTACT_EMAIL}`} className="mx-1 font-black text-indigo-600 hover:text-indigo-700">{CONTACT_EMAIL}</a>
-          。來信時請盡量提供年份、區域、學校、科系與問題描述，方便我們定位資料。
-        </p>
-      </section>
-    </section>
-  </div>
-);
-
-const LegalNoticePage = ({ onBack }: { onBack: () => void }) => {
-  const noticeCards = [
-    {
-      title: '資料來源',
-      tone: 'indigo',
-      body: '本平台內容主要由使用者自願分享與公開統計整理而成，僅供升學參考與資料瀏覽使用。',
-    },
-    {
-      title: '版權歸屬',
-      tone: 'violet',
-      body: '網站版面、程式設計、整理後的呈現方式與原創文字內容，除另有標示外，均屬 CAP Score Sharing / TYCTW 團隊所有。',
-    },
-    {
-      title: '合理使用',
-      tone: 'emerald',
-      body: '歡迎分享本站連結或引用少量內容作為非商業、教育與討論用途；引用時請保留來源說明。',
-    },
-    {
-      title: '禁止事項',
-      tone: 'rose',
-      body: '未經同意，請勿大量爬取、重新包裝、商業販售、移除來源標示，或將資料用於誤導性內容。',
-    },
-  ];
-
-  const toneClass: Record<string, string> = {
-    indigo: 'bg-indigo-50 text-indigo-600 ring-indigo-100',
-    violet: 'bg-violet-50 text-violet-600 ring-violet-100',
-    emerald: 'bg-emerald-50 text-emerald-600 ring-emerald-100',
-    rose: 'bg-rose-50 text-rose-600 ring-rose-100',
-  };
-
-  return (
-    <div className="mx-auto max-w-5xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <section className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/75 p-6 shadow-[0_28px_90px_-48px_rgba(79,70,229,0.55)] ring-1 ring-indigo-100/70 backdrop-blur-xl sm:p-8">
-        <div className="pointer-events-none absolute -left-20 -top-24 h-64 w-64 rounded-full bg-indigo-200/60 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-28 -right-20 h-72 w-72 rounded-full bg-rose-200/50 blur-3xl" />
-        <div className="pointer-events-none absolute inset-0 opacity-[0.05] [background-image:linear-gradient(rgba(79,70,229,.8)_1px,transparent_1px),linear-gradient(90deg,rgba(79,70,229,.8)_1px,transparent_1px)] [background-size:30px_30px]" />
-
-        <div className="relative z-10 flex flex-col gap-7 lg:flex-row lg:items-center lg:justify-between">
-          <div className="max-w-2xl">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-white/80 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-indigo-500 shadow-sm">
-              <Shield className="h-3.5 w-3.5" />
-              Privacy & Copyright
-            </div>
-            <h2 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-              隱私權與版權聲明
-            </h2>
-            <p className="mt-4 text-sm font-bold leading-7 text-slate-500 sm:text-base">
-              這裡說明本站如何保存使用偏好、呈現共享資料，以及網站內容的授權與使用界線。請以尊重資料提供者與創作者的方式使用本平台。
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={onBack}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-black text-white shadow-lg shadow-slate-200 transition-all hover:-translate-y-0.5 hover:bg-indigo-600 hover:shadow-indigo-200 active:scale-[0.98] sm:w-auto"
-          >
-            <ArrowRight className="h-4 w-4 rotate-180" />
-            返回平台
-          </button>
-        </div>
-      </section>
-
-      <section className="grid gap-4 md:grid-cols-2">
-        {noticeCards.map((item, index) => (
-          <article
-            key={item.title}
-            className="group relative overflow-hidden rounded-[1.5rem] border border-white/80 bg-white p-5 shadow-[0_18px_55px_-38px_rgba(15,23,42,0.55)] ring-1 ring-slate-100 transition-all hover:-translate-y-1 hover:shadow-[0_24px_70px_-38px_rgba(79,70,229,0.45)]"
-          >
-            <div className="pointer-events-none absolute -right-10 -top-12 h-32 w-32 rounded-full bg-indigo-100/50 blur-3xl transition-opacity group-hover:opacity-80" />
-            <div className="relative flex gap-4">
-              <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-sm font-black ring-1 ${toneClass[item.tone]}`}>
-                {String(index + 1).padStart(2, '0')}
-              </div>
-              <div>
-                <h3 className="text-lg font-black tracking-tight text-slate-850">{item.title}</h3>
-                <p className="mt-2 text-sm font-medium leading-7 text-slate-500">{item.body}</p>
-              </div>
-            </div>
-          </article>
-        ))}
-      </section>
-
-      <section className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-        <article className="rounded-[1.75rem] border border-slate-100 bg-white p-6 shadow-sm sm:p-7">
-          <div className="mb-5 flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-100">
-              <BookOpen className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500">Usage notes</p>
-              <h3 className="text-xl font-black text-slate-900">使用與引用規範</h3>
-            </div>
-          </div>
-          <div className="space-y-4 text-sm font-medium leading-7 text-slate-500">
-            <p>
-              使用本站資料時，請理解所有分享內容可能受到時間、個人填寫方式與樣本數影響。本站不保證資料完全正確，也不構成錄取保證或升學建議。
-            </p>
-            <p>
-              若要截圖、引用或轉貼內容，請標明「資料來源：CAP Score Sharing」，並避免讓讀者誤以為引用內容是官方公告。
-            </p>
-          </div>
-        </article>
-
-        <article className="relative overflow-hidden rounded-[1.75rem] border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-sky-50 p-6 shadow-sm sm:p-7">
-          <Sparkles className="absolute right-6 top-6 h-5 w-5 text-amber-400" />
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-indigo-600 shadow-lg shadow-indigo-100">
-            <MailWarning className="h-5 w-5" />
-          </div>
-          <h3 className="mt-5 text-xl font-black text-slate-900">回報侵權或資料疑慮</h3>
-          <p className="mt-3 text-sm font-medium leading-7 text-slate-500">
-            如您認為本站內容涉及隱私、版權、錯誤資料或不當引用，請來信並附上相關頁面、截圖或可協助定位的資訊。
-          </p>
-          <a
-            href={`mailto:${CONTACT_EMAIL}`}
-            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-black text-indigo-600 shadow-sm ring-1 ring-indigo-100 transition-all hover:-translate-y-0.5 hover:bg-indigo-600 hover:text-white hover:shadow-indigo-100 sm:w-auto"
-          >
-            {CONTACT_EMAIL}
-          </a>
-        </article>
-      </section>
-
-      <section className="rounded-[1.5rem] border border-amber-100 bg-amber-50/80 p-5 text-sm font-bold leading-7 text-amber-800">
-        本聲明可能依平台功能、資料來源或營運需求調整；更新後將直接公布於本頁面。
-      </section>
-    </div>
-  );
-};
-
-const ModernDisclaimerPage = ({ onBack }: { onBack: () => void }) => {
-  const statements = [
-    {
-      title: '非官方資料',
-      body: '本站不是官方招生單位，所有錄取分享、統計與落點參考皆不代表任何學校或主管機關公告。',
-      tone: 'rose',
-    },
-    {
-      title: '僅供參考',
-      body: '資料會受到年度名額、填報志願、個人條件與樣本數影響，不能作為保證錄取或最終決策依據。',
-      tone: 'amber',
-    },
-    {
-      title: '使用者分享',
-      body: '平台內容多來自使用者自願填寫，我們會盡力整理與修正，但無法保證每筆資料完全正確。',
-      tone: 'indigo',
-    },
-    {
-      title: '請自行查證',
-      body: '正式錄取、分發、招生與報到資訊，請以各主管機關、招生簡章與學校正式公告為準。',
-      tone: 'emerald',
-    },
-  ];
-
-  const toneClass: Record<string, string> = {
-    rose: 'bg-rose-50 text-rose-600 ring-rose-100',
-    amber: 'bg-amber-50 text-amber-600 ring-amber-100',
-    indigo: 'bg-indigo-50 text-indigo-600 ring-indigo-100',
-    emerald: 'bg-emerald-50 text-emerald-600 ring-emerald-100',
-  };
-
-  return (
-    <div className="mx-auto max-w-5xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <section className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/75 p-6 shadow-[0_28px_90px_-48px_rgba(245,158,11,0.55)] ring-1 ring-amber-100/80 backdrop-blur-xl sm:p-8">
-        <div className="pointer-events-none absolute -left-20 -top-24 h-64 w-64 rounded-full bg-amber-200/55 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-28 -right-20 h-72 w-72 rounded-full bg-rose-200/50 blur-3xl" />
-        <div className="relative z-10 flex flex-col gap-7 lg:flex-row lg:items-center lg:justify-between">
-          <div className="max-w-2xl">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-amber-100 bg-white/85 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-amber-600 shadow-sm">
-              <ShieldAlert className="h-3.5 w-3.5" />
-              Platform Notice
-            </div>
-            <h2 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-              免責聲明
-            </h2>
-            <p className="mt-4 text-sm font-bold leading-7 text-slate-500 sm:text-base">
-              CAP Score Sharing 以整理、分享與查詢為目的，協助學生快速理解歷年錄取經驗。請把本站視為參考工具，而不是官方結果或保證承諾。
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={onBack}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-black text-white shadow-lg shadow-slate-200 transition-all hover:-translate-y-0.5 hover:bg-amber-500 hover:shadow-amber-100 active:scale-[0.98] sm:w-auto"
-          >
-            <ArrowRight className="h-4 w-4 rotate-180" />
-            返回平台
-          </button>
-        </div>
-      </section>
-
-      <section className="grid gap-4 md:grid-cols-2">
-        {statements.map((item, index) => (
-          <article
-            key={item.title}
-            className="relative overflow-hidden rounded-[1.5rem] border border-white/80 bg-white p-5 shadow-[0_18px_55px_-38px_rgba(15,23,42,0.55)] ring-1 ring-slate-100"
-          >
-            <div className="flex gap-4">
-              <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-sm font-black ring-1 ${toneClass[item.tone]}`}>
-                {index + 1}
-              </div>
-              <div>
-                <h3 className="text-lg font-black tracking-tight text-slate-900">{item.title}</h3>
-                <p className="mt-2 text-sm font-medium leading-7 text-slate-500">{item.body}</p>
-              </div>
-            </div>
-          </article>
-        ))}
-      </section>
-
-      <section className="grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
-        <article className="rounded-[1.75rem] border border-amber-100 bg-amber-50/85 p-6 sm:p-7">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-lg shadow-amber-100">
-            <Info className="h-5 w-5" />
-          </div>
-          <h3 className="mt-5 text-xl font-black text-slate-900">正式資訊以官方公告為準</h3>
-          <p className="mt-3 text-sm font-bold leading-7 text-amber-800">
-            遇到報名、分發、報到、放榜、複查與錄取資格等重要事項，請務必回到官方招生網站、簡章或學校公告確認。
-          </p>
-        </article>
-
-        <article className="rounded-[1.75rem] border border-slate-100 bg-white p-6 shadow-sm sm:p-7">
-          <div className="mb-5 flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-100">
-              <MailWarning className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500">Feedback</p>
-              <h3 className="text-xl font-black text-slate-900">資料錯誤回報</h3>
-            </div>
-          </div>
-          <p className="text-sm font-medium leading-7 text-slate-500">
-            若發現疑似錯誤、重複、隱私疑慮或需要刪修的資料，請附上年份、區域、學校與可定位資訊來信。
-          </p>
-          <a
-            href={`mailto:${CONTACT_EMAIL}`}
-            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-black text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-indigo-600 sm:w-auto"
-          >
-            {CONTACT_EMAIL}
-          </a>
-        </article>
-      </section>
-    </div>
-  );
-};
-
-type LegalPageKind = 'disclaimer' | 'privacy';
-
-/**
- * The wording below reflects the functions this site currently provides:
- * anonymous score submissions stored in Supabase, public display of approved
- * submissions, and preference data kept in the visitor's own browser.
- */
-const LegalContentPage = ({ kind, onBack }: { kind: LegalPageKind; onBack: () => void }) => {
-  const isPrivacy = kind === 'privacy';
-  const title = isPrivacy ? '隱私權與版權聲明' : '免責聲明';
-  const subtitle = isPrivacy
-    ? '最後更新：2026 年 7 月 26 日'
-    : '使用本站前，請先了解資料的性質與限制。';
-
-  const sections = isPrivacy ? [
-    {
-      heading: '1. 蒐集者與適用範圍',
-      body: <>本聲明適用於「TYCTW 會考落點／CAP Score Sharing」（下稱「本平台」）之瀏覽、查詢與投稿服務。平台聯絡窗口為 <a className="font-bold text-indigo-700 underline underline-offset-2" href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>。</>,
-    },
-    {
-      heading: '2. 蒐集資料、目的與不提供的影響',
-      body: <>您瀏覽本平台時，平台不要求註冊帳號。若您主動投稿，會蒐集您填寫的會考年度、就學區、學校、科別／班別、身分別、各科成績、積分／積點、補充說明及送出時間；用途限於彙整、公開呈現、查詢、統計、維護資料品質與處理爭議。投稿完全自由；不提供資料僅會使您無法使用投稿功能，不影響瀏覽公開資料。</>,
-    },
-    {
-      heading: '3. 公開顯示與請勿填寫個人資料',
-      body: <>投稿資料可能公開供其他使用者查詢、篩選、統計與比較。請勿在任何欄位填寫姓名、電話、電子郵件、社群帳號、地址、准考證號、班級座號、照片，或其他可直接或間接辨識您或他人的資訊。若內容含有個人資料、侵權內容或不當資訊，平台得先行遮蔽、修正或移除。</>,
-    },
-    {
-      heading: '4. 保存、利用與第三方服務',
-      body: <>投稿資料保存至其不再有統計、維護、爭議處理或法令遵循之必要為止；有隱私或正確性疑慮時得提前刪除。資料由雲端資料庫服務處理與保存，可能涉及境外處理。除為提供、維護本平台、依法配合主管機關或取得您同意外，平台不出售或出租投稿資料。本站不使用廣告追蹤 Cookie；瀏覽器的 Local Storage 僅保存收藏、介面偏好及已閱讀聲明等資料，您可自行在瀏覽器設定中清除。</>,
-    },
-    {
-      heading: '5. 您的權利與申請方式',
-      body: <>如資料屬於您本人，您可依法請求查詢或閱覽、製給複製本、補充或更正、停止蒐集／處理／利用，或刪除。請寄信至上述聯絡信箱，主旨註明「個資／資料申請」，並提供能定位內容的年度、區域、學校、科別與投稿時間等資訊；為避免誤刪，平台得要求合理的身分或權利關係確認。申請將依適用法令與他人權益處理；依法得拒絕或限制者，會說明理由。</>,
-    },
-    {
-      heading: '6. 安全、外部連結與聲明更新',
-      body: <>平台採取合理的技術與管理措施保護資料，但網路傳輸與系統均無法保證絕對安全。本站如連結至其他網站或社群平台，其資料處理由各該服務負責。本聲明會因功能或法令變更而更新，更新版本自本頁公布時生效；重大變更將於網站以合理方式提示。</>,
-    },
-    {
-      heading: '7. 版權與投稿授權',
-      body: <>本站介面、文字、設計、程式與自行製作的圖表，除另有標示外，受著作權法保護。未經權利人書面同意，不得重製、改作、散布、公開傳輸或作商業利用；法律所允許的合理使用不在此限。您保有投稿內容原有權利，但投稿即表示您授權平台在營運本服務所必要範圍內，非專屬、無償地儲存、重製、編輯、匿名化、公開展示與統計使用。您應確保投稿不侵害第三人權利；若您是權利人並認為本站內容侵權，請來信提供網址／畫面、權利說明及聯絡方式，平台將依合理程序處理。</>,
-    },
-  ] : [
-    {
-      heading: '1. 非官方資訊與使用目的',
-      body: <>本平台由使用者自願、匿名投稿建立，並非教育主管機關、國中教育會考中心、招生委員會、學校或任何官方單位之網站；資料僅供經驗交流與資訊參考，不構成招生公告、錄取保證、升學建議、法律、財務或其他專業意見。</>,
-    },
-    {
-      heading: '2. 資料限制與判讀',
-      body: <>投稿可能有誤植、遺漏、重複、樣本不足、時點落差或個人情況差異。錄取結果也會受年度、志願序、超額比序、免試入學規則、身分別、招生名額及其他條件影響；單一筆資料、最低分或統計結果，均不能推論為正式門檻或預測您必然錄取。請以各招生主管機關、免試入學委員會與學校的最新正式公告為準。</>,
-    },
-    {
-      heading: '3. 使用者責任',
-      body: <>您應自行判斷資料是否適用並承擔使用結果。投稿時請如實填寫，且不得提供個人資料、虛偽內容、歧視、侮辱、廣告、惡意程式、侵害隱私或著作權之資料。您對投稿內容及其合法性負責；如因您的內容造成第三人損害或爭議，應自行負責處理。</>,
-    },
-    {
-      heading: '4. 平台管理與責任範圍',
-      body: <>平台得基於資料品質、安全、隱私、法令遵循或維運需要，審核、排序、統計、遮蔽、修正或移除內容，且不保證資料完整、正確、即時、持續可用或符合個別需求。在法令容許的最大範圍內，平台不就使用或無法使用本站、依賴使用者投稿、外部連結或第三方服務所生的間接、附帶、特殊、衍生損害或預期利益損失負責；但因故意或重大過失，或法律不得排除之責任，不受此限制。</>,
-    },
-    {
-      heading: '5. 回報、刪修與適用原則',
-      body: <>若發現錯誤、重複、個資、侵權或其他不當內容，請寄信至 <a className="font-bold text-indigo-700 underline underline-offset-2" href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>，並提供能定位的網址或年度、區域、學校、科別等資訊。平台將在合理範圍內處理。本聲明依中華民國法律解釋；如有爭議，應先以聯絡窗口協商處理。</>,
-    },
-  ];
-
-  return (
-    <div className="mx-auto max-w-4xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <section className={`rounded-[2rem] border p-6 shadow-sm sm:p-8 ${isPrivacy ? 'border-indigo-100 bg-indigo-50/50' : 'border-amber-100 bg-amber-50/60'}`}>
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-4">
-            <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-white ${isPrivacy ? 'bg-indigo-600' : 'bg-amber-500'}`}>
-              {isPrivacy ? <Shield className="h-7 w-7" /> : <ShieldAlert className="h-7 w-7" />}
-            </div>
-            <div>
-              <h2 className="text-3xl font-black tracking-tight text-slate-900">{title}</h2>
-              <p className="mt-2 text-sm font-medium leading-6 text-slate-600">{subtitle}</p>
-            </div>
-          </div>
-          <button type="button" onClick={onBack} className="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-black text-white transition-colors hover:bg-indigo-600">返回資料列表</button>
-        </div>
-      </section>
-      <section className="space-y-4 rounded-[2rem] border border-slate-100 bg-white p-5 shadow-sm sm:p-8">
-        {sections.map(section => (
-          <article key={section.heading} className="border-b border-slate-100 pb-5 last:border-0 last:pb-0">
-            <h3 className="border-l-4 border-indigo-500 pl-3 text-lg font-black text-slate-800">{section.heading}</h3>
-            <p className="mt-3 text-sm font-medium leading-7 text-slate-600">{section.body}</p>
-          </article>
-        ))}
-      </section>
-    </div>
-  );
-};
-
 const MinimumScoresPage = ({ entries }: { entries: ScoreEntry[] }) => {
-  const [selectedYear, setSelectedYear] = React.useState('115');
+  const availableYears = useEntryYears();
+  const [selectedYear, setSelectedYear] = React.useState(String(availableYears[0]));
   const [selectedRegion, setSelectedRegion] = React.useState('all');
   const [searchTerm, setSearchTerm] = React.useState('');
   const [sortOption, setSortOption] = React.useState<MinimumSortOption>('region');
@@ -846,9 +330,9 @@ const MinimumScoresPage = ({ entries }: { entries: ScoreEntry[] }) => {
   );
 
   const years = React.useMemo(
-    () => Array.from(new Set(generalEntries.map(entry => String(entry.year))))
+    () => Array.from(new Set([...availableYears.map(String), ...generalEntries.map(entry => String(entry.year))]))
       .sort((a, b) => Number(b) - Number(a)),
-    [generalEntries]
+    [generalEntries, availableYears]
   );
 
   const regions = React.useMemo(
@@ -1038,8 +522,7 @@ const MinimumScoresPage = ({ entries }: { entries: ScoreEntry[] }) => {
               }}
               className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-bold text-slate-700 outline-none transition-all focus:border-indigo-300 focus:bg-white focus:ring-4 focus:ring-indigo-50"
             >
-              <option value="115">115 年</option>
-              {years.filter(year => year !== '115').map(year => (
+              {years.map(year => (
                 <option key={year} value={year}>{year} 年</option>
               ))}
               <option value="all">所有年份</option>
@@ -1394,6 +877,7 @@ const MinimumScoresPage = ({ entries }: { entries: ScoreEntry[] }) => {
 };
 
 const App: React.FC = () => {
+  const availableYears = useEntryYears();
   const [entries, setEntries] = useState<ScoreEntry[]>([]);
   const [activeTab, setActiveTab] = useState<ActiveTab>(() => resolvePageRoute(window.location.pathname).tab);
   const [favoriteIds, setFavoriteIds] = useState<string[]>(() => {
@@ -1581,7 +1065,7 @@ const App: React.FC = () => {
 
   const handleAddEntry = async (newEntry: Omit<ScoreEntry, 'id' | 'timestamp'>) => {
     if (isEntryYearLocked(newEntry.year)) {
-      alert(ENTRY_LOCK_MESSAGE);
+      alert(getEntryLockMessage(newEntry.year));
       return;
     }
 
@@ -2017,7 +1501,7 @@ const App: React.FC = () => {
                                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-300 opacity-70"></span>
                                   <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
                                 </span>
-                                <span>115會考</span>
+                                <span>{availableYears[0]}會考</span>
                                 <span className="h-3 w-px bg-indigo-200"></span>
                                 <span className="text-slate-500">數據即時更新</span>
                             </div>
@@ -2200,11 +1684,11 @@ const App: React.FC = () => {
             )}
 
             {activeTab === 'disclaimer' && (
-              <LegalContentPage kind="disclaimer" onBack={handleAcceptDisclaimer} />
+              <LegalContentPage kind="disclaimer" onBack={handleAcceptDisclaimer} onNavigate={handleTabChange} />
             )}
 
             {activeTab === 'privacy' && (
-              <LegalContentPage kind="privacy" onBack={() => handleTabChange('list')} />
+              <LegalContentPage kind="privacy" onBack={() => handleTabChange('list')} onNavigate={handleTabChange} />
             )}
         </div>
       </main>

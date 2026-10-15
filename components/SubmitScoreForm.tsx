@@ -1,3 +1,5 @@
+import { useEntryYears } from '../hooks/useEntryYears';
+import { getEntryLockMessage, isEntryYearLocked } from '../utils/entryOpenLock';
 
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -10,6 +12,7 @@ interface SubmitScoreFormProps {
 }
 
 export const SubmitScoreForm: React.FC<SubmitScoreFormProps> = ({ onSubmited, onCancel }) => {
+  const years = useEntryYears();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -40,7 +43,7 @@ export const SubmitScoreForm: React.FC<SubmitScoreFormProps> = ({ onSubmited, on
 
   const [formData, setFormData] = useState({
     email: '',
-    examYear: Date.now() >= new Date('2026-07-07T10:55:00+08:00').getTime() ? '115' : '114',
+    examYear: String(years[0]),
     region: '',
     chineseScore: '',
     mathScore: '',
@@ -66,11 +69,13 @@ export const SubmitScoreForm: React.FC<SubmitScoreFormProps> = ({ onSubmited, on
     setFormData(prev => ({ ...prev, [subj]: value }));
   };
 
+  const yearOptions = years.includes(Number(formData.examYear)) ? years : [...years, Number(formData.examYear)];
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (formData.examYear === '115' && Date.now() < new Date('2026-07-07T10:55:00+08:00').getTime()) {
-      setError('115年度系統預計將於 2026/07/07 10:55 開放填寫');
+    if (isEntryYearLocked(formData.examYear)) {
+      setError(getEntryLockMessage(formData.examYear));
       return;
     }
 
@@ -205,17 +210,12 @@ export const SubmitScoreForm: React.FC<SubmitScoreFormProps> = ({ onSubmited, on
              className="w-full px-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none font-medium text-slate-700 transition-all shadow-sm hover:border-slate-300 appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%24%2024%22%20fill%3D%22none%22%20stroke%3D%22%2364748b%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-[length:1.5em_1.5em] bg-no-repeat bg-[position:right_1rem_center]"
              required
            >
-             <option value="115">115</option>
-             <option value="114">114</option>
-             <option value="113">113</option>
-             <option value="112">112</option>
-             <option value="111">111</option>
-             <option value="110">110</option>
+             {yearOptions.map(year => <option key={year} value={year}>{year}</option>)}
            </select>
-           {formData.examYear === '115' && Date.now() < new Date('2026-07-07T10:55:00+08:00').getTime() && (
+           {isEntryYearLocked(formData.examYear) && (
              <div className="mt-2 text-sm font-bold text-amber-600 flex items-start gap-1 p-2 bg-amber-50 rounded-xl border border-amber-200">
                <Info className="w-4 h-4 shrink-0 mt-0.5" />
-               <span>115年度系統預計於 2026/07/07 10:55 開放填寫資料</span>
+               <span>{getEntryLockMessage(formData.examYear)}</span>
              </div>
            )}
          </div>
@@ -359,16 +359,16 @@ export const SubmitScoreForm: React.FC<SubmitScoreFormProps> = ({ onSubmited, on
           </button>
           <button 
             type="submit" 
-            disabled={loading || (formData.examYear === '115' && Date.now() < new Date('2026-07-07T10:55:00+08:00').getTime())}
+            disabled={loading || (isEntryYearLocked(formData.examYear))}
             className={`w-full sm:w-2/3 px-4 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 group transition-all active:scale-[0.98] disabled:opacity-70 disabled:hover:translate-y-0 disabled:active:scale-100 ${
-              (formData.examYear === '115' && Date.now() < new Date('2026-07-07T10:55:00+08:00').getTime())
+              (isEntryYearLocked(formData.examYear))
                 ? 'bg-slate-200 text-slate-500 cursor-not-allowed shadow-none'
                 : 'bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-xl shadow-slate-900/20 hover:shadow-slate-900/30 hover:from-slate-800 hover:to-slate-700 hover:-translate-y-0.5'
             }`}
           >
             {loading ? (
               <Loader2 className="w-6 h-6 animate-spin text-slate-300" />
-            ) : (formData.examYear === '115' && Date.now() < new Date('2026-07-07T10:55:00+08:00').getTime()) ? (
+            ) : (isEntryYearLocked(formData.examYear)) ? (
               <span className="flex items-center gap-2">
                  未開放
                  <Clock className="w-5 h-5 text-slate-400" />

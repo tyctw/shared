@@ -1,6 +1,7 @@
+import { useEntryYears } from '../hooks/useEntryYears';
 import React, { useState, useEffect } from 'react';
 import { ScoreEntry, StudentIdentity } from '../types';
-import { REGIONS, YEARS } from '../constants';
+import { REGIONS } from '../constants';
 import { MapPin, Search, Sparkles, Share2, Check, Calendar, Quote, School, ChevronLeft, ChevronRight, Heart, Filter, ChevronDown, RefreshCw, RotateCcw, MailWarning, UsersRound } from 'lucide-react';
 
 interface ScoreListProps {
@@ -106,6 +107,7 @@ const ScoreSkeleton = () => (
 );
 
 const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds = [], toggleFavorite, onRefresh, isRefreshing }) => {
+  const years = useEntryYears();
   const [filterRegion, setFilterRegion] = useState<string>('All');
   const [filterYear, setFilterYear] = useState<string>('All');
   const [filterStudentIdentity, setFilterStudentIdentity] = useState<string>('All');
@@ -314,7 +316,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
                   className="h-14 w-full min-w-0 appearance-none rounded-2xl border border-slate-200 bg-white pl-11 pr-10 text-sm font-black text-slate-700 shadow-sm outline-none transition-all hover:border-indigo-200 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10"
                 >
                   <option value="All">所有年份</option>
-                  {YEARS.map(year => (
+                  {years.map(year => (
                     <option key={year} value={year}>{year}年</option>
                   ))}
                 </select>

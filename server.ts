@@ -3,7 +3,7 @@ import path from 'path';
 import cors from 'cors';
 import { createServer as createViteServer } from 'vite';
 import { createClient } from '@supabase/supabase-js';
-import { ENTRY_LOCK_MESSAGE, isEntryYearLocked } from './utils/entryOpenLock';
+import { getEntryLockMessage, isEntryYearLocked } from './utils/entryOpenLock';
 
 const app = express();
 const PORT = 3000;
@@ -83,7 +83,7 @@ app.post('/api/entries', async (req, res) => {
     }
 
     if (isEntryYearLocked(entry.year)) {
-      return res.status(403).json({ status: 'error', message: ENTRY_LOCK_MESSAGE });
+      return res.status(403).json({ status: 'error', message: getEntryLockMessage(entry.year) });
     }
 
     const payload = {

@@ -1,3 +1,4 @@
+import { useEntryYears } from '../hooks/useEntryYears';
 import React, { useMemo, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend } from 'recharts';
 import { BarChart3, Download, RotateCcw, Users, School, MapPin, Clock } from 'lucide-react';
@@ -39,11 +40,12 @@ function Distribution({ data, valid }: { data: { name: string; count: number; sh
 }
 
 export default function Dashboard({ entries }: Props) {
+  const availableYears = useEntryYears();
   const [year, setYear] = useState('all');
   const [region, setRegion] = useState('all');
   const [identity, setIdentity] = useState('all');
   const [officialYear, setOfficialYear] = useState<keyof typeof NATIONAL_STATS>('115');
-  const years = useMemo(() => [...new Set(entries.map(e => e.year))].sort((a, b) => b - a), [entries]);
+  const years = useMemo(() => [...new Set([...availableYears, ...entries.map(e => e.year)])].sort((a, b) => b - a), [entries, availableYears]);
   const identities = useMemo(() => [...new Set(entries.map(e => e.studentIdentity || '一般生'))].sort((a, b) => a.localeCompare(b, 'zh-Hant')), [entries]);
   const stats = useMemo(() => calculateDashboardStats(entries, { year, region, identity }), [entries, year, region, identity]);
   const subjectChart = stats.subjects.map(subject => ({ name: subject.name, ...subject.percentages }));

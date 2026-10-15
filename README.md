@@ -46,3 +46,12 @@ GitHub Pages 部署範例：`https://tyctw.github.io/shared/statistics/`。
 全國官方資料獨立於平台樣本篩選，分母為五科皆有效考生。0～5A 分類依原表人數加總，再重新計算百分比；來源連結隨官方年度切換。CSV 匯出包含目前篩選下的統計、完整學校列表與選定年度的官方參考資料。
 
 統計與路徑測試：`npx tsx --test tests/dashboardStats.test.ts tests/pageRoutes.test.ts`。
+
+
+## 年度自動開放
+
+台灣時間每年 7 月 5 日 00:00 新增並開放當年度（西元年減 1911），提供最近六年的選項。日期之前以去年為最新年度；未來年度與無效年度會被前端及 Node API 拒絕。歷年已開放資料仍可投稿。
+
+表單、瀏覽、最低分數及平台統計的年度選項會在開放時間到達、頁面恢復可見或視窗取得焦點時更新；正在填寫的表單保留已選年度。官方統計年度依已建置資料顯示。
+
+年度時間邊界測試：`npx tsx --test tests/entryOpenLock.test.ts`。

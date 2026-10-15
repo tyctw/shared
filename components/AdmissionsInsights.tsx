@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { STRATEGY_ARTICLES } from '../data/strategyArticles';
 import {
   AlertTriangle,
   ArrowRight,
   BookOpenCheck,
   CheckCircle2,
+  ChevronDown,
   ClipboardList,
   Compass,
   ExternalLink,
@@ -21,6 +23,20 @@ interface AdmissionsInsightsProps {
 }
 
 const AdmissionsInsights: React.FC<AdmissionsInsightsProps> = ({ onNavigate }) => {
+  useEffect(() => {
+    const openLinkedArticle = () => {
+      const article = STRATEGY_ARTICLES.find(item => window.location.hash === `#article-${item.slug}`);
+      if (!article) return;
+      const element = document.getElementById(`article-${article.slug}`);
+      const details = element?.querySelector('details');
+      if (details) details.open = true;
+      element?.scrollIntoView({ block: 'start' });
+    };
+    openLinkedArticle();
+    window.addEventListener('hashchange', openLinkedArticle);
+    return () => window.removeEventListener('hashchange', openLinkedArticle);
+  }, []);
+
   const strategyCards = [
     {
       icon: Search,
@@ -38,8 +54,8 @@ const AdmissionsInsights: React.FC<AdmissionsInsightsProps> = ({ onNavigate }) =
     },
     {
       icon: LineChart,
-      title: '用趨勢判斷熱度，而不是只看一年',
-      body: '熱門科系的分數可能連續上升，也可能因招生名額或地區選擇改變而回落。統計圖能協助你看出資料是否集中、是否正在升溫。',
+      title: '比較年度樣本，先確認範圍與名額',
+      body: '統計圖可以整理年度回報量與成績分布，但回報增加不等於招生熱度上升。比較前先確認年度、身分、管道與招生名額，避免混用不同範圍的資料。',
       action: '看統計趨勢',
       tab: 'stats' as const,
     },
@@ -68,7 +84,7 @@ const AdmissionsInsights: React.FC<AdmissionsInsightsProps> = ({ onNavigate }) =
     },
     {
       question: '志願序要先填想去的，還是先填分數穩的？',
-      answer: '志願序通常應先放真正想去的選項，再用安全志願收尾。不要因為怕浪費而把不想去的校系放太前面。',
+      answer: '先整理真正願意就讀的選項，再依當年度、本區及本管道的志願序採計規定安排順位。部分地區會採計志願序積分，不能只套用「喜歡的放前面」；相對保守的選項也應是自己願意接受的。',
     },
   ];
 
@@ -122,6 +138,40 @@ const AdmissionsInsights: React.FC<AdmissionsInsightsProps> = ({ onNavigate }) =
             ))}
           </div>
         </div>
+      </section>
+
+      <section aria-labelledby="strategy-articles-title" className="space-y-4">
+        <div className="flex flex-wrap items-end justify-between gap-3 px-1">
+          <div><p className="text-xs font-semibold text-cyan-700">新增 {STRATEGY_ARTICLES.length} 篇</p><h3 id="strategy-articles-title" className="mt-2 text-2xl font-bold text-slate-900">升學策略文章</h3></div>
+          <p className="text-xs leading-6 text-slate-500">點選文章展開閱讀 · 內容整理於 2026/10/15</p>
+        </div>
+        {STRATEGY_ARTICLES.map((article, index) => {
+          const textLength = article.sections.reduce((total, section) => total + section.paragraphs.join('').length, 0);
+          const readMinutes = Math.max(1, Math.ceil(textLength / 350));
+          return <article id={`article-${article.slug}`} key={article.slug} className="scroll-mt-28 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+            <details className="group">
+              <summary className="flex cursor-pointer list-none items-start gap-4 p-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-indigo-500 sm:p-7 [&::-webkit-details-marker]:hidden">
+                <span aria-hidden="true" className="mt-0.5 hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-sm font-semibold text-cyan-700 sm:flex">{String(index + 1).padStart(2, '0')}</span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-slate-500"><span className="font-semibold text-cyan-700">{article.category}</span><span className="mx-2">·</span>閱讀約 {readMinutes} 分鐘</p>
+                  <h4 className="mt-2 text-lg font-bold leading-7 text-slate-900 sm:text-xl">{article.title}</h4>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">{article.summary}</p>
+                  <span className="mt-3 inline-block text-xs font-semibold text-cyan-700"><span className="group-open:hidden">閱讀全文</span><span className="hidden group-open:inline">收合文章</span></span>
+                </div>
+                <ChevronDown aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-slate-400 group-open:rotate-180" />
+              </summary>
+              <div className="border-t border-slate-100 px-5 py-6 sm:px-7 sm:py-8">
+                <div className="mx-auto max-w-3xl space-y-7">
+                  {article.sections.map(section => <section key={section.heading}><h5 className="text-base font-bold leading-7 text-slate-900 sm:text-lg">{section.heading}</h5><div className="mt-3 space-y-3">{section.paragraphs.map(paragraph => <p key={paragraph} className="text-[15px] leading-8 text-slate-600">{paragraph}</p>)}</div></section>)}
+                  <aside className="rounded-xl border border-cyan-100 bg-cyan-50/50 p-5"><h5 className="font-bold text-cyan-900">{article.practice.title}</h5><p className="mt-2 text-sm leading-7 text-slate-600">{article.practice.body}</p></aside>
+                  <section><h5 className="font-bold text-slate-900">讀完後，確認這三件事</h5><ul className="mt-3 space-y-3">{article.checklist.map(item => <li key={item} className="flex items-start gap-2 text-sm leading-6 text-slate-600"><CheckCircle2 aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-emerald-600" />{item}</li>)}</ul></section>
+                  <section className="border-t border-slate-100 pt-5"><h5 className="text-sm font-bold text-slate-700">官方參考與適用範圍</h5><ul className="mt-3 space-y-4">{article.sources.map(source => <li key={source.url}><a href={source.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-start gap-1.5 text-sm font-medium leading-6 text-cyan-700 underline underline-offset-4">{source.title}<ExternalLink aria-hidden="true" className="mt-1 h-3.5 w-3.5 shrink-0" /></a><p className="mt-1 text-xs leading-6 text-slate-500">{source.note}</p></li>)}</ul><p className="mt-4 text-xs leading-6 text-slate-500">本文的練習與比較方法為本站整理。涉及資格、名額、比序及期限時，請核對當年度、所在就學區與入學管道的正式公告。</p></section>
+                  <div className="flex flex-wrap items-center justify-between gap-4 border-t border-slate-100 pt-5"><button type="button" onClick={() => onNavigate(article.action.tab)} className="inline-flex items-center gap-2 text-sm font-semibold text-cyan-700 hover:text-cyan-900">{article.action.label}<ArrowRight aria-hidden="true" className="h-4 w-4" /></button><a href={`${window.location.pathname}#article-${article.slug}`} className="text-xs font-medium text-slate-500 underline underline-offset-4">這篇文章的連結</a></div>
+                </div>
+              </div>
+            </details>
+          </article>;
+        })}
       </section>
 
       <article className="overflow-hidden rounded-[2rem] border border-slate-100 bg-white shadow-sm">

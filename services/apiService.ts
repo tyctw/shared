@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { Grade, Region, ScoreEntry, SubjectScores, WritingGrade } from '../types';
 import { calculateRegionalScore } from '../utils/scoreCalculator';
-import { ENTRY_LOCK_MESSAGE, isEntryYearLocked } from '../utils/entryOpenLock';
+import { getEntryLockMessage, isEntryYearLocked } from '../utils/entryOpenLock';
 import { moderateNotesContent } from '../utils/contentModeration';
 
 // ===============================
@@ -203,7 +203,7 @@ export const fetchEntries = async (): Promise<ScoreEntry[]> => {
 export const submitEntry = async (entry: ScoreEntry): Promise<boolean> => {
    try {
     if (isEntryYearLocked(entry.year)) {
-      console.warn(ENTRY_LOCK_MESSAGE);
+      console.warn(getEntryLockMessage(entry.year));
       return false;
     }
 

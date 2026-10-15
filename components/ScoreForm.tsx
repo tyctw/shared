@@ -1,8 +1,10 @@
+import { useEntryYears } from '../hooks/useEntryYears';
 import React, { useState, useEffect, useRef } from 'react';
 import { ScoreEntry, Region, Grade, WritingGrade, StudentIdentity } from '../types';
-import { YEARS, GRADES, WRITING_GRADES, REGIONS, DEPARTMENT_GROUPS, SCHOOLS_BY_REGION } from '../constants';
+import { GRADES, WRITING_GRADES, REGIONS, DEPARTMENT_GROUPS, SCHOOLS_BY_REGION } from '../constants';
 import { calculateRegionalScore } from '../utils/scoreCalculator';
-import { ENTRY_OPEN_AT_LABEL, isEntryYearLocked } from '../utils/entryOpenLock';
+import { getEntryOpenLabel, isEntryYearLocked } from '../utils/entryOpenLock';
+import { pageHref, resolvePageRoute } from '../utils/pageRoutes';
 import { moderateNotesContent } from '../utils/contentModeration';
 import { Send, Loader2, ChevronDown, User, PenTool, Search, ShieldCheck, MapPin, School, GraduationCap, Trophy, FileText, Sparkles, Lock } from 'lucide-react';
 
@@ -26,8 +28,10 @@ const STUDENT_IDENTITIES: StudentIdentity[] = [
 ];
 
 const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
+  const years = useEntryYears();
+  const initialYear = React.useRef(years[0]);
   const [formData, setFormData] = useState({
-    year: YEARS[0],
+    year: initialYear.current,
     school: '',
     department: '',
     studentIdentity: '一般生' as StudentIdentity,
@@ -64,6 +68,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
   const [notesModerationReasons, setNotesModerationReasons] = useState<string[]>([]);
 
   const showLockState = isEntryYearLocked(formData.year);
+  const yearOptions = years.includes(formData.year) ? years : [...years, formData.year];
 
   // Auto-calculate total points & credits based on region
   useEffect(() => {
@@ -98,7 +103,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
 
   const hasUnsavedInput = React.useMemo(() => {
     return (
-      formData.year !== YEARS[0] ||
+      formData.year !== initialYear.current ||
       formData.region !== REGIONS[0] ||
       formData.school.trim() !== '' ||
       formData.department.trim() !== '' ||
@@ -360,7 +365,7 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
                     <label htmlFor="entry-year" className={labelClass}>會考年份</label>
                     <div className={selectWrapperClass}>
                         <select id="entry-year" value={formData.year} onChange={(e) => handleChange('year', Number(e.target.value))} className={`${inputClass} cursor-pointer`}>
-                            {YEARS.map(y => <option key={y} value={y}>{y} 年</option>)}
+                            {yearOptions.map(y => <option key={y} value={y}>{y} 年</option>)}
                         </select>
                         <ChevronDown className={selectArrowClass} />
                     </div>
@@ -377,12 +382,12 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
                                 <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-indigo-100 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-indigo-600">
                                     Coming soon
                                 </div>
-                                <h4 className="text-xl font-black tracking-tight text-slate-900">115 年分享尚未開放</h4>
+                                <h4 className="text-xl font-black tracking-tight text-slate-900">{formData.year} 年分享尚未開放</h4>
                                 <p className="mt-1 text-sm font-medium text-slate-500">會考放榜後即可回來分享你的錄取結果。</p>
                             </div>
                             <div className="shrink-0 rounded-2xl border border-indigo-100 bg-white/90 px-5 py-3 shadow-sm">
                                 <span className="block text-[10px] font-black uppercase tracking-widest text-indigo-400">開放時間</span>
-                                <strong className="mt-1 block whitespace-nowrap text-base font-black text-indigo-700">{ENTRY_OPEN_AT_LABEL}</strong>
+                                <strong className="mt-1 block whitespace-nowrap text-base font-black text-indigo-700">{getEntryOpenLabel(formData.year)}（台灣時間）</strong>
                             </div>
                         </div>
                     </div>
@@ -648,6 +653,12 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
                 </div>
 
                 <div className="pt-2">
+                    <p className="mb-4 text-xs leading-6 text-slate-500">
+                        送出後，學校／科別、考生身分、成績與補充說明將用於公開查詢及統計，請勿填入可識別個人的資訊。送出前請閱讀
+                        <a href={pageHref('privacy', resolvePageRoute(window.location.pathname).base)} target="_blank" rel="noopener noreferrer" className="mx-1 font-medium text-indigo-700 underline underline-offset-4" aria-label="隱私權與版權聲明（另開分頁）">隱私權與版權聲明</a>
+                        中的資料處理及投稿授權說明，以及
+                        <a href={pageHref('disclaimer', resolvePageRoute(window.location.pathname).base)} target="_blank" rel="noopener noreferrer" className="mx-1 font-medium text-indigo-700 underline underline-offset-4" aria-label="免責聲明（另開分頁）">免責聲明</a>。
+                    </p>
                     <button
                         type="submit" 
                         disabled={isSubmitting} 
@@ -840,6 +851,10 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
               </div>
 
               <div className="grid shrink-0 grid-cols-2 gap-2 border-t border-slate-100 bg-white/95 p-3 shadow-[0_-12px_30px_-24px_rgba(15,23,42,0.45)]">
+                 <p className="col-span-2 text-xs leading-6 text-slate-500">
+                    請確認願意公開以上錄取資料；身分與成績的組合仍可能被辨識。
+                    <a href={`${pageHref('privacy', resolvePageRoute(window.location.pathname).base)}#privacy-submission-license`} target="_blank" rel="noopener noreferrer" className="ml-1 font-medium text-indigo-700 underline underline-offset-4" aria-label="查看資料處理與投稿授權（另開分頁）">查看資料處理與投稿授權</a>
+                 </p>
                  <button
                     type="button"
                     onClick={() => setIsConfirmModalOpen(false)}
