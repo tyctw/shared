@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import ScoreForm from './components/ScoreForm';
 import ScoreList from './components/ScoreList';
 import Dashboard from './components/Dashboard';
@@ -39,7 +39,7 @@ const AppLoader = () => (
   </div>
 );
 
-type ActiveTab = 'list' | 'form' | 'stats' | 'guide' | 'compare' | 'favorites' | 'minimums' | 'insights' | 'disclaimer' | 'privacy';
+import { PAGE_ROUTES, resolvePageRoute, pageHref, type ActiveTab } from './utils/pageRoutes';
 const CONTACT_EMAIL = 'tyctw.analyze@gmail.com';
 type MinimumSortOption = 'region' | 'pointsAsc' | 'pointsDesc' | 'creditsAsc' | 'creditsDesc' | 'yearDesc' | 'yearAsc' | 'countDesc' | 'schoolAsc';
 
@@ -1395,7 +1395,7 @@ const MinimumScoresPage = ({ entries }: { entries: ScoreEntry[] }) => {
 
 const App: React.FC = () => {
   const [entries, setEntries] = useState<ScoreEntry[]>([]);
-  const [activeTab, setActiveTab] = useState<ActiveTab>('list');
+  const [activeTab, setActiveTab] = useState<ActiveTab>(() => resolvePageRoute(window.location.pathname).tab);
   const [favoriteIds, setFavoriteIds] = useState<string[]>(() => {
       const saved = localStorage.getItem('cap_favorites');
       return saved ? JSON.parse(saved) : [];
@@ -1409,6 +1409,63 @@ const App: React.FC = () => {
   const [showFavoritesModal, setShowFavoritesModal] = useState(false);
   const [isFormDirty, setIsFormDirty] = useState(false);
   const [pendingNavigationTab, setPendingNavigationTab] = useState<ActiveTab | null>(null);
+  const routeBase = useRef(resolvePageRoute(window.location.pathname).base);
+  const historyIndex = useRef(window.history.state?.pageIndex ?? 0);
+  const navigationState = useRef({ activeTab, isFormDirty });
+  navigationState.current = { activeTab, isFormDirty };
+  const restoringHistory = useRef(false);
+  const pendingHistory = useRef<{ delta: number; tab: ActiveTab } | null>(null);
+
+  const cancelPendingNavigation = () => {
+    pendingHistory.current = null;
+    setPendingNavigationTab(null);
+  };
+
+  useEffect(() => {
+    // Freeze the asset base before changing the URL, including subdirectory deployments.
+    let baseElement = document.querySelector('base');
+    if (!baseElement) {
+      baseElement = document.createElement('base');
+      document.head.prepend(baseElement);
+    }
+    baseElement.href = new URL(routeBase.current, window.location.origin).href;
+    window.history.replaceState(
+      { ...window.history.state, pageIndex: historyIndex.current }, '',
+      pageHref(resolvePageRoute(window.location.pathname).tab, routeBase.current) + window.location.search + window.location.hash,
+    );
+    const onPopState = () => {
+      if (restoringHistory.current) {
+        restoringHistory.current = false;
+        if (pendingHistory.current) setPendingNavigationTab(pendingHistory.current.tab);
+        return;
+      }
+      const tab = resolvePageRoute(window.location.pathname).tab;
+      const nextIndex = window.history.state?.pageIndex ?? 0;
+      const delta = nextIndex - historyIndex.current;
+      const current = navigationState.current;
+      if (current.activeTab === 'form' && tab !== 'form' && current.isFormDirty && delta !== 0) {
+        pendingHistory.current = { delta, tab };
+        restoringHistory.current = true;
+        window.history.go(-delta);
+        return;
+      }
+      historyIndex.current = nextIndex;
+      setActiveTab(tab);
+      setIsSidebarOpen(false);
+      window.scrollTo({ top: 0 });
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  useEffect(() => {
+    document.title = `${PAGE_ROUTES[activeTab].title}｜會考錄取分享平台`;
+    const url = new URL(pageHref(activeTab, routeBase.current), window.location.origin).href;
+    document.querySelector('link[rel="canonical"]')?.setAttribute('href', url);
+    document.querySelector('meta[property="og:url"]')?.setAttribute('content', url);
+    document.querySelector('meta[name="twitter:url"]')?.setAttribute('content', url);
+  }, [activeTab]);
+
 
   useEffect(() => {
       localStorage.setItem('cap_favorites', JSON.stringify(favoriteIds));
@@ -1457,7 +1514,13 @@ const App: React.FC = () => {
   }, [loadData]);
 
   const performTabChange = (tab: typeof activeTab) => {
+    const href = pageHref(tab, routeBase.current);
+    if (window.location.pathname !== href) {
+      historyIndex.current += 1;
+      window.history.pushState({ pageIndex: historyIndex.current }, '', href);
+    }
     setActiveTab(tab);
+    setIsSidebarOpen(false);
     logUserAction('tab_change', tab);
     window.requestAnimationFrame(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1466,6 +1529,7 @@ const App: React.FC = () => {
 
   const handleTabChange = (tab: typeof activeTab) => {
     if (activeTab === 'form' && tab !== 'form' && isFormDirty) {
+      pendingHistory.current = null;
       setPendingNavigationTab(tab);
       return;
     }
@@ -1473,12 +1537,25 @@ const App: React.FC = () => {
     performTabChange(tab);
   };
 
+  const handlePageLinkClick = (event: React.MouseEvent<HTMLAnchorElement>, tab: ActiveTab) => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    handleTabChange(tab);
+  };
+
   const handleConfirmLeaveForm = () => {
     if (!pendingNavigationTab) return;
     setIsFormDirty(false);
     const nextTab = pendingNavigationTab;
     setPendingNavigationTab(null);
-    performTabChange(nextTab);
+    if (pendingHistory.current) {
+      const { delta } = pendingHistory.current;
+      pendingHistory.current = null;
+      navigationState.current.isFormDirty = false;
+      window.history.go(delta);
+    } else {
+      performTabChange(nextTab);
+    }
   };
 
   const handleAcceptDisclaimer = () => {
@@ -1512,9 +1589,13 @@ const App: React.FC = () => {
 
   // Desktop Nav Button
   const NavButton = ({ id, label, icon: Icon }: { id: typeof activeTab, label: string, icon: any }) => (
-    <button
-      type="button"
-      onClick={() => handleTabChange(id)}
+    <a
+      href={pageHref(id, routeBase.current)}
+      onClick={(event) => {
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
+        handleTabChange(id);
+      }}
       aria-current={activeTab === id ? 'page' : undefined}
       className={`relative px-4 py-2.5 rounded-full text-sm font-black transition-all duration-300 flex items-center gap-2 group ${
         activeTab === id 
@@ -1527,14 +1608,18 @@ const App: React.FC = () => {
       {activeTab === id && (
           <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-indigo-500 rounded-full md:opacity-100 opacity-0 hidden"></span>
       )}
-    </button>
+    </a>
   );
 
   // Mobile Bottom Nav Button
   const MobileNavButton = ({ id, label, icon: Icon }: { id: typeof activeTab, label: string, icon: any }) => (
-    <button
-      type="button"
-      onClick={() => handleTabChange(id)}
+    <a
+      href={pageHref(id, routeBase.current)}
+      onClick={(event) => {
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
+        handleTabChange(id);
+      }}
       aria-current={activeTab === id ? 'page' : undefined}
       className={`relative flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl py-1 transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 ${
         activeTab === id ? 'text-indigo-600' : 'text-slate-600 hover:text-indigo-600'
@@ -1549,13 +1634,13 @@ const App: React.FC = () => {
         {activeTab === id && (
             <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-indigo-600 rounded-full"></span>
         )}
-    </button>
+    </a>
   );
 
   return (
     <div className="font-sans text-slate-900 selection:bg-indigo-200 selection:text-indigo-900 overflow-x-hidden min-h-screen">
       <a
-        href="#main-content"
+        href={`${pageHref(activeTab, routeBase.current)}#main-content`}
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-xl focus:bg-slate-900 focus:px-4 focus:py-3 focus:text-sm focus:font-black focus:text-white focus:shadow-xl"
       >
         跳到主要內容
@@ -1627,7 +1712,7 @@ const App: React.FC = () => {
         <div className="fixed inset-0 z-[130] flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div
             className="absolute inset-0 bg-slate-950/65 backdrop-blur-md"
-            onClick={() => setPendingNavigationTab(null)}
+            onClick={cancelPendingNavigation}
           />
 
           <div
@@ -1656,7 +1741,7 @@ const App: React.FC = () => {
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  onClick={() => setPendingNavigationTab(null)}
+                  onClick={cancelPendingNavigation}
                   className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-600 shadow-sm transition-colors hover:bg-slate-50"
                 >
                   繼續填寫
@@ -1800,9 +1885,9 @@ const App: React.FC = () => {
           <div className="flex items-center gap-2 sm:gap-4 flex-1 md:flex-none justify-end min-w-0">
             
             {/* PROMINENT SHARE CTA - Visible everywhere */}
-            <button
-                type="button"
-                onClick={() => handleTabChange('form')}
+            <a
+                href={pageHref('form', routeBase.current)}
+                onClick={(event) => handlePageLinkClick(event, 'form')}
                 aria-current={activeTab === 'form' ? 'page' : undefined}
                 className={`
                     relative group hidden items-center justify-center gap-1.5 sm:gap-2 md:flex
@@ -1822,7 +1907,7 @@ const App: React.FC = () => {
                 
                 <PlusCircle className={`w-4 h-4 sm:w-5 sm:h-5 relative z-10 ${activeTab !== 'form' ? 'group-hover:rotate-180 transition-transform duration-700' : ''}`} />
                 <span className="relative z-10"><span className="hidden sm:inline">新增</span>分享</span>
-            </button>
+            </a>
 
             {/* Menu Button */}
             <button 
@@ -1881,7 +1966,7 @@ const App: React.FC = () => {
                  </div>
             )}
 
-            {!isLoading && !loadError && entries.length === 0 && !['guide', 'minimums', 'insights', 'disclaimer', 'privacy'].includes(activeTab) && (
+            {!isLoading && !loadError && entries.length === 0 && !['guide', 'minimums', 'stats', 'insights', 'disclaimer', 'privacy'].includes(activeTab) && (
                  <div className="mb-8 bg-white/50 backdrop-blur-md border border-amber-200/60 rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left shadow-sm">
                     <div className="bg-amber-100 p-3 rounded-full text-amber-600">
                         <CloudOff className="w-6 h-6" />
@@ -2134,19 +2219,19 @@ const App: React.FC = () => {
             <div>
               <h3 className="text-sm font-black text-white">快速前往</h3>
               <div className="mt-4 flex flex-col items-start gap-3 text-sm font-medium text-slate-400">
-                <button onClick={() => handleTabChange('list')} className="transition-colors hover:text-cyan-200">瀏覽錄取資料</button>
-                <button onClick={() => handleTabChange('minimums')} className="transition-colors hover:text-cyan-200">各校最低分數</button>
-                <button onClick={() => handleTabChange('stats')} className="transition-colors hover:text-cyan-200">會考統計資料</button>
-                <button onClick={() => handleTabChange('insights')} className="transition-colors hover:text-cyan-200">會考志願策略</button>
+                <a href={pageHref('list', routeBase.current)} onClick={(event) => handlePageLinkClick(event, 'list')} className="transition-colors hover:text-cyan-200">瀏覽錄取資料</a>
+                <a href={pageHref('minimums', routeBase.current)} onClick={(event) => handlePageLinkClick(event, 'minimums')} className="transition-colors hover:text-cyan-200">各校最低分數</a>
+                <a href={pageHref('stats', routeBase.current)} onClick={(event) => handlePageLinkClick(event, 'stats')} className="transition-colors hover:text-cyan-200">會考統計資料</a>
+                <a href={pageHref('insights', routeBase.current)} onClick={(event) => handlePageLinkClick(event, 'insights')} className="transition-colors hover:text-cyan-200">會考志願策略</a>
               </div>
             </div>
 
             <div>
               <h3 className="text-sm font-black text-white">平台資訊</h3>
               <div className="mt-4 flex flex-col items-start gap-3 text-sm font-medium text-slate-400">
-                <button onClick={() => handleTabChange('guide')} className="transition-colors hover:text-cyan-200">使用說明</button>
-                <button onClick={() => handleTabChange('disclaimer')} className="transition-colors hover:text-cyan-200">免責聲明</button>
-                <button onClick={() => handleTabChange('privacy')} className="transition-colors hover:text-cyan-200">隱私權與版權聲明</button>
+                <a href={pageHref('guide', routeBase.current)} onClick={(event) => handlePageLinkClick(event, 'guide')} className="transition-colors hover:text-cyan-200">使用說明</a>
+                <a href={pageHref('disclaimer', routeBase.current)} onClick={(event) => handlePageLinkClick(event, 'disclaimer')} className="transition-colors hover:text-cyan-200">免責聲明</a>
+                <a href={pageHref('privacy', routeBase.current)} onClick={(event) => handlePageLinkClick(event, 'privacy')} className="transition-colors hover:text-cyan-200">隱私權與版權聲明</a>
                 <a href="https://tyctw.github.io/spare/support/" target="_blank" rel="noopener noreferrer" onClick={() => logUserAction('external_link', 'small_support')} className="transition-colors hover:text-rose-200">小額支持</a>
               </div>
             </div>

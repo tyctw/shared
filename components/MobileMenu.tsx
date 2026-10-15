@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { pageHref, resolvePageRoute } from '../utils/pageRoutes';
 import { AtSign, BarChart3, BookOpen, Calculator, Compass, ExternalLink, GraduationCap, Heart, Instagram, PlusCircle, Search, Share2, Table2, X } from 'lucide-react';
 
 type MenuTab = 'list' | 'minimums' | 'stats' | 'insights' | 'form' | 'favorites';
@@ -80,6 +81,13 @@ export default function MobileMenu({ isOpen, activeTab, favoriteCount, onClose, 
 
   if (!isOpen) return null;
 
+  const base = resolvePageRoute(window.location.pathname).base;
+  const navigateLink = (event: React.MouseEvent<HTMLAnchorElement>, tab: MenuTab) => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    onNavigate(tab);
+  };
+
   const menuItemClass = 'flex min-h-16 w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition-colors hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500';
 
   return (
@@ -103,20 +111,20 @@ export default function MobileMenu({ isOpen, activeTab, favoriteCount, onClose, 
             <section key={section.title} aria-label={section.title} className="rounded-3xl border border-slate-200/80 bg-white p-3 shadow-sm">
               <h3 className="px-3 pb-2 pt-1 text-xs font-black tracking-widest text-slate-500">{section.title}</h3>
               {section.items.map(({ id, label, description, icon: Icon, tone }) => (
-                <button key={id} type="button" onClick={() => onNavigate(id)} aria-current={activeTab === id ? 'page' : undefined} className={`${menuItemClass} ${activeTab === id ? 'bg-indigo-50' : ''}`}>
+                <a key={id} href={pageHref(id, base)} onClick={(event) => navigateLink(event, id)} aria-current={activeTab === id ? 'page' : undefined} className={`${menuItemClass} ${activeTab === id ? 'bg-indigo-50' : ''}`}>
                   <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${tone}`}><Icon className="h-5 w-5" /></span>
                   <span className="min-w-0 flex-1"><span className="block text-sm font-black text-slate-900">{label}</span><span className="block text-xs text-slate-500">{description}</span></span>
                   {activeTab === id && <span className="rounded-full bg-indigo-600 px-2 py-1 text-[10px] font-bold text-white">目前</span>}
-                </button>
+                </a>
               ))}
             </section>
           ))}
 
           <section aria-label="分享與收藏" className="rounded-3xl border border-slate-200/80 bg-white p-3 shadow-sm">
             <h3 className="px-3 pb-2 pt-1 text-xs font-black tracking-widest text-slate-500">分享與收藏</h3>
-            <button type="button" onClick={() => onNavigate('form')} aria-current={activeTab === 'form' ? 'page' : undefined} className={`${menuItemClass} ${activeTab === 'form' ? 'bg-indigo-50' : ''}`}><span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-rose-50 text-rose-600"><PlusCircle className="h-5 w-5" /></span><span className="flex-1 text-sm font-black text-slate-900">分享錄取結果</span></button>
+            <a href={pageHref('form', base)} onClick={(event) => navigateLink(event, 'form')} aria-current={activeTab === 'form' ? 'page' : undefined} className={`${menuItemClass} ${activeTab === 'form' ? 'bg-indigo-50' : ''}`}><span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-rose-50 text-rose-600"><PlusCircle className="h-5 w-5" /></span><span className="flex-1 text-sm font-black text-slate-900">分享錄取結果</span></a>
             <button type="button" onClick={onShare} className={menuItemClass}><span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600"><Share2 className="h-5 w-5" /></span><span className="flex-1 text-sm font-black text-slate-900">分享這個網站</span></button>
-            {favoriteCount > 0 && <button type="button" onClick={() => onNavigate('favorites')} aria-current={activeTab === 'favorites' ? 'page' : undefined} className={`${menuItemClass} ${activeTab === 'favorites' ? 'bg-indigo-50' : ''}`}><span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-rose-50 text-rose-600"><Heart className="h-5 w-5" /></span><span className="flex-1 text-sm font-black text-slate-900">查看收藏</span><span className="text-xs font-bold text-slate-500">{favoriteCount} 筆</span></button>}
+            {favoriteCount > 0 && <a href={pageHref('favorites', base)} onClick={(event) => navigateLink(event, 'favorites')} aria-current={activeTab === 'favorites' ? 'page' : undefined} className={`${menuItemClass} ${activeTab === 'favorites' ? 'bg-indigo-50' : ''}`}><span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-rose-50 text-rose-600"><Heart className="h-5 w-5" /></span><span className="flex-1 text-sm font-black text-slate-900">查看收藏</span><span className="text-xs font-bold text-slate-500">{favoriteCount} 筆</span></a>}
           </section>
 
           <section aria-label="相關服務" className="px-1">
