@@ -1,3 +1,4 @@
+import StrategyArticlePage from './components/StrategyArticlePage';
 import LegalContentPage from './components/LegalContentPage';
 import { LEGAL_CONTACT_EMAIL } from './data/legalContent';
 import { useEntryYears } from './hooks/useEntryYears';
@@ -42,7 +43,7 @@ const AppLoader = () => (
   </div>
 );
 
-import { PAGE_ROUTES, resolvePageRoute, pageHref, type ActiveTab } from './utils/pageRoutes';
+import { PAGE_ROUTES, resolvePageRoute, resolveInitialPageRoute, pageHref, getPageMetadata, type ActiveTab } from './utils/pageRoutes';
 const CONTACT_EMAIL = LEGAL_CONTACT_EMAIL;
 type MinimumSortOption = 'region' | 'pointsAsc' | 'pointsDesc' | 'creditsAsc' | 'creditsDesc' | 'yearDesc' | 'yearAsc' | 'countDesc' | 'schoolAsc';
 
@@ -877,9 +878,11 @@ const MinimumScoresPage = ({ entries }: { entries: ScoreEntry[] }) => {
 };
 
 const App: React.FC = () => {
+  const initialRoute = useRef(resolveInitialPageRoute(window.location.pathname, window.location.hash));
+  const [articleSlug, setArticleSlug] = useState(initialRoute.current.articleSlug);
   const availableYears = useEntryYears();
   const [entries, setEntries] = useState<ScoreEntry[]>([]);
-  const [activeTab, setActiveTab] = useState<ActiveTab>(() => resolvePageRoute(window.location.pathname).tab);
+  const [activeTab, setActiveTab] = useState<ActiveTab>(initialRoute.current.tab);
   const [favoriteIds, setFavoriteIds] = useState<string[]>(() => {
       const saved = localStorage.getItem('cap_favorites');
       return saved ? JSON.parse(saved) : [];
@@ -893,7 +896,7 @@ const App: React.FC = () => {
   const [showFavoritesModal, setShowFavoritesModal] = useState(false);
   const [isFormDirty, setIsFormDirty] = useState(false);
   const [pendingNavigationTab, setPendingNavigationTab] = useState<ActiveTab | null>(null);
-  const routeBase = useRef(resolvePageRoute(window.location.pathname).base);
+  const routeBase = useRef(initialRoute.current.base);
   const historyIndex = useRef(window.history.state?.pageIndex ?? 0);
   const navigationState = useRef({ activeTab, isFormDirty });
   navigationState.current = { activeTab, isFormDirty };
@@ -915,7 +918,7 @@ const App: React.FC = () => {
     baseElement.href = new URL(routeBase.current, window.location.origin).href;
     window.history.replaceState(
       { ...window.history.state, pageIndex: historyIndex.current }, '',
-      pageHref(resolvePageRoute(window.location.pathname).tab, routeBase.current) + window.location.search + window.location.hash,
+      pageHref(initialRoute.current.tab, routeBase.current, initialRoute.current.articleSlug) + window.location.search + (initialRoute.current.articleSlug && !resolvePageRoute(window.location.pathname).articleSlug ? '' : window.location.hash),
     );
     const onPopState = () => {
       if (restoringHistory.current) {
@@ -923,7 +926,8 @@ const App: React.FC = () => {
         if (pendingHistory.current) setPendingNavigationTab(pendingHistory.current.tab);
         return;
       }
-      const tab = resolvePageRoute(window.location.pathname).tab;
+      const route = resolveInitialPageRoute(window.location.pathname, window.location.hash);
+      const tab = route.tab;
       const nextIndex = window.history.state?.pageIndex ?? 0;
       const delta = nextIndex - historyIndex.current;
       const current = navigationState.current;
@@ -935,6 +939,7 @@ const App: React.FC = () => {
       }
       historyIndex.current = nextIndex;
       setActiveTab(tab);
+      setArticleSlug(route.articleSlug);
       setIsSidebarOpen(false);
       window.scrollTo({ top: 0 });
     };
@@ -943,12 +948,15 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    document.title = `${PAGE_ROUTES[activeTab].title}｜會考錄取分享平台`;
-    const url = new URL(pageHref(activeTab, routeBase.current), window.location.origin).href;
+    const metadata = getPageMetadata(activeTab, articleSlug);
+    document.title = `${metadata.title}｜會考錄取分享平台`;
+    for (const selector of ['meta[property="og:title"]', 'meta[name="twitter:title"]']) document.querySelector(selector)?.setAttribute('content', document.title);
+    for (const selector of ['meta[name="description"]', 'meta[property="og:description"]', 'meta[name="twitter:description"]']) document.querySelector(selector)?.setAttribute('content', metadata.description);
+    const url = new URL(pageHref(activeTab, routeBase.current, articleSlug), window.location.origin).href;
     document.querySelector('link[rel="canonical"]')?.setAttribute('href', url);
     document.querySelector('meta[property="og:url"]')?.setAttribute('content', url);
     document.querySelector('meta[name="twitter:url"]')?.setAttribute('content', url);
-  }, [activeTab]);
+  }, [activeTab, articleSlug]);
 
 
   useEffect(() => {
@@ -1012,13 +1020,14 @@ const App: React.FC = () => {
     loadData();
   }, [loadData]);
 
-  const performTabChange = (tab: typeof activeTab) => {
-    const href = pageHref(tab, routeBase.current);
+  const performTabChange = (tab: typeof activeTab, nextArticleSlug?: string) => {
+    const href = pageHref(tab, routeBase.current, nextArticleSlug);
     if (window.location.pathname !== href) {
       historyIndex.current += 1;
       window.history.pushState({ pageIndex: historyIndex.current }, '', href);
     }
     setActiveTab(tab);
+    setArticleSlug(tab === 'insights' ? nextArticleSlug : undefined);
     setIsSidebarOpen(false);
     logUserAction('tab_change', tab);
     window.requestAnimationFrame(() => {
@@ -1139,7 +1148,7 @@ const App: React.FC = () => {
   return (
     <div className="font-sans text-slate-900 selection:bg-indigo-200 selection:text-indigo-900 overflow-x-hidden min-h-screen">
       <a
-        href={`${pageHref(activeTab, routeBase.current)}#main-content`}
+        href={`${pageHref(activeTab, routeBase.current, articleSlug)}#main-content`}
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-xl focus:bg-slate-900 focus:px-4 focus:py-3 focus:text-sm focus:font-black focus:text-white focus:shadow-xl"
       >
         跳到主要內容
@@ -1481,7 +1490,7 @@ const App: React.FC = () => {
             )}
 
             {activeTab === 'insights' && (
-                <AdmissionsInsights onNavigate={(tab) => handleTabChange(tab)} />
+                articleSlug ? <StrategyArticlePage slug={articleSlug} onBack={() => handleTabChange('insights')} onNavigate={handleTabChange} onOpenArticle={slug => performTabChange('insights', slug)} /> : <AdmissionsInsights onNavigate={handleTabChange} onOpenArticle={slug => performTabChange('insights', slug)} />
             )}
 
             {activeTab === 'list' && (

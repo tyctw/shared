@@ -23,3 +23,24 @@ test('all paths are distinct', () => {
   const paths = Object.values(PAGE_ROUTES).map(route => route.path);
   assert.equal(new Set(paths).size, paths.length);
 });
+
+test('each article resolves independently under root and subdirectory deployments', async () => {
+  const { ALL_STRATEGY_ARTICLES } = await import('../data/strategyArticles');
+  const { articleHref, getPageMetadata, resolveInitialPageRoute } = await import('../utils/pageRoutes');
+  for (const article of ALL_STRATEGY_ARTICLES) {
+    for (const base of ['/', '/shared/']) {
+      const href = articleHref(article.slug, base);
+      const expected = { tab: 'insights', base, articleSlug: article.slug };
+      assert.deepEqual(resolvePageRoute(href), expected);
+      assert.deepEqual(resolvePageRoute(href.slice(0, -1)), expected);
+      assert.deepEqual(resolvePageRoute(`${href}index.html`), expected);
+      assert.deepEqual(resolveInitialPageRoute(`${base}insights/`, `#article-${article.slug}`), expected);
+    }
+    assert.equal(getPageMetadata('insights', article.slug).title, article.title);
+    assert.equal(getPageMetadata('insights', article.slug).description, article.summary);
+  }
+});
+
+test('unknown article retains its parent route for a useful not-found page', () => {
+  assert.deepEqual(resolvePageRoute('/shared/insights/missing/'), { tab: 'insights', base: '/shared/', articleSlug: 'missing' });
+});

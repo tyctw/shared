@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react';
-import { STRATEGY_ARTICLES } from '../data/strategyArticles';
+import React from 'react';
+import { articleHref, resolvePageRoute } from '../utils/pageRoutes';
+import { STRATEGY_ARTICLES, FEATURED_STRATEGY_ARTICLE } from '../data/strategyArticles';
 import {
   AlertTriangle,
   ArrowRight,
   BookOpenCheck,
   CheckCircle2,
-  ChevronDown,
   ClipboardList,
   Compass,
   ExternalLink,
@@ -20,22 +20,11 @@ type InsightsTab = 'list' | 'form' | 'stats' | 'minimums';
 
 interface AdmissionsInsightsProps {
   onNavigate: (tab: InsightsTab) => void;
+  onOpenArticle: (slug: string) => void;
 }
 
-const AdmissionsInsights: React.FC<AdmissionsInsightsProps> = ({ onNavigate }) => {
-  useEffect(() => {
-    const openLinkedArticle = () => {
-      const article = STRATEGY_ARTICLES.find(item => window.location.hash === `#article-${item.slug}`);
-      if (!article) return;
-      const element = document.getElementById(`article-${article.slug}`);
-      const details = element?.querySelector('details');
-      if (details) details.open = true;
-      element?.scrollIntoView({ block: 'start' });
-    };
-    openLinkedArticle();
-    window.addEventListener('hashchange', openLinkedArticle);
-    return () => window.removeEventListener('hashchange', openLinkedArticle);
-  }, []);
+const AdmissionsInsights: React.FC<AdmissionsInsightsProps> = ({ onNavigate, onOpenArticle }) => {
+  const base = resolvePageRoute(window.location.pathname).base;
 
   const strategyCards = [
     {
@@ -88,20 +77,6 @@ const AdmissionsInsights: React.FC<AdmissionsInsightsProps> = ({ onNavigate }) =
     },
   ];
 
-  const featureStory = [
-    {
-      heading: '先把分數放回自己的脈絡，而不是急著替它下結論',
-      body: '會考成績公布後，許多學生最先做的事，是搜尋某一校系「最低要幾分」。但志願選填真正需要回答的，往往不是一個單一數字，而是：這個分數放在今年的招生名額、自己的區域、身分別與志願順序中，可能落在哪個位置。歷年資料能提供方向，卻不能取代當年度的簡章與正式公告。',
-    },
-    {
-      heading: '資料看得越細，越能避開單筆成績帶來的誤判',
-      body: '同一所學校、同一個科別，可能因為區域、招生管道、特殊身分或積分細項不同，而出現不小的差距。比起只記住一筆「有人以多少分錄取」，更值得觀察的是資料是否集中、樣本是否足夠，以及近兩到三年是否呈現持續升溫或回落。當資料偏少時，應該把它視為線索，而非答案。',
-    },
-    {
-      heading: '志願表不是排行榜，而是一份關於未來三年的選擇',
-      body: '分數相近的校系，課程方向、通勤時間、社團資源、實作設備與升學出口可能完全不同。建議把真正想讀的選項放在前段，並以安全、相近、挑戰三個層次配置。這樣做不是保守或冒險二選一，而是同時保留理想與可行性，讓最後的選擇更貼近自己的生活。',
-    },
-  ];
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -142,79 +117,34 @@ const AdmissionsInsights: React.FC<AdmissionsInsightsProps> = ({ onNavigate }) =
 
       <section aria-labelledby="strategy-articles-title" className="space-y-4">
         <div className="flex flex-wrap items-end justify-between gap-3 px-1">
-          <div><p className="text-xs font-semibold text-cyan-700">新增 {STRATEGY_ARTICLES.length} 篇</p><h3 id="strategy-articles-title" className="mt-2 text-2xl font-bold text-slate-900">升學策略文章</h3></div>
-          <p className="text-xs leading-6 text-slate-500">點選文章展開閱讀 · 內容整理於 2026/10/15</p>
+          <div><p className="text-xs font-semibold text-cyan-700">共 {STRATEGY_ARTICLES.length} 篇</p><h3 id="strategy-articles-title" className="mt-2 text-2xl font-bold text-slate-900">升學策略文章</h3></div>
+          <p className="text-xs leading-6 text-slate-500">完整文章、實作練習與官方參考</p>
         </div>
-        {STRATEGY_ARTICLES.map((article, index) => {
-          const textLength = article.sections.reduce((total, section) => total + section.paragraphs.join('').length, 0);
-          const readMinutes = Math.max(1, Math.ceil(textLength / 350));
-          return <article id={`article-${article.slug}`} key={article.slug} className="scroll-mt-28 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-            <details className="group">
-              <summary className="flex cursor-pointer list-none items-start gap-4 p-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-indigo-500 sm:p-7 [&::-webkit-details-marker]:hidden">
-                <span aria-hidden="true" className="mt-0.5 hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-sm font-semibold text-cyan-700 sm:flex">{String(index + 1).padStart(2, '0')}</span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs text-slate-500"><span className="font-semibold text-cyan-700">{article.category}</span><span className="mx-2">·</span>閱讀約 {readMinutes} 分鐘</p>
-                  <h4 className="mt-2 text-lg font-bold leading-7 text-slate-900 sm:text-xl">{article.title}</h4>
-                  <p className="mt-2 text-sm leading-6 text-slate-500">{article.summary}</p>
-                  <span className="mt-3 inline-block text-xs font-semibold text-cyan-700"><span className="group-open:hidden">閱讀全文</span><span className="hidden group-open:inline">收合文章</span></span>
-                </div>
-                <ChevronDown aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-slate-400 group-open:rotate-180" />
-              </summary>
-              <div className="border-t border-slate-100 px-5 py-6 sm:px-7 sm:py-8">
-                <div className="mx-auto max-w-3xl space-y-7">
-                  {article.sections.map(section => <section key={section.heading}><h5 className="text-base font-bold leading-7 text-slate-900 sm:text-lg">{section.heading}</h5><div className="mt-3 space-y-3">{section.paragraphs.map(paragraph => <p key={paragraph} className="text-[15px] leading-8 text-slate-600">{paragraph}</p>)}</div></section>)}
-                  <aside className="rounded-xl border border-cyan-100 bg-cyan-50/50 p-5"><h5 className="font-bold text-cyan-900">{article.practice.title}</h5><p className="mt-2 text-sm leading-7 text-slate-600">{article.practice.body}</p></aside>
-                  <section><h5 className="font-bold text-slate-900">讀完後，確認這三件事</h5><ul className="mt-3 space-y-3">{article.checklist.map(item => <li key={item} className="flex items-start gap-2 text-sm leading-6 text-slate-600"><CheckCircle2 aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-emerald-600" />{item}</li>)}</ul></section>
-                  <section className="border-t border-slate-100 pt-5"><h5 className="text-sm font-bold text-slate-700">官方參考與適用範圍</h5><ul className="mt-3 space-y-4">{article.sources.map(source => <li key={source.url}><a href={source.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-start gap-1.5 text-sm font-medium leading-6 text-cyan-700 underline underline-offset-4">{source.title}<ExternalLink aria-hidden="true" className="mt-1 h-3.5 w-3.5 shrink-0" /></a><p className="mt-1 text-xs leading-6 text-slate-500">{source.note}</p></li>)}</ul><p className="mt-4 text-xs leading-6 text-slate-500">本文的練習與比較方法為本站整理。涉及資格、名額、比序及期限時，請核對當年度、所在就學區與入學管道的正式公告。</p></section>
-                  <div className="flex flex-wrap items-center justify-between gap-4 border-t border-slate-100 pt-5"><button type="button" onClick={() => onNavigate(article.action.tab)} className="inline-flex items-center gap-2 text-sm font-semibold text-cyan-700 hover:text-cyan-900">{article.action.label}<ArrowRight aria-hidden="true" className="h-4 w-4" /></button><a href={`${window.location.pathname}#article-${article.slug}`} className="text-xs font-medium text-slate-500 underline underline-offset-4">這篇文章的連結</a></div>
-                </div>
-              </div>
-            </details>
-          </article>;
-        })}
+        <div className="grid gap-4 sm:grid-cols-2">
+          {STRATEGY_ARTICLES.map((article, index) => {
+            const readMinutes = Math.max(1, Math.ceil(article.sections.reduce((total, section) => total + section.paragraphs.join('').length, 0) / 350));
+            return <a key={article.slug} href={articleHref(article.slug, base)} onClick={event => {
+              if (event.button !== 0 || event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
+              event.preventDefault(); onOpenArticle(article.slug);
+            }} className="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 transition-colors hover:border-cyan-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 sm:p-6">
+              <p className="text-xs text-slate-500"><span className="font-semibold text-cyan-700">{String(index + 1).padStart(2, '0')} · {article.category}</span><span className="mx-2">·</span>約 {readMinutes} 分鐘</p>
+              <h4 className="mt-3 text-lg font-bold leading-8 text-slate-900">{article.title}</h4>
+              <p className="mb-5 mt-2 flex-1 text-sm leading-7 text-slate-500">{article.summary}</p>
+              <span className="inline-flex items-center gap-2 text-sm font-semibold text-cyan-700">閱讀全文<ArrowRight aria-hidden="true" className="h-4 w-4" /></span>
+            </a>;
+          })}
+        </div>
       </section>
 
-      <article className="overflow-hidden rounded-[2rem] border border-slate-100 bg-white shadow-sm">
-        <div className="border-b border-slate-100 px-6 py-6 sm:px-9 sm:py-8">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-black">
-            <span className="rounded-full bg-cyan-50 px-3 py-1.5 text-cyan-700">志願選填專題</span>
-            <span className="text-slate-400">會考升學觀察</span>
-            <span className="text-slate-300">｜</span>
-            <span className="text-slate-400">閱讀時間約 4 分鐘</span>
-          </div>
-          <h3 className="mt-5 max-w-4xl text-2xl font-black leading-tight tracking-tight text-slate-900 sm:text-4xl">
-            分數公布後，如何把「我能填哪裡」變成更有把握的志願選擇？
-          </h3>
-          <p className="mt-4 max-w-3xl text-base font-medium leading-8 text-slate-500">
-            在填下第一個志願前，先用資料理解風險、用興趣確認方向，再為自己留下一條穩定而有選擇感的路。
-          </p>
-        </div>
-
-        <div className="grid gap-8 px-6 py-7 sm:px-9 sm:py-9 lg:grid-cols-[minmax(0,1fr)_220px]">
-          <div className="space-y-7">
-            <p className="border-l-4 border-cyan-500 pl-4 text-lg font-bold leading-8 text-slate-700">
-              志願選填不是猜題，也不是把所有校系照分數由高到低排一遍。真正重要的是理解資料的範圍、限制與自己的優先順序。
-            </p>
-            {featureStory.map(({ heading, body }, index) => (
-              <section key={heading}>
-                <p className="mb-2 text-xs font-black tracking-[0.18em] text-cyan-600">POINT {String(index + 1).padStart(2, '0')}</p>
-                <h4 className="text-xl font-black leading-8 text-slate-900">{heading}</h4>
-                <p className="mt-3 text-[15px] font-medium leading-8 text-slate-600">{body}</p>
-              </section>
-            ))}
-          </div>
-
-          <aside className="h-fit rounded-[1.5rem] bg-slate-950 p-5 text-white">
-            <p className="text-[10px] font-black tracking-[0.2em] text-cyan-300">編輯提醒</p>
-            <p className="mt-3 text-sm font-bold leading-7 text-slate-100">
-              平台資料適合用來比較趨勢與建立志願組合；實際招生名額、比序規則與錄取結果，請以當年度官方資料為準。
-            </p>
-            <button type="button" onClick={() => onNavigate('list')} className="mt-5 inline-flex items-center gap-2 text-sm font-black text-cyan-300 hover:text-white">
-              查看同校系資料 <ArrowRight className="h-4 w-4" />
-            </button>
-          </aside>
-        </div>
-      </article>
+      <section className="rounded-2xl border border-cyan-100 bg-white p-5 sm:p-7" aria-labelledby="featured-strategy-title">
+        <p className="text-xs font-semibold text-cyan-700">入門專題</p>
+        <h3 id="featured-strategy-title" className="mt-3 text-xl font-bold leading-9 text-slate-900">{FEATURED_STRATEGY_ARTICLE.title}</h3>
+        <p className="mt-3 text-sm leading-7 text-slate-500">{FEATURED_STRATEGY_ARTICLE.summary}</p>
+        <a href={articleHref(FEATURED_STRATEGY_ARTICLE.slug, base)} onClick={event => {
+          if (event.button !== 0 || event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
+          event.preventDefault(); onOpenArticle(FEATURED_STRATEGY_ARTICLE.slug);
+        }} className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-cyan-700">閱讀入門專題<ArrowRight aria-hidden="true" className="h-4 w-4" /></a>
+      </section>
 
       <section className="grid gap-4 lg:grid-cols-3">
         {strategyCards.map(({ icon: Icon, title, body, action, tab }) => (

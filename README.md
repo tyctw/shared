@@ -55,3 +55,16 @@ GitHub Pages 部署範例：`https://tyctw.github.io/shared/statistics/`。
 表單、瀏覽、最低分數及平台統計的年度選項會在開放時間到達、頁面恢復可見或視窗取得焦點時更新；正在填寫的表單保留已選年度。官方統計年度依已建置資料顯示。
 
 年度時間邊界測試：`npx tsx --test tests/entryOpenLock.test.ts`。
+
+## 策略文章獨立頁面
+
+策略首頁 `insights/` 保留五篇文章及原置頂專題的摘要入口。全文分別位於：
+
+- `insights/preference-order/`：志願排序
+- `insights/small-samples/`：少量樣本判讀
+- `insights/school-program-choice/`：適性選校
+- `insights/tie-break-rules/`：積分與同分比序
+- `insights/submission-to-enrollment/`：送出志願到報到清單
+- `insights/score-to-choice/`：原置頂入門專題
+
+支援站內導覽、上一頁／下一頁、文章目錄、直接開啟與重新整理。舊的 `insights/#article-代稱` 連結會在載入後改用獨立路徑。建置會產生六個文章入口，設定各自的標題、描述與分享網址，並以 `../../` 對應 GitHub Pages 子目錄資源。
