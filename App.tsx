@@ -1614,7 +1614,7 @@ const App: React.FC = () => {
       aria-current={activeTab === id ? 'page' : undefined}
       className={`relative px-4 py-2.5 rounded-full text-sm font-black transition-colors duration-200 flex items-center gap-2 group ${
         activeTab === id 
-          ? 'bg-slate-100 text-slate-900 shadow-none border border-transparent' 
+          ? 'bg-slate-100 text-slate-900 shadow-none border border-transparent'
           : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50 border border-transparent'
       }`}
     >
