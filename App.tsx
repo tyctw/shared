@@ -138,54 +138,66 @@ const DataStreamLoader = () => (
   </div>
 );
 
-const SystemInitializingScreen = () => (
-  <div className="system-boot relative isolate flex min-h-[58vh] items-center justify-center overflow-hidden rounded-[2rem] bg-[#07111f] px-5 py-10 text-slate-100 shadow-[0_30px_100px_-45px_rgba(15,23,42,0.9)] sm:px-10">
-    <div className="system-boot-grid absolute inset-0 opacity-70" />
-    <div className="system-boot-orb system-boot-orb-one" />
-    <div className="system-boot-orb system-boot-orb-two" />
-    <div className="system-boot-scan absolute inset-x-0 h-px" />
-
-    <div className="relative z-10 w-full max-w-xl">
-      <div className="mb-7 flex items-center justify-between text-[10px] font-black tracking-[0.22em] text-cyan-200/70">
-        <span>CAP / DATA TERMINAL</span>
-        <span className="system-boot-online inline-flex items-center gap-2"><i />ONLINE</span>
-      </div>
-
-      <div className="rounded-[1.75rem] border border-cyan-200/15 bg-slate-950/45 p-5 shadow-2xl shadow-cyan-950/30 backdrop-blur-xl sm:p-8">
-        <div className="flex items-center gap-5">
-          <div className="system-boot-core relative grid h-16 w-16 shrink-0 place-items-center rounded-2xl border border-cyan-200/40 bg-cyan-300/10">
-            <div className="absolute inset-2 rounded-xl border border-cyan-100/25" />
-            <GraduationCap className="relative h-7 w-7 text-cyan-100" />
+const MinimumScoresSkeleton = () => (
+  <div role="status" aria-label="正在載入最低錄取分數總表" className="mx-auto max-w-6xl">
+    <span className="sr-only">正在載入最低錄取分數總表，請稍候。</span>
+    <div aria-hidden="true" className="space-y-6 motion-safe:animate-pulse">
+      <div className="rounded-[2rem] bg-[#11132b] p-6 sm:p-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="min-w-0 flex-1 space-y-4">
+            <div className="h-9 w-44 rounded-full bg-white/10" />
+            <div className="h-9 w-64 max-w-full rounded-xl bg-white/20 sm:h-10" />
+            <div className="space-y-3">
+              <div className="h-4 w-full rounded bg-white/10" />
+              <div className="h-4 w-4/5 rounded bg-white/10" />
+            </div>
           </div>
-          <div>
-            <p className="text-[10px] font-black tracking-[0.28em] text-cyan-300">SYSTEM INITIALIZING</p>
-            <h2 className="mt-2 text-2xl font-black tracking-tight text-white sm:text-3xl">正在建立資料連線</h2>
-            <p className="mt-2 text-sm font-medium text-slate-400">正在同步匿名錄取資料與平台設定。</p>
+          <div className="grid grid-cols-3 gap-2 sm:min-w-[360px]">
+            {[0, 1, 2].map(index => (
+              <div key={index} className="rounded-2xl border border-white/10 bg-white/[0.07] px-4 py-3">
+                <div className="h-3 w-8 rounded bg-white/10" />
+                <div className="mt-2 h-7 w-12 rounded bg-white/20" />
+              </div>
+            ))}
           </div>
         </div>
-
-        <div className="mt-8 space-y-3">
-          {[
-            ['驗證安全連線', 'SECURE CHANNEL', 'done'],
-            ['載入資料索引', 'INDEXING RECORDS', 'active'],
-            ['準備分析介面', 'RENDER QUEUED', 'wait'],
-          ].map(([label, state, status]) => (
-            <div key={state} className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.035] px-3 py-3">
-              <span className={`system-boot-status system-boot-status-${status}`} />
-              <span className="flex-1 text-sm font-bold text-slate-200">{label}</span>
-              <span className="text-[9px] font-black tracking-[0.18em] text-slate-500">{state}</span>
+      </div>
+      <div className="rounded-[2rem] border border-slate-100 bg-white p-4 sm:p-5">
+        <div className="grid gap-3 md:grid-cols-[150px_190px_190px_1fr]">
+          {[0, 1, 2, 3].map(index => (
+            <div key={index}>
+              <div className="mb-2 h-3 w-10 rounded bg-slate-200" />
+              <div className="h-12 rounded-2xl bg-slate-100" />
             </div>
           ))}
         </div>
-
-        <div className="mt-8">
-          <div className="mb-2 flex justify-between text-[10px] font-black tracking-[0.18em] text-cyan-200/80">
-            <span>LOADING MODULES</span><span>SYNCING</span>
+      </div>
+      <div className="overflow-hidden rounded-[2rem] border border-slate-100 bg-white">
+        <div className="grid gap-3 p-3 md:hidden">
+          {[0, 1, 2].map(index => (
+            <div key={index} className="overflow-hidden rounded-2xl border border-slate-100">
+              <div className="space-y-3 bg-slate-50 p-4">
+                <div className="flex gap-2"><div className="h-6 w-16 rounded-full bg-slate-200" /><div className="h-6 w-16 rounded-full bg-slate-200" /></div>
+                <div className="h-5 w-3/4 rounded bg-slate-200" />
+                <div className="h-3 w-1/2 rounded bg-slate-200" />
+              </div>
+              <div className="grid grid-cols-2 gap-3 p-4">
+                {[0, 1].map(column => <div key={column} className="h-16 rounded-xl bg-slate-100" />)}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="hidden md:block">
+          <div className="grid grid-cols-7 gap-5 border-b border-slate-100 bg-slate-50 px-5 py-4">
+            {[0, 1, 2, 3, 4, 5, 6].map(column => <div key={column} className="h-4 w-2/3 rounded bg-slate-200" />)}
           </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-white/10"><div className="system-boot-progress h-full rounded-full" /></div>
+          {[0, 1, 2, 3, 4, 5].map(row => (
+            <div key={row} className="grid grid-cols-7 items-center gap-5 border-b border-slate-100 px-5 py-5 last:border-0">
+              {[0, 1, 2, 3, 4, 5, 6].map(column => <div key={column} className={`${column === 2 ? 'h-10 rounded-2xl' : 'h-4 rounded'} ${column === 1 || column === 5 ? 'w-full' : 'w-2/3'} bg-slate-100`} />)}
+            </div>
+          ))}
         </div>
       </div>
-      <p className="mt-5 text-center text-[10px] font-bold tracking-[0.16em] text-slate-500">PLEASE WAIT — DO NOT REFRESH</p>
     </div>
   </div>
 );
@@ -256,59 +268,64 @@ const SystemBootOverlay = ({ ready, onComplete }: { ready: boolean; onComplete: 
   );
 };
 
-const StatsInsightLoader = () => (
-  <div className="flex min-h-[46vh] flex-col items-center justify-center px-4 py-10 animate-in fade-in duration-700">
-    <div className="relative w-full max-w-xl overflow-hidden rounded-[2rem] border border-white/80 bg-white/75 p-6 shadow-[0_28px_90px_-48px_rgba(79,70,229,0.68)] ring-1 ring-indigo-100/70 backdrop-blur-xl sm:p-8">
-      <div className="pointer-events-none absolute -left-16 -top-20 h-56 w-56 rounded-full bg-sky-200/55 blur-3xl"></div>
-      <div className="pointer-events-none absolute -bottom-24 -right-16 h-56 w-56 rounded-full bg-violet-200/55 blur-3xl"></div>
-      <div className="stats-loader-grid pointer-events-none absolute inset-0"></div>
-
-      <div className="relative z-10 grid gap-6 md:grid-cols-[1fr_1.15fr] md:items-center">
-        <div className="flex flex-col items-center text-center md:items-start md:text-left">
-          <span className="mb-3 rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-indigo-500">
-            Building charts
-          </span>
-          <h3 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
-            正在生成統計圖表
-          </h3>
-          <p className="mt-3 text-sm font-bold leading-6 text-slate-500">
-            分析各區分享資料、分數分布與趨勢摘要。
-          </p>
-
-          <div className="mt-6 flex items-center gap-3">
-            <div className="stats-loader-badge flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-sky-500 text-white shadow-xl shadow-indigo-200">
-              <BarChart3 className="h-6 w-6" />
-            </div>
-            <div className="text-left">
-              <div className="h-2 w-24 rounded-full bg-slate-200"></div>
-              <div className="mt-2 h-2 w-16 rounded-full bg-indigo-200"></div>
-            </div>
+const StatsSkeleton = () => (
+  <div role="status" aria-label="正在載入數據統計" className="space-y-6">
+    <span className="sr-only">正在載入數據統計，請稍候。</span>
+    <div aria-hidden="true" className="space-y-6 motion-safe:animate-pulse">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <div className="h-12 w-12 shrink-0 rounded-xl bg-slate-200" />
+          <div className="w-full max-w-sm space-y-3">
+            <div className="h-6 w-40 rounded-lg bg-slate-200" />
+            <div className="h-4 w-full rounded bg-slate-100" />
           </div>
         </div>
-
-        <div className="stats-chart-panel relative min-h-48 overflow-hidden rounded-[1.5rem] border border-white/80 bg-white/85 p-5 shadow-xl shadow-slate-200/60">
-          <div className="mb-5 flex items-center justify-between">
-            <div>
-              <div className="h-2 w-20 rounded-full bg-slate-200"></div>
-              <div className="mt-2 h-2 w-12 rounded-full bg-indigo-200"></div>
+        <div className="h-11 w-36 rounded-lg bg-slate-200" />
+      </div>
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {[0, 1, 2].map(index => (
+            <div key={index} className="space-y-2">
+              <div className="h-3 w-16 rounded bg-slate-200" />
+              <div className="h-11 rounded-lg bg-slate-100" />
             </div>
-            <div className="stats-loader-ring flex h-14 w-14 items-center justify-center rounded-full">
-              <span className="h-8 w-8 rounded-full bg-white shadow-inner"></span>
-            </div>
-          </div>
-
-          <div className="stats-bar-wrap flex h-28 items-end gap-2">
-            {[62, 38, 76, 52, 88, 45, 70].map((height, index) => (
-              <span
-                key={height + index}
-                className="stats-loader-bar flex-1 rounded-t-xl bg-gradient-to-t from-indigo-500 to-sky-300"
-                style={{ height: `${height}%`, animationDelay: `${index * 0.12}s` }}
-              ></span>
-            ))}
-          </div>
-
-          <div className="stats-scan-line pointer-events-none absolute left-5 right-5"></div>
+          ))}
         </div>
+        <div className="mt-4 space-y-3 border-t border-slate-100 pt-4">
+          <div className="h-3 w-2/3 rounded bg-slate-200" />
+          <div className="h-3 w-full rounded bg-slate-100" />
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {[0, 1, 2, 3, 4].map(index => <div key={index} className="h-9 w-24 rounded-full bg-slate-200" />)}
+      </div>
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {[0, 1, 2, 3].map(index => (
+          <div key={index} className="rounded-xl border border-slate-200 bg-white p-4">
+            <div className="h-3 w-3/4 rounded bg-slate-200" />
+            <div className="mt-4 h-8 w-20 rounded-lg bg-slate-200" />
+            <div className="mt-2 h-3 w-full rounded bg-slate-100" />
+          </div>
+        ))}
+      </div>
+      <div className="h-3 w-1/2 rounded bg-slate-200" />
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
+        <div className="h-5 w-36 rounded bg-slate-200" />
+        <div className="mt-3 h-3 w-3/4 rounded bg-slate-100" />
+        <div className="mt-5 flex h-64 flex-col justify-around rounded-xl bg-slate-50 p-5">
+          {['w-3/4', 'w-full', 'w-2/3', 'w-4/5', 'w-1/2'].map(width => (
+            <div key={width} className={`h-6 rounded bg-slate-200 ${width}`} />
+          ))}
+        </div>
+      </div>
+      <div className="grid gap-6 lg:grid-cols-2">
+        {[0, 1].map(index => (
+          <div key={index} className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
+            <div className="h-5 w-36 rounded bg-slate-200" />
+            <div className="mt-3 h-3 w-3/4 rounded bg-slate-100" />
+            <div className="mt-5 h-56 rounded-xl bg-slate-100" />
+          </div>
+        ))}
       </div>
     </div>
   </div>
@@ -1669,7 +1686,7 @@ const App: React.FC = () => {
             {activeTab === 'minimums' && (
                 <div className="space-y-8">
                     {isLoading ? (
-                         <SystemInitializingScreen />
+                         <MinimumScoresSkeleton />
                     ) : (
                         <MinimumScoresPage entries={entries} />
                     )}
@@ -1679,7 +1696,7 @@ const App: React.FC = () => {
             {activeTab === 'stats' && (
                 <div className="space-y-8 max-w-7xl mx-auto">
                     {isLoading ? (
-                         <StatsInsightLoader />
+                         <StatsSkeleton />
                     ) : (
                         <Dashboard entries={entries} />
                     )}
