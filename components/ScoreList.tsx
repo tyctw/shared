@@ -82,26 +82,23 @@ const getWritingStyle = (grade: number) => {
 };
 
 const ScoreSkeleton = () => (
-  <div className="bg-white rounded-[2rem] border border-slate-100 p-1 shadow-sm">
-    <div className="bg-slate-50/50 rounded-[1.75rem] p-6 sm:p-8 relative overflow-hidden">
-      <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/60 to-transparent z-10"></div>
-      <div className="flex justify-between items-start mb-6">
-        <div className="space-y-4">
-          <div className="flex gap-2">
-            <div className="w-16 h-6 bg-slate-200/60 rounded-lg"></div>
-            <div className="w-16 h-6 bg-slate-200/60 rounded-lg"></div>
-          </div>
-          <div className="w-48 h-8 bg-slate-200/80 rounded-xl"></div>
-          <div className="w-24 h-6 bg-slate-200/60 rounded-lg"></div>
-        </div>
-        <div className="w-20 h-16 bg-slate-200/60 rounded-2xl"></div>
+  <div aria-hidden="true" className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white motion-safe:animate-pulse">
+    <div className="space-y-4 border-b border-slate-100 bg-slate-50 px-5 py-5 sm:px-6">
+      <div className="flex justify-between gap-4">
+        <div className="flex gap-2"><div className="h-6 w-16 rounded-full bg-slate-200" /><div className="h-6 w-16 rounded-full bg-slate-200" /></div>
+        <div className="h-8 w-8 rounded-xl bg-slate-200" />
       </div>
-
-      <div className="grid grid-cols-3 gap-2 mt-8 sm:mt-12 border-t border-slate-200/50 pt-6">
-        {[...Array(6)].map((_, i) => (
-          <div key={i} className="aspect-square rounded-2xl bg-slate-200/50"></div>
-        ))}
+      <div className="h-7 w-3/4 rounded-lg bg-slate-200" />
+      <div className="h-4 w-1/2 rounded bg-slate-200" />
+    </div>
+    <div className="space-y-5 p-5 sm:p-6">
+      <div className="grid grid-cols-3 gap-2">
+        {[0, 1, 2, 3, 4, 5].map(index => <div key={index} className="h-16 rounded-xl bg-slate-100" />)}
       </div>
+      <div className="grid grid-cols-2 gap-3">
+        {[0, 1].map(index => <div key={index} className="h-20 rounded-2xl bg-slate-100" />)}
+      </div>
+      <div className="h-3 w-1/2 rounded bg-slate-100" />
     </div>
   </div>
 );
@@ -374,6 +371,7 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
         </div>
       </div>
 
+      {isLoading && <p role="status" className="sr-only">正在載入錄取資料，請稍候。</p>}
       {/* Card Grid */}
       <div className="mx-auto grid w-full max-w-[1320px] grid-cols-1 gap-6 md:grid-cols-[repeat(auto-fit,minmax(360px,1fr))] lg:gap-8">
         {isLoading ? (

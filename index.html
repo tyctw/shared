@@ -230,17 +230,34 @@
     <div class="noise-overlay"></div>
     
     <div id="root">
-        <!-- Loader -->
-        <div class="fixed inset-0 flex flex-col items-center justify-center bg-[#f8fafc] z-50">
-            <div class="relative w-24 h-24">
-                <div class="absolute inset-0 rounded-full border-4 border-indigo-100 animate-[spin_3s_linear_infinite]"></div>
-                <div class="absolute inset-0 rounded-full border-4 border-t-indigo-500 animate-[spin_1.5s_linear_infinite]"></div>
-                <div class="absolute inset-4 rounded-full border-4 border-b-purple-500 animate-[spin_2s_linear_infinite_reverse]"></div>
-                <div class="absolute inset-0 flex items-center justify-center">
-                   <div class="w-3 h-3 bg-indigo-600 rounded-full animate-pulse"></div>
+        <style>
+            .startup-skeleton { max-width:1320px; margin:auto; padding:24px 20px; }
+            .startup-skeleton, .startup-skeleton * { box-sizing:border-box; }
+            .startup-block { height:16px; border-radius:8px; background:#e2e8f0; }
+            .startup-header { display:flex; align-items:center; gap:12px; height:56px; margin-bottom:32px; }
+            .startup-hero { padding:32px; border:1px solid #e2e8f0; border-radius:32px; background:white; }
+            .startup-filters { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; padding:24px; margin:24px 0; border-radius:24px; background:white; border:1px solid #e2e8f0; }
+            .startup-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
+            .startup-card { padding:24px; border:1px solid #e2e8f0; border-radius:32px; background:white; }
+            .startup-grades { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:32px; }
+            .startup-grades div { height:64px; border-radius:12px; background:#f1f5f9; }
+            .startup-points { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:20px; }
+            .startup-points div { height:80px; border-radius:16px; background:#f1f5f9; }
+            .startup-status { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+            @media(max-width:1100px) { .startup-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+            @media(max-width:767px) { .startup-grid, .startup-filters { grid-template-columns:minmax(0,1fr); } .startup-hero { padding:24px; } }
+            @media(prefers-reduced-motion:no-preference) { .startup-skeleton [aria-hidden] { animation:startup-pulse 2s ease-in-out infinite; } }
+            @keyframes startup-pulse { 50% { opacity:.55; } }
+        </style>
+        <div class="startup-skeleton" role="status" aria-label="正在載入錄取資料">
+            <span class="startup-status">正在載入錄取資料，請稍候。</span>
+            <div aria-hidden="true">
+                <div class="startup-header"><div class="startup-block" style="width:48px;height:48px;border-radius:16px"></div><div class="startup-block" style="width:180px;height:24px"></div></div>
+                <div class="startup-hero"><div class="startup-block" style="width:120px;height:28px"></div><div class="startup-block" style="width:75%;height:40px;margin-top:24px"></div><div class="startup-block" style="width:90%;margin-top:20px"></div><div class="startup-block" style="width:65%;margin-top:12px"></div></div>
+                <div class="startup-filters"><div class="startup-block" style="height:48px"></div><div class="startup-block" style="height:48px"></div><div class="startup-block" style="height:48px"></div></div>
+                <div class="startup-grid"><div class="startup-card"><div class="startup-block" style="width:35%;height:24px"></div><div class="startup-block" style="width:75%;height:28px;margin-top:20px"></div><div class="startup-block" style="width:50%;margin-top:12px"></div><div class="startup-grades"><div></div><div></div><div></div><div></div><div></div><div></div></div><div class="startup-points"><div></div><div></div></div></div><div class="startup-card"><div class="startup-block" style="width:35%;height:24px"></div><div class="startup-block" style="width:75%;height:28px;margin-top:20px"></div><div class="startup-block" style="width:50%;margin-top:12px"></div><div class="startup-grades"><div></div><div></div><div></div><div></div><div></div><div></div></div><div class="startup-points"><div></div><div></div></div></div><div class="startup-card"><div class="startup-block" style="width:35%;height:24px"></div><div class="startup-block" style="width:75%;height:28px;margin-top:20px"></div><div class="startup-block" style="width:50%;margin-top:12px"></div><div class="startup-grades"><div></div><div></div><div></div><div></div><div></div><div></div></div><div class="startup-points"><div></div><div></div></div></div>
                 </div>
             </div>
-            <p class="mt-6 text-slate-400 font-mono text-sm tracking-widest animate-pulse">SYSTEM INITIALIZING...</p>
         </div>
     </div>
     
