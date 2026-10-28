@@ -1,3 +1,4 @@
+import PageIntro from './PageIntro';
 import React from 'react';
 import { articleHref, resolvePageRoute } from '../utils/pageRoutes';
 import { STRATEGY_ARTICLES, FEATURED_STRATEGY_ARTICLE } from '../data/strategyArticles';
@@ -80,40 +81,7 @@ const AdmissionsInsights: React.FC<AdmissionsInsightsProps> = ({ onNavigate, onO
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <section className="relative overflow-hidden rounded-[2rem] bg-slate-950 px-6 py-10 text-white shadow-[0_28px_80px_-45px_rgba(15,23,42,0.7)] sm:px-10 sm:py-12">
-        <div className="pointer-events-none absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,.9)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.9)_1px,transparent_1px)] [background-size:36px_36px]" />
-        <div className="pointer-events-none absolute -right-24 -top-28 h-72 w-72 rounded-full bg-cyan-400/20 blur-[90px]" />
-        <div className="pointer-events-none absolute -bottom-28 left-1/4 h-72 w-72 rounded-full bg-amber-400/15 blur-[90px]" />
-
-        <div className="relative z-10 grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
-          <div>
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.08] px-3 py-2 text-xs font-bold text-cyan-100">
-              <Compass className="h-4 w-4 text-cyan-300" />
-              會考志願策略
-            </div>
-            <h2 className="text-3xl font-black tracking-tight sm:text-5xl">
-              不是只看分數，
-              <span className="block text-cyan-200">而是把風險看懂。</span>
-            </h2>
-            <p className="mt-5 max-w-2xl text-sm font-medium leading-7 text-slate-300 sm:text-base">
-              這裡整理會考落點、最低錄取參考、志願排序與資料判讀方法，幫助學生和家長把分數資料轉成更實際的選校決策。
-            </p>
-          </div>
-
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              ['3 層', '志願配置'],
-              ['2-3 年', '趨勢比較'],
-              ['5 項', '檢查清單'],
-            ].map(([value, label]) => (
-              <div key={label} className="rounded-2xl border border-white/10 bg-white/[0.07] px-3 py-4 text-center">
-                <strong className="block text-xl font-black text-white">{value}</strong>
-                <span className="mt-1 block text-[10px] font-bold text-slate-400">{label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <PageIntro number="04" eyebrow="MAKE YOUR CHOICE / 升學策略" title="把分數看懂，" highlight="把志願想清楚。" description="從落點判讀、風險配置到志願排序，一步步把錄取經驗轉成適合自己的選校策略。" />
 
       <section aria-labelledby="strategy-articles-title" className="space-y-4">
         <div className="flex flex-wrap items-end justify-between gap-3 px-1">

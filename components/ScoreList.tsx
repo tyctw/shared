@@ -1,8 +1,9 @@
+import AdmissionCard from './AdmissionCard';
 import { useEntryYears } from '../hooks/useEntryYears';
 import React, { useState, useEffect } from 'react';
 import { ScoreEntry, StudentIdentity } from '../types';
 import { REGIONS } from '../constants';
-import { MapPin, Search, Sparkles, Share2, Check, Calendar, Quote, School, ChevronLeft, ChevronRight, Heart, Filter, ChevronDown, RefreshCw, RotateCcw, MailWarning, UsersRound } from 'lucide-react';
+import { MapPin, Search, Sparkles, Calendar, School, ChevronLeft, ChevronRight, Filter, ChevronDown, RefreshCw, RotateCcw, UsersRound } from 'lucide-react';
 
 interface ScoreListProps {
   entries: ScoreEntry[];
@@ -12,14 +13,6 @@ interface ScoreListProps {
   onRefresh?: () => void;
   isRefreshing?: boolean;
 }
-
-const SUBJECT_LABELS: Record<string, string> = {
-  chinese: '國文',
-  english: '英文',
-  math: '數學',
-  nature: '自然',
-  social: '社會',
-};
 
 const REPORT_EMAIL = import.meta.env.VITE_REPORT_EMAIL || 'tyctw.analyze@gmail.com';
 
@@ -67,39 +60,12 @@ const STUDENT_IDENTITY_FILTERS: StudentIdentity[] = [
   '退伍軍人',
 ];
 
-const getGradeStyle = (grade: string) => {
-  if (grade === 'A++') return 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 text-amber-600 shadow-sm shadow-amber-100';
-  if (grade === 'A+') return 'bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200 text-emerald-600 shadow-sm shadow-emerald-100';
-  if (grade === 'A') return 'bg-gradient-to-br from-indigo-50 to-blue-50 border-indigo-200 text-indigo-600 shadow-sm shadow-indigo-100';
-  if (grade.startsWith('B')) return 'bg-slate-50 border-slate-200 text-slate-600 shadow-sm';
-  return 'bg-gray-50 border-gray-100 text-gray-400';
-};
-
-const getWritingStyle = (grade: number) => {
-  if (grade === 6) return 'bg-gradient-to-br from-rose-50 to-pink-50 border-rose-200 text-rose-600 shadow-sm shadow-rose-100';
-  if (grade === 5) return 'bg-gradient-to-br from-fuchsia-50 to-purple-50 border-fuchsia-200 text-fuchsia-600 shadow-sm shadow-fuchsia-100';
-  return 'bg-slate-50 border-slate-200 text-slate-600 shadow-sm';
-};
-
 const ScoreSkeleton = () => (
-  <div aria-hidden="true" className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white motion-safe:animate-pulse">
-    <div className="space-y-4 border-b border-slate-100 bg-slate-50 px-5 py-5 sm:px-6">
-      <div className="flex justify-between gap-4">
-        <div className="flex gap-2"><div className="h-6 w-16 rounded-full bg-slate-200" /><div className="h-6 w-16 rounded-full bg-slate-200" /></div>
-        <div className="h-8 w-8 rounded-xl bg-slate-200" />
-      </div>
-      <div className="h-7 w-3/4 rounded-lg bg-slate-200" />
-      <div className="h-4 w-1/2 rounded bg-slate-200" />
-    </div>
-    <div className="space-y-5 p-5 sm:p-6">
-      <div className="grid grid-cols-3 gap-2">
-        {[0, 1, 2, 3, 4, 5].map(index => <div key={index} className="h-16 rounded-xl bg-slate-100" />)}
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        {[0, 1].map(index => <div key={index} className="h-20 rounded-2xl bg-slate-100" />)}
-      </div>
-      <div className="h-3 w-1/2 rounded bg-slate-100" />
-    </div>
+  <div aria-hidden="true" className="admission-skeleton motion-safe:animate-pulse">
+    <div className="admission-skeleton-line" /><div className="admission-skeleton-title" /><div className="admission-skeleton-subtitle" />
+    <div className="admission-skeleton-score" />
+    <div className="admission-skeleton-grades">{[0,1,2,3,4,5].map(i=><span key={i} />)}</div>
+    <div className="admission-skeleton-line" />
   </div>
 );
 
@@ -421,148 +387,17 @@ const ScoreList: React.FC<ScoreListProps> = ({ entries, isLoading, favoriteIds =
           </div>
         ) : (
           paginatedEntries.map((entry) => (
-            <article
-              key={entry.id}
-              className="group relative flex h-full flex-col overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white shadow-[0_12px_40px_-24px_rgba(15,23,42,0.3)] transition-all duration-500 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-[0_24px_60px_-28px_rgba(79,70,229,0.38)]"
-            >
-              <div className="relative overflow-hidden border-b border-slate-100 bg-gradient-to-br from-white via-indigo-50/70 to-sky-50 px-5 pb-5 pt-4 text-slate-900 sm:px-6">
-                <div className="pointer-events-none absolute -right-12 -top-16 h-44 w-44 rounded-full border-[28px] border-indigo-100/55"></div>
-                <div className="pointer-events-none absolute -bottom-20 left-1/4 h-40 w-40 rounded-full bg-sky-100/80 blur-[55px]"></div>
-
-                <div className="relative z-10 flex items-center justify-between gap-3">
-                  <div className="flex flex-wrap gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-100 bg-white/80 px-3 py-1.5 text-[10px] font-black text-indigo-600 shadow-sm backdrop-blur-md">
-                      <Calendar className="h-3 w-3" /> {entry.year} 年
-                    </span>
-
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-100 bg-white/80 px-3 py-1.5 text-[10px] font-black text-sky-700 shadow-sm backdrop-blur-md">
-                      <MapPin className="h-3 w-3" /> {entry.region}
-                    </span>
-                  </div>
-
-                  <div className="flex shrink-0 gap-1.5">
-                    {toggleFavorite && (
-                      <button
-                        onClick={() => toggleFavorite(entry.id)}
-                        className={`flex h-9 w-9 items-center justify-center rounded-xl border bg-white/80 shadow-sm backdrop-blur-md transition-all hover:border-rose-200 hover:bg-rose-50 hover:text-rose-500 ${favoriteIds.includes(entry.id) ? 'border-rose-100 text-rose-500' : 'border-slate-200 text-slate-400'}`}
-                        title={favoriteIds.includes(entry.id) ? '取消收藏' : '加入收藏'}
-                        aria-label={favoriteIds.includes(entry.id) ? '取消收藏' : '加入收藏'}
-                      >
-                        <Heart className={`h-4 w-4 ${favoriteIds.includes(entry.id) ? 'fill-current' : ''}`} />
-                      </button>
-                    )}
-
-                    <button
-                      onClick={() => handleShare(entry)}
-                      className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white/80 text-slate-400 shadow-sm backdrop-blur-md transition-all hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
-                      title="複製分享內容"
-                      aria-label="複製分享內容"
-                    >
-                      {copiedId === entry.id ? <Check className="h-4 w-4 text-emerald-400" /> : <Share2 className="h-4 w-4" />}
-                    </button>
-
-                    <a
-                      href={buildReportMailto(entry)}
-                      className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white/80 text-slate-400 shadow-sm backdrop-blur-md transition-all hover:border-amber-200 hover:bg-amber-50 hover:text-amber-600"
-                      title="Email 回報資料錯誤"
-                      aria-label="Email 回報資料錯誤"
-                    >
-                      <MailWarning className="h-4 w-4" />
-                    </a>
-                  </div>
-                </div>
-
-                <div className="relative z-10 mt-4">
-                  <h3 className="text-xl font-black leading-tight tracking-tight text-slate-900 sm:text-2xl">{entry.school}</h3>
-
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-xl bg-white/85 px-3 py-1 text-xs font-bold text-slate-600 shadow-sm ring-1 ring-slate-200">
-                      <School className="h-3.5 w-3.5 text-indigo-500" />{entry.department}
-                    </span>
-
-                    <span className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-600 ring-1 ring-indigo-100">
-                      {entry.studentIdentity ?? '一般生'}
-                    </span>
-
-                    {(() => {
-                      const minimumEntry = minimumAdmissionEntryMap.get(`${entry.year}-${entry.school}`);
-                      return minimumEntry && isMinimumAdmissionTie(entry, minimumEntry);
-                    })() && (
-                      <span className="inline-flex items-center gap-1.5 rounded-xl bg-rose-50 px-3 py-1 text-xs font-bold text-rose-600 ring-1 ring-rose-100">
-                        <Sparkles className="h-3.5 w-3.5" />同校同年最低錄取資料
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="-mt-3 grid grid-cols-2 gap-3 px-5 sm:px-6">
-                <div className="relative z-10 rounded-2xl border border-indigo-100 bg-white p-3 shadow-[0_12px_30px_-18px_rgba(79,70,229,0.55)]">
-                  <span className="text-[10px] font-black uppercase tracking-[0.18em] text-indigo-400">總積分</span>
-                  <strong className="mt-1 block text-3xl font-black tracking-tight text-indigo-700">{entry.totalPoints}</strong>
-                </div>
-
-                <div className="relative z-10 rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50 to-white p-3 shadow-[0_12px_30px_-18px_rgba(245,158,11,0.5)]">
-                  <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.18em] text-amber-500">
-                    <Sparkles className="h-3 w-3" />總積點
-                  </span>
-                  <strong className="mt-1 block text-3xl font-black tracking-tight text-amber-600">{entry.totalCredits ?? '—'}</strong>
-                </div>
-              </div>
-
-              <div className="flex flex-1 flex-col px-5 pb-4 pt-4 sm:px-6 sm:pb-5">
-                <div className="grid grid-cols-6 gap-1.5 rounded-2xl border border-slate-100 bg-slate-50 p-2">
-                  {(['chinese', 'english', 'math', 'nature', 'social'] as const).map(sub => (
-                    <div key={sub} className={`flex min-w-0 flex-col items-center justify-center rounded-xl border px-1 py-2 ${getGradeStyle(entry.scores[sub])}`}>
-                      <span className="mb-1 text-[9px] font-black opacity-60">{SUBJECT_LABELS[sub]}</span>
-                      <span className="whitespace-nowrap font-mono text-sm font-black leading-none">{entry.scores[sub]}</span>
-                    </div>
-                  ))}
-
-                  <div className={`flex min-w-0 flex-col items-center justify-center rounded-xl border px-1 py-2 ${getWritingStyle(entry.scores.writing)}`}>
-                    <span className="mb-1 text-[9px] font-black opacity-60">作文</span>
-                    <span className="whitespace-nowrap font-mono text-sm font-black leading-none">
-                      {entry.scores.writing}
-                      <small className="ml-0.5 text-[9px]">級</small>
-                    </span>
-                  </div>
-                </div>
-
-                {entry.notes && (
-                  <div className="mt-3 rounded-[1.2rem] border border-slate-100 bg-white p-3 shadow-[0_8px_24px_-18px_rgba(15,23,42,0.28)]">
-                    <div className="flex items-start gap-2.5">
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-400">
-                        <Quote className="h-3.5 w-3.5 rotate-180" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-bold leading-6 text-slate-600">
-                          {entry.notes.length > 10 ? `${entry.notes.slice(0, 10)}…` : entry.notes}
-                        </p>
-                        {entry.notes.length > 10 && (
-                          <details className="group mt-0.5">
-                            <summary className="cursor-pointer list-none text-right text-sm font-black text-indigo-600 transition-colors hover:text-violet-600">
-                              <span className="group-open:hidden">查看完整說明</span>
-                              <span className="hidden group-open:inline">收起完整說明</span>
-                            </summary>
-                            <p className="mt-3 whitespace-pre-wrap border-t border-indigo-50 pt-3 text-sm font-medium leading-7 text-slate-600">
-                              {entry.notes}
-                            </p>
-                          </details>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-3 text-[10px] font-bold text-slate-400">
-                  <span className="flex items-center gap-1.5">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
-                    匿名考生分享
-                  </span>
-                  <span>僅供升學參考</span>
-                </div>
-              </div>
-            </article>
+            <AdmissionCard key={entry.id} entry={entry}
+              isFavorite={favoriteIds.includes(entry.id)}
+              isMinimum={(() => {
+                const minimumEntry = minimumAdmissionEntryMap.get(`${entry.year}-${entry.school}`);
+                return !!minimumEntry && isMinimumAdmissionTie(entry, minimumEntry);
+              })()}
+              copied={copiedId === entry.id}
+              onFavorite={toggleFavorite ? () => toggleFavorite(entry.id) : undefined}
+              onCopy={() => handleShare(entry)}
+              reportHref={buildReportMailto(entry)}
+            />
           ))
         )}
       </div>

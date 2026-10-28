@@ -30,17 +30,23 @@ var import_vite = require("vite");
 var import_supabase_js = require("@supabase/supabase-js");
 
 // utils/entryOpenLock.ts
-var LOCKED_ENTRY_YEAR = 115;
-var ENTRY_OPEN_AT_ISO = "2026-07-07T10:55:00+08:00";
-var ENTRY_OPEN_AT_LABEL = "115/07/07 10:55";
-var isEntryYearLocked = (year, now = Date.now()) => {
-  return Number(year) === LOCKED_ENTRY_YEAR && now < Date.parse(ENTRY_OPEN_AT_ISO);
+var TAIWAN_OFFSET_MS = 8 * 60 * 60 * 1e3;
+var getEntryOpenAt = (year) => Date.UTC(year + 1911, 6, 5) - TAIWAN_OFFSET_MS;
+var getEntryOpenLabel = (year) => `${Number(year)}/07/05 00:00`;
+var getLatestEntryYear = (now = Date.now()) => {
+  const currentYear = new Date(now + TAIWAN_OFFSET_MS).getUTCFullYear() - 1911;
+  return now >= getEntryOpenAt(currentYear) ? currentYear : currentYear - 1;
 };
-var ENTRY_LOCK_MESSAGE = `115 \u5E74\u5206\u4EAB\u5C1A\u672A\u958B\u653E\uFF0C\u958B\u653E\u6642\u9593\u70BA ${ENTRY_OPEN_AT_LABEL}`;
+var isEntryYearLocked = (year, now = Date.now()) => {
+  const value = Number(year);
+  return !Number.isInteger(value) || value < 1 || value > getLatestEntryYear(now);
+};
+var getEntryLockMessage = (year) => Number.isInteger(Number(year)) && Number(year) > 0 ? `${Number(year)} \u5E74\u5206\u4EAB\u5C1A\u672A\u958B\u653E\uFF0C\u958B\u653E\u6642\u9593\u70BA ${getEntryOpenLabel(year)}\uFF08\u53F0\u7063\u6642\u9593\uFF09` : "\u8ACB\u9078\u64C7\u6709\u6548\u7684\u6703\u8003\u5E74\u5EA6";
 
 // server.ts
 var app = (0, import_express.default)();
 var PORT = 3e3;
+var SUPABASE_PAGE_SIZE = 1e3;
 app.use((0, import_cors.default)());
 app.use(import_express.default.json());
 var supabase = null;
@@ -57,11 +63,18 @@ app.get("/api/entries", async (req, res) => {
     return res.status(503).json({ error: "Supabase is not configured" });
   }
   try {
-    const { data, error } = await supabase.from("score_entries").select("*").order("timestamp", { ascending: false });
-    if (error) {
-      throw error;
+    const rows = [];
+    for (let from = 0; ; from += SUPABASE_PAGE_SIZE) {
+      const { data, error } = await supabase.from("score_entries").select("*").order("timestamp", { ascending: false }).range(from, from + SUPABASE_PAGE_SIZE - 1);
+      if (error) {
+        throw error;
+      }
+      rows.push(...data || []);
+      if (!data || data.length < SUPABASE_PAGE_SIZE) {
+        break;
+      }
     }
-    const formattedData = data.map((entry) => ({
+    const formattedData = rows.map((entry) => ({
       ...entry,
       scores: typeof entry.scores === "string" ? JSON.parse(entry.scores) : entry.scores,
       studentIdentity: entry.student_identity ?? entry.studentIdentity ?? "\u4E00\u822C\u751F"
@@ -82,7 +95,7 @@ app.post("/api/entries", async (req, res) => {
       return res.status(400).json({ error: "Missing entry data" });
     }
     if (isEntryYearLocked(entry.year)) {
-      return res.status(403).json({ status: "error", message: ENTRY_LOCK_MESSAGE });
+      return res.status(403).json({ status: "error", message: getEntryLockMessage(entry.year) });
     }
     const payload = {
       id: entry.id,
@@ -118,7 +131,7 @@ async function startServer() {
   } else {
     const distPath = import_path.default.join(process.cwd(), "dist");
     app.use(import_express.default.static(distPath));
-    app.get("*", (req, res) => {
+    app.get("/{*path}", (req, res) => {
       res.sendFile(import_path.default.join(distPath, "index.html"));
     });
   }

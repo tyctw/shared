@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <base href="../" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>分享錄取結果｜會考錄取分享平台</title>
+    <meta name="description" content="分享錄取結果：整理考生匿名回報的會考成績與高中職錄取經驗，協助比較升學選擇。" />
+    <meta name="keywords" content="會考錄取分享平台,會考錄取分數,會考落點,高中錄取分數,高中職錄取,國中會考,免試入學,基北區,桃連區,中投區,會考成績分享,志願選填" />
+    <meta name="author" content="TYCTW 會考錄取分享平台" />
+    <meta name="application-name" content="會考錄取分享平台" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="theme-color" content="#4f46e5" />
+    <meta name="color-scheme" content="light" />
+
+    <link rel="canonical" href="https://tyctw.github.io/shared/submit/" />
+    <link rel="alternate" hreflang="zh-Hant-TW" href="https://tyctw.github.io/shared/submit/" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="apple-touch-icon" href="./icon-512.png" />
+    <link rel="manifest" href="./site.webmanifest" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="zh_TW" />
+    <meta property="og:site_name" content="會考錄取分享平台" />
+    <meta property="og:title" content="分享錄取結果｜會考錄取分享平台" />
+    <meta property="og:description" content="分享錄取結果：整理考生匿名回報的會考成績與高中職錄取經驗，協助比較升學選擇。" />
+    <meta property="og:url" content="https://tyctw.github.io/shared/submit/" />
+    <meta property="og:image" content="https://tyctw.github.io/shared/og-cover.jpg" />
+    <meta property="og:image:secure_url" content="https://tyctw.github.io/shared/og-cover.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1536" />
+    <meta property="og:image:height" content="1024" />
+    <meta property="og:image:alt" content="會考錄取分享平台功能封面，主打匿名分享錄取分數、各區最低錄取總表、年份區域身分篩選、收藏比較與統計" />
+    <meta property="og:updated_time" content="2026-07-06T00:00:00+08:00" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:domain" content="tyctw.github.io" />
+    <meta name="twitter:url" content="https://tyctw.github.io/shared/submit/" />
+    <meta name="twitter:title" content="分享錄取結果｜會考錄取分享平台" />
+    <meta name="twitter:description" content="分享錄取結果：整理考生匿名回報的會考成績與高中職錄取經驗，協助比較升學選擇。" />
+    <meta name="twitter:image" content="https://tyctw.github.io/shared/og-cover.jpg" />
+    <meta name="twitter:image:alt" content="會考錄取分享平台社群分享封面，包含匿名分享、最低錄取總表、篩選、收藏比較與統計等功能特色" />
+    <link rel="image_src" href="https://tyctw.github.io/shared/og-cover.jpg" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "會考錄取分享平台",
+      "alternateName": "CAP Score Sharing",
+      "url": "https://tyctw.github.io/shared/",
+      "description": "會考錄取分享平台整理台灣各就學區考生匿名回報的高中職錄取資料，提供歷年錄取分數、會考成績、總積分與錄取經驗查詢。",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Any",
+      "inLanguage": "zh-Hant-TW",
+      "isAccessibleForFree": true,
+      "image": "https://tyctw.github.io/shared/og-cover.jpg",
+      "thumbnailUrl": "https://tyctw.github.io/shared/og-cover.jpg",
+      "screenshot": "https://tyctw.github.io/shared/og-cover.jpg",
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "student"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "TWD"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "TYCTW 會考錄取分享平台",
+        "url": "https://tyctw.github.io/"
+      }
+    }
+    </script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Inter"', '"Noto Sans TC"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                        display: ['"Noto Sans TC"', 'sans-serif'],
+                    },
+                    colors: {
+                        indigo: { 50: '#eef2ff', 100: '#e0e7ff', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 900: '#312e81' },
+                        slate: { 850: '#1e293b' }, // Darker slate for strong text
+                    },
+                    boxShadow: {
+                        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
+                        'glow': '0 0 20px rgba(99, 102, 241, 0.4)',
+                        'float': '0 10px 40px -10px rgba(0,0,0,0.08)',
+                    },
+                    animation: {
+                        'spin-slow-reverse': 'spin-reverse 6s linear infinite',
+                        'shimmer': 'shimmer 2s infinite linear',
+                        'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        'spin-reverse': {
+                            '0%': { transform: 'rotate(0deg)' },
+                            '100%': { transform: 'rotate(-360deg)' },
+                        },
+                        'shimmer': {
+                            '0%': { transform: 'translateX(-100%)' },
+                            '100%': { transform: 'translateX(100%)' },
+                        },
+                        'fadeInUp': {
+                            '0%': { opacity: '0', transform: 'translateY(24px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        'float': {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap');
+        
+        body {
+            background-color: #f3f4f6;
+            min-height: 100vh;
+        }
+        
+        /* Ambient Background with Noise */
+        
+        .ambient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,0) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,0) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,0) 0, transparent 50%);
+            background-size: 100% 100%;
+        }
+        
+        .ambient-orbs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background: #f8fafc;
+        }
+        
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+        }
+        
+        .orb-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #e0e7ff; animation: float 10s infinite alternate; }
+        
+        .orb-2 { bottom: -10%; right: -10%; width: 50vw; height: 50vw; background: #fce7f3; animation: float 12s infinite alternate-reverse; }
+        
+        .orb-3 { top: 40%; left: 40%; width: 30vw; height: 30vw; background: #fae8ff; opacity: 0.4; animation: float 15s infinite alternate; }
+        
+        /* Noise Texture */
+        
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.035;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+        
+        /* Glassmorphism Classes */
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
+        }
+        
+        .glass-header {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+        }
+        
+        /* Scrollbar */
+        
+        ::-webkit-scrollbar { width: 6px; }
+        
+        ::-webkit-scrollbar-track { background: transparent; }
+        
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        ::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
+    </style>
+
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.33.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
+    "recharts": "https://esm.sh/recharts@^3.5.1",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "vite": "https://esm.sh/vite@^7.2.7"
+  }
+}
+</script>
+  <script type="module" crossorigin src="./assets/index-CFPeDr9h.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-BfbN3y6D.css">
+</head>
+<body class="text-slate-800 antialiased min-h-screen">
+    <div class="ambient-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+    <div class="noise-overlay"></div>
+    
+    <div id="root">
+        <style>
+            .startup-skeleton { max-width:1320px; margin:auto; padding:24px 20px; }
+            .startup-skeleton, .startup-skeleton * { box-sizing:border-box; }
+            .startup-block { height:16px; border-radius:8px; background:#e2e8f0; }
+            .startup-header { display:flex; align-items:center; gap:12px; height:56px; margin-bottom:32px; }
+            .startup-hero { padding:32px; border:1px solid #e2e8f0; border-radius:32px; background:white; }
+            .startup-filters { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; padding:24px; margin:24px 0; border-radius:24px; background:white; border:1px solid #e2e8f0; }
+            .startup-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
+            .startup-card { padding:24px; border:1px solid #e2e8f0; border-radius:32px; background:white; }
+            .startup-grades { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:32px; }
+            .startup-grades div { height:64px; border-radius:12px; background:#f1f5f9; }
+            .startup-points { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:20px; }
+            .startup-points div { height:80px; border-radius:16px; background:#f1f5f9; }
+            .startup-status { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+            @media(max-width:1100px) { .startup-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+            @media(max-width:767px) { .startup-grid, .startup-filters { grid-template-columns:minmax(0,1fr); } .startup-hero { padding:24px; } }
+            @media(prefers-reduced-motion:no-preference) { .startup-skeleton [aria-hidden] { animation:startup-pulse 2s ease-in-out infinite; } }
+            @keyframes startup-pulse { 50% { opacity:.55; } }
+        </style>
+        <div class="startup-skeleton" role="status" aria-label="正在載入錄取資料">
+            <span class="startup-status">正在載入錄取資料，請稍候。</span>
+            <div aria-hidden="true">
+                <div class="startup-header"><div class="startup-block" style="width:48px;height:48px;border-radius:16px"></div><div class="startup-block" style="width:180px;height:24px"></div></div>
+                <div class="startup-hero"><div class="startup-block" style="width:120px;height:28px"></div><div class="startup-block" style="width:75%;height:40px;margin-top:24px"></div><div class="startup-block" style="width:90%;margin-top:20px"></div><div class="startup-block" style="width:65%;margin-top:12px"></div></div>
+                <div class="startup-filters"><div class="startup-block" style="height:48px"></div><div class="startup-block" style="height:48px"></div><div class="startup-block" style="height:48px"></div></div>
+                <div class="startup-grid"><div class="startup-card"><div class="startup-block" style="width:35%;height:24px"></div><div class="startup-block" style="width:75%;height:28px;margin-top:20px"></div><div class="startup-block" style="width:50%;margin-top:12px"></div><div class="startup-grades"><div></div><div></div><div></div><div></div><div></div><div></div></div><div class="startup-points"><div></div><div></div></div></div><div class="startup-card"><div class="startup-block" style="width:35%;height:24px"></div><div class="startup-block" style="width:75%;height:28px;margin-top:20px"></div><div class="startup-block" style="width:50%;margin-top:12px"></div><div class="startup-grades"><div></div><div></div><div></div><div></div><div></div><div></div></div><div class="startup-points"><div></div><div></div></div></div><div class="startup-card"><div class="startup-block" style="width:35%;height:24px"></div><div class="startup-block" style="width:75%;height:28px;margin-top:20px"></div><div class="startup-block" style="width:50%;margin-top:12px"></div><div class="startup-grades"><div></div><div></div><div></div><div></div><div></div><div></div></div><div class="startup-points"><div></div><div></div></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6966991656561179"
+     crossorigin="anonymous"></script>
+                    <script async src="https://www.googletagmanager.com/gtag/js?id=G-H9X7EC127P"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-H9X7EC127P');
+</script>
+</body>
+</html>

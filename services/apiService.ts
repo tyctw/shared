@@ -12,7 +12,7 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 const SUPABASE_PAGE_SIZE = 1000;
 
 // Create a single supabase client for interacting with your database
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
 
 const VALID_GRADES = new Set<Grade>(['A++', 'A+', 'A', 'B++', 'B+', 'B', 'C']);
 const VALID_WRITING_GRADES = new Set<number>([0, 1, 2, 3, 4, 5, 6]);
@@ -138,10 +138,10 @@ const repairScoreEntries = async (items: any[]): Promise<ScoreEntry[]> => {
     }
   });
 
-  if (updates.length > 0) {
+  if (updates.length > 0 && supabase) {
     const results = await Promise.allSettled(
       updates.map(({ id, update }) =>
-        supabase
+        supabase!
           .from('score_entries')
           .update(update)
           .eq('id', id)
@@ -166,8 +166,8 @@ const repairScoreEntries = async (items: any[]): Promise<ScoreEntry[]> => {
 // ===============================
 export const fetchEntries = async (): Promise<ScoreEntry[]> => {
   try {
-    if (!supabaseUrl || !supabaseAnonKey) {
-      throw new Error('Supabase 環境變數尚未設定，請確認 VITE_SUPABASE_URL 與 VITE_SUPABASE_ANON_KEY。');
+    if (!supabase) {
+      throw new Error('錄取資料服務尚未連線，暫時無法讀取分享資料。');
     }
 
     const rows: any[] = [];
@@ -202,6 +202,7 @@ export const fetchEntries = async (): Promise<ScoreEntry[]> => {
 // ===============================
 export const submitEntry = async (entry: ScoreEntry): Promise<boolean> => {
    try {
+    if (!supabase) return false;
     if (isEntryYearLocked(entry.year)) {
       console.warn(getEntryLockMessage(entry.year));
       return false;

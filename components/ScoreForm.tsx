@@ -1,3 +1,4 @@
+import PageIntro from './PageIntro';
 import { useEntryYears } from '../hooks/useEntryYears';
 import React, { useState, useEffect, useRef } from 'react';
 import { ScoreEntry, Region, Grade, WritingGrade, StudentIdentity } from '../types';
@@ -312,36 +313,11 @@ const ScoreForm: React.FC<ScoreFormProps> = ({ onSubmit, onDirtyChange }) => {
   return (
     <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8 animate-in slide-in-from-bottom-8 duration-700">
       
-      {/* Header */}
-      <div className="relative overflow-hidden rounded-[2rem] border border-indigo-100 bg-gradient-to-br from-white via-indigo-50/70 to-sky-50 px-6 py-8 text-slate-900 shadow-[0_20px_70px_-42px_rgba(15,23,42,0.35)] sm:rounded-[2.5rem] sm:px-10 sm:py-10">
-          <div className="pointer-events-none absolute -right-16 -top-24 h-64 w-64 rounded-full bg-indigo-100/80 blur-[70px]"></div>
-          <div className="pointer-events-none absolute -bottom-28 left-1/4 h-64 w-64 rounded-full bg-emerald-100/70 blur-[80px]"></div>
-          <div className="pointer-events-none absolute inset-0 opacity-[0.35] [background-image:linear-gradient(rgba(99,102,241,.12)_1px,transparent_1px),linear-gradient(90deg,rgba(99,102,241,.12)_1px,transparent_1px)] [background-size:36px_36px]"></div>
+      <PageIntro number="01" eyebrow="SHARE YOUR STORY / 分享錄取" title="你的經驗，" highlight="是別人的方向。" description="匿名分享會考成績與錄取結果，讓學弟妹少一點資訊焦慮，多一份選擇的底氣。">
+        <p className="cap-intro-note"><ShieldCheck size={18} />請依成績單與錄取結果如實填寫，勿留下姓名、准考證號、電話等個人資訊。</p>
+      </PageIntro>
+      <div className="cap-form-progress" aria-label="填寫步驟"><span><b>01</b> 考生背景</span><i /><span><b>02</b> 會考成績</span><i /><span><b>03</b> 經驗傳承</span></div>
 
-          <div className="relative z-10 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-white/80 px-3.5 py-2 text-xs font-black text-indigo-600 shadow-sm backdrop-blur-md">
-                 <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-                 <span>你的經驗，會成為別人的方向</span>
-              </div>
-              <h2 className="text-3xl font-black tracking-[-0.035em] sm:text-5xl">
-                 分享你的
-                 <span className="bg-gradient-to-r from-indigo-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent">錄取數據</span>
-              </h2>
-              <p className="mt-3 max-w-xl text-sm font-bold leading-7 text-slate-600 sm:text-base">
-                 匿名分享會考成績與錄取結果，讓學弟妹少一點資訊焦慮，多一份選擇的底氣。
-              </p>
-              <div className="mt-4 flex max-w-2xl items-start gap-2.5 rounded-2xl border border-amber-100 bg-amber-50/80 px-4 py-3 text-xs font-bold leading-6 text-amber-700 shadow-sm backdrop-blur-md sm:text-sm">
-                <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
-                <p>
-                  請協助回報正確資料：請依照成績單與錄取結果如實填寫，避免測試、亂填或誇大資料；也請勿留下姓名、准考證號、電話等個人資訊。
-                </p>
-              </div>
-            </div>
-
-          </div>
-      </div>
-      
       <form onSubmit={handleSubmit} className="space-y-6">
         
         {/* Section 1: Background Info */}

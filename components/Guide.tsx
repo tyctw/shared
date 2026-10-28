@@ -1,3 +1,4 @@
+import PageIntro from './PageIntro';
 import React from 'react';
 import {
   AlertTriangle,
@@ -65,41 +66,7 @@ const Guide: React.FC<GuideProps> = ({ onNavigate }) => {
 
   return (
     <div className="mx-auto max-w-5xl space-y-7 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <section className="relative isolate overflow-hidden rounded-[2.25rem] bg-[#11132b] px-6 py-10 text-white shadow-[0_28px_80px_-35px_rgba(49,46,129,0.75)] sm:rounded-[2.75rem] sm:px-12 sm:py-14">
-        <div className="pointer-events-none absolute -right-24 -top-28 h-80 w-80 rounded-full bg-violet-500/30 blur-[90px]" />
-        <div className="pointer-events-none absolute -bottom-36 left-1/4 h-72 w-72 rounded-full bg-indigo-500/25 blur-[90px]" />
-        <div className="pointer-events-none absolute inset-0 opacity-[0.055] [background-image:linear-gradient(rgba(255,255,255,.7)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.7)_1px,transparent_1px)] [background-size:38px_38px]" />
-
-        <div className="relative z-10 grid items-end gap-8 lg:grid-cols-[1fr_auto]">
-          <div>
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.08] px-3.5 py-2 text-xs font-bold text-indigo-100 backdrop-blur-md">
-              <BookOpen className="h-4 w-4 text-indigo-300" />
-              使用指南・資料判讀原則
-            </div>
-            <h2 className="text-3xl font-black tracking-[-0.04em] sm:text-5xl">
-              更安心地使用
-              <span className="block bg-gradient-to-r from-indigo-300 via-fuchsia-300 to-amber-200 bg-clip-text text-transparent">
-                會考落點資料
-              </span>
-            </h2>
-            <p className="mt-5 max-w-2xl text-sm font-medium leading-7 text-slate-300 sm:text-base">
-              這裡整理考生自願分享的錄取經驗，協助你了解歷年趨勢。請將平台當作探索工具，搭配官方簡章與多筆資料做決定。
-            </p>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              ['匿名', '自由分享'],
-              ['多筆', '交叉比較'],
-              ['官方', '資訊優先'],
-            ].map(([value, label]) => (
-              <div key={value} className="min-w-[84px] rounded-2xl border border-white/10 bg-white/[0.07] px-3 py-3 text-center backdrop-blur-md">
-                <strong className="block text-sm font-black text-white">{value}</strong>
-                <span className="mt-1 block text-[10px] font-bold text-slate-400">{label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <PageIntro number="05" eyebrow="GET STARTED / 使用指南" title="少一點摸索，" highlight="多一點把握。" description="三步開始探索錄取資料。將平台當作參考工具，搭配官方簡章與多筆資料，走出自己的升學路線。" />
 
       <section className="rounded-[2rem] border border-slate-100 bg-white p-5 shadow-[0_16px_50px_-30px_rgba(15,23,42,0.3)] sm:p-8">
         <div className="mb-6 flex items-end justify-between gap-4">

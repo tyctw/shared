@@ -39,7 +39,7 @@ export default function StrategyArticlePage({ slug, onBack, onNavigate, onOpenAr
   const siblings = [ALL_STRATEGY_ARTICLES[index - 1], ALL_STRATEGY_ARTICLES[index + 1]].filter(Boolean);
   const sectionHref = (id: string) => `${articleHref(slug, base)}#${id}`;
 
-  return <article className="mx-auto max-w-4xl space-y-6" aria-labelledby="strategy-article-title">
+  return <article className="cap-article mx-auto max-w-4xl space-y-6" aria-labelledby="strategy-article-title">
     {backLink}
     <header className="rounded-2xl border border-slate-200 bg-white px-5 py-7 sm:px-9 sm:py-9">
       <p className="text-xs leading-6 text-slate-500"><span className="font-semibold text-cyan-700">{article.category}</span><span className="mx-2">·</span>閱讀約 {readMinutes} 分鐘<span className="mx-2">·</span>整理於 2026/10/15</p>

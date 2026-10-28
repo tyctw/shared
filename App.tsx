@@ -1,3 +1,5 @@
+import PageIntro from './components/PageIntro';
+import RouteHero from './components/RouteHero';
 import StrategyArticlePage from './components/StrategyArticlePage';
 import LegalContentPage from './components/LegalContentPage';
 import { LEGAL_CONTACT_EMAIL } from './data/legalContent';
@@ -453,37 +455,9 @@ const MinimumScoresPage = ({ entries }: { entries: ScoreEntry[] }) => {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <section className="relative overflow-hidden rounded-[2rem] bg-[#11132b] p-6 text-white shadow-[0_28px_80px_-45px_rgba(15,23,42,0.6)] sm:p-8">
-        <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-indigo-500/30 blur-[70px]" />
-        <div className="pointer-events-none absolute -bottom-24 left-1/4 h-64 w-64 rounded-full bg-emerald-500/20 blur-[80px]" />
-        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.08] px-3.5 py-2 text-xs font-bold text-indigo-100">
-              <Table2 className="h-4 w-4 text-emerald-300" />
-              各區學校最低錄取資料
-            </div>
-            <h2 className="text-3xl font-black tracking-tight sm:text-4xl">最低錄取分數總表</h2>
-            <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-slate-300">
-              僅統整一般生匿名分享資料，列出同一區域、同一學校中目前蒐集到的最低總積分紀錄。此表並不保證為該校真正最低錄取分數，請以官方簡章與正式公告為準。
-            </p>
-          </div>
-
-          <div className="grid grid-cols-3 gap-2 sm:min-w-[360px]">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.07] px-4 py-3">
-              <span className="block text-[10px] font-black uppercase tracking-widest text-indigo-300">區域</span>
-              <strong className="mt-1 block text-2xl font-black">{regionCount}</strong>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/[0.07] px-4 py-3">
-              <span className="block text-[10px] font-black uppercase tracking-widest text-indigo-300">學校</span>
-              <strong className="mt-1 block text-2xl font-black">{rows.length}</strong>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/[0.07] px-4 py-3">
-              <span className="block text-[10px] font-black uppercase tracking-widest text-indigo-300">資料</span>
-              <strong className="mt-1 block text-2xl font-black">{filteredEntries.length}</strong>
-            </div>
-          </div>
-        </div>
-      </section>
+      <PageIntro number="02" eyebrow="EXPLORE THE POSSIBILITIES / 錄取門檻" title="下一站的門檻，" highlight="一起看清楚。" description="整理各區學校的一般生匿名錄取分享，從歷年最低紀錄找到參考方向。此表並非官方最低錄取分數，請以正式簡章與公告為準。">
+        <div className="cap-summary-strip"><div><span>就學區</span><strong>{regionCount}<small>區</small></strong></div><div><span>學校紀錄</span><strong>{rows.length}<small>筆</small></strong></div><div><span>錄取分享</span><strong>{filteredEntries.length}<small>筆</small></strong></div></div>
+      </PageIntro>
 
       {isMinimumNoticeOpen && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 animate-in fade-in duration-200">
@@ -1163,7 +1137,7 @@ const App: React.FC = () => {
   );
 
   return (
-    <div className="font-sans text-slate-900 selection:bg-indigo-200 selection:text-indigo-900 overflow-x-hidden min-h-screen">
+    <div className="cap-redesign font-sans text-slate-900 selection:bg-lime-200 selection:text-black overflow-x-hidden min-h-screen">
       <a
         href={`${pageHref(activeTab, routeBase.current, articleSlug)}#main-content`}
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-xl focus:bg-slate-900 focus:px-4 focus:py-3 focus:text-sm focus:font-black focus:text-white focus:shadow-xl"
@@ -1459,11 +1433,11 @@ const App: React.FC = () => {
       </nav>
 
       {/* Main Content */}
-      <main id="main-content" className="max-w-5xl mx-auto px-3 sm:px-6 pt-24 sm:pt-32 pb-28 sm:pb-16">
+      <main data-page={activeTab} id="main-content" className="max-w-5xl mx-auto px-3 sm:px-6 pt-24 sm:pt-32 pb-28 sm:pb-16">
         
         <div className="animate-in fade-in duration-700 slide-in-from-bottom-6">
             
-            {!isLoading && loadError && !['guide', 'insights', 'disclaimer', 'privacy'].includes(activeTab) && (
+            {activeTab !== 'list' && (<>            {!isLoading && loadError && !['guide', 'insights', 'disclaimer', 'privacy'].includes(activeTab) && (
                  <div className="mb-8 overflow-hidden rounded-2xl border border-rose-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-md">
                     <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
                       <div className="bg-rose-100 p-3 rounded-full text-rose-600">
@@ -1502,6 +1476,7 @@ const App: React.FC = () => {
                  </div>
             )}
 
+</>)}
             {activeTab === 'guide' && (
                 <Guide onNavigate={(tab) => handleTabChange(tab)} />
             )}
@@ -1511,115 +1486,49 @@ const App: React.FC = () => {
             )}
 
             {activeTab === 'list' && (
-            <div className="space-y-12">
-                 {/* Editorial data-driven hero */}
-                 <section className="relative isolate overflow-hidden rounded-[2rem] border border-white/80 bg-white shadow-[0_28px_80px_-45px_rgba(15,23,42,0.38)] ring-1 ring-slate-200/70 sm:rounded-[2.75rem]">
-                    <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                        <div className="absolute -right-24 -top-28 h-80 w-80 rounded-full bg-sky-100/90 blur-[90px]"></div>
-                        <div className="absolute -bottom-36 left-1/4 h-80 w-80 rounded-full bg-indigo-100/80 blur-[100px]"></div>
-                        <div className="absolute inset-0 opacity-[0.38] [background-image:linear-gradient(rgba(99,102,241,.11)_1px,transparent_1px),linear-gradient(90deg,rgba(99,102,241,.11)_1px,transparent_1px)] [background-size:42px_42px]"></div>
+            <div className="route-home">
+                 <RouteHero year={availableYears[0]} onNavigate={handleTabChange} />
+
+                <div className="route-data-status">            {!isLoading && loadError && !['guide', 'insights', 'disclaimer', 'privacy'].includes(activeTab) && (
+                 <div className="mb-8 overflow-hidden rounded-2xl border border-rose-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-md">
+                    <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
+                      <div className="bg-rose-100 p-3 rounded-full text-rose-600">
+                          <CloudOff className="w-6 h-6" />
+                      </div>
+                      <div className="flex-1">
+                          <h4 className="font-black text-slate-800 text-lg">資料載入失敗</h4>
+                          <p className="mt-1 text-sm font-medium leading-6 text-slate-500">
+                              {loadError}
+                          </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => loadData(true)}
+                        className="inline-flex items-center justify-center gap-2 rounded-2xl bg-rose-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-rose-100 transition-all hover:bg-rose-700 active:scale-[0.98]"
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                        重新載入
+                      </button>
                     </div>
+                 </div>
+            )}
 
-                    <div className="relative grid min-h-[510px] items-center gap-10 px-6 py-10 sm:px-10 sm:py-14 lg:grid-cols-[1.08fr_.92fr] lg:px-14 lg:py-16">
-                        <div className="max-w-xl">
-                            <div className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-indigo-100 bg-indigo-50/85 px-3.5 py-2 text-xs font-bold text-indigo-700 shadow-sm backdrop-blur-md sm:text-sm">
-                                <span className="relative flex h-2.5 w-2.5">
-                                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-300 opacity-70"></span>
-                                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
-                                </span>
-                                <span>{availableYears[0]}會考</span>
-                                <span className="h-3 w-px bg-indigo-200"></span>
-                                <span className="text-slate-500">數據即時更新</span>
-                            </div>
-
-                            <h2 className="text-[2.65rem] font-black leading-[1.08] tracking-[-0.045em] text-slate-900 sm:text-6xl lg:text-[4.25rem]">
-                                精準落點，
-                                <span className="mt-1 block bg-gradient-to-r from-indigo-600 via-sky-500 to-amber-500 bg-clip-text text-transparent">
-                                    預見你的未來
-                                </span>
-                            </h2>
-
-                            <p className="mt-6 max-w-lg text-base font-medium leading-8 text-slate-600 sm:text-lg">
-                                彙整全台各區真實錄取分數，透明公開。<br className="hidden sm:block" />
-                                拒絕資訊焦慮，用數據規劃最適合的升學藍圖。
-                            </p>
-
-                            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                                <button
-                                    onClick={() => handleTabChange('form')}
-                                    className="group flex w-full items-center justify-center gap-2.5 rounded-2xl bg-slate-900 px-6 py-4 text-base font-black text-white shadow-[0_16px_35px_-18px_rgba(15,23,42,0.65)] transition-all hover:-translate-y-1 hover:bg-indigo-600 hover:shadow-indigo-200 active:scale-[0.98] sm:w-auto"
-                                >
-                                    <PlusCircle className="h-5 w-5 text-indigo-200 transition-transform duration-500 group-hover:rotate-90" />
-                                    我要分享分數
-                                    <ArrowRight className="h-4 w-4 text-white/55 transition-transform group-hover:translate-x-1 group-hover:text-white" />
-                                </button>
-                                <button
-                                    onClick={() => handleTabChange('guide')}
-                                    className="flex w-full items-center justify-center gap-2.5 rounded-2xl border border-slate-200 bg-white px-6 py-4 text-base font-bold text-slate-700 shadow-sm backdrop-blur-md transition-all hover:-translate-y-1 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 active:scale-[0.98] sm:w-auto"
-                                >
-                                    <BookOpen className="h-5 w-5 text-indigo-500" />
-                                    新手指南
-                                </button>
-                            </div>
-
-                        </div>
-
-                        <div className="relative hidden min-h-[390px] lg:block" aria-hidden="true">
-                            <div className="absolute left-3 top-5 w-[88%] rotate-[-3deg] rounded-[2rem] border border-indigo-100 bg-white/60 p-5 opacity-80 shadow-sm backdrop-blur-xl"></div>
-                            <div className="absolute right-0 top-0 w-[92%] rotate-2 rounded-[2rem] border border-sky-100 bg-white/70 p-5 opacity-90 shadow-sm backdrop-blur-xl"></div>
-
-                            <div className="absolute inset-x-4 top-8 overflow-hidden rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-2xl shadow-slate-200/70 backdrop-blur-2xl">
-                                <div className="flex items-start justify-between">
-                                    <div>
-                                        <div className="mb-2 flex items-center gap-2 text-xs font-bold text-indigo-500">
-                                            <MapPin className="h-3.5 w-3.5" />
-                                            桃連區・114 年
-                                        </div>
-                                        <p className="text-lg font-black text-slate-900">理想高中錄取分享</p>
-                                        <p className="mt-1 text-xs font-medium text-slate-500">匿名考生提供的真實經驗</p>
-                                    </div>
-                                    <div className="rounded-2xl bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-600 ring-1 ring-emerald-100">
-                                        已錄取
-                                    </div>
-                                </div>
-
-                                <div className="mt-7 grid grid-cols-6 gap-2">
-                                    {[
-                                      ['國', 'A++'], ['英', 'A+'], ['數', 'A++'],
-                                      ['自', 'A'], ['社', 'A+'], ['作', '5級']
-                                    ].map(([subject, grade]) => (
-                                      <div key={subject} className="rounded-xl border border-slate-200 bg-slate-50 px-1 py-3 text-center">
-                                        <span className="block text-[9px] font-bold text-slate-400">{subject}</span>
-                                        <strong className="mt-1 block text-xs font-black text-slate-800">{grade}</strong>
-                                      </div>
-                                    ))}
-                                </div>
-
-                                <div className="mt-5 grid grid-cols-2 gap-3">
-                                    <div className="rounded-2xl bg-indigo-50 p-4 ring-1 ring-indigo-100">
-                                        <span className="text-[10px] font-bold tracking-widest text-indigo-500">總積分</span>
-                                        <strong className="mt-1 block text-3xl font-black text-indigo-700">31</strong>
-                                    </div>
-                                    <div className="rounded-2xl bg-amber-50 p-4 ring-1 ring-amber-100">
-                                        <span className="text-[10px] font-bold tracking-widest text-amber-500">總積點</span>
-                                        <strong className="mt-1 block text-3xl font-black text-amber-600">33</strong>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="absolute -right-2 bottom-5 flex items-center gap-3 rounded-2xl border border-white/15 bg-white/90 p-3 pr-5 shadow-xl backdrop-blur-xl">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white">
-                                    <Sparkles className="h-5 w-5" />
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-500">Data powered</p>
-                                    <p className="text-sm font-black text-slate-800">真實資料，安心參考</p>
-                                </div>
-                            </div>
-                        </div>
+            {!isLoading && !loadError && entries.length === 0 && !['guide', 'minimums', 'stats', 'insights', 'disclaimer', 'privacy'].includes(activeTab) && (
+                 <div className="mb-8 bg-white/50 backdrop-blur-md border border-amber-200/60 rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left shadow-sm">
+                    <div className="bg-amber-100 p-3 rounded-full text-amber-600">
+                        <CloudOff className="w-6 h-6" />
                     </div>
-                 </section>
+                    <div>
+                        <h4 className="font-bold text-slate-800 text-lg">目前沒有資料</h4>
+                        <p className="text-slate-500 text-sm mt-1">
+                            資料庫目前沒有可顯示的錄取分享。<br className="hidden sm:block"/>
+                            歡迎成為第一位分享者。
+                        </p>
+                    </div>
+                 </div>
+            )}
 
+</div>
                 <ScoreList
                     entries={entries}
                     isLoading={isLoading}
@@ -1633,6 +1542,7 @@ const App: React.FC = () => {
             
             {activeTab === 'compare' && (
                 <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500">
+                    <PageIntro number="07" eyebrow="SIDE BY SIDE / 落點比較" title="把選擇攤開，" highlight="方向更清楚。" description="並排比較已收藏的學校、科系與會考成績，整理出自己的選校參考。" />
                     <ScoreCompare 
                         entries={entries}
                         favoriteIds={favoriteIds}
@@ -1643,26 +1553,7 @@ const App: React.FC = () => {
 
             {activeTab === 'favorites' && (
                 <div className="mx-auto max-w-6xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <section className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-rose-600 via-pink-600 to-violet-700 px-6 py-8 text-white shadow-[0_24px_70px_-35px_rgba(190,24,93,0.7)] sm:px-9 sm:py-10">
-                        <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full border-[32px] border-white/10" />
-                        <div className="pointer-events-none absolute -bottom-24 left-1/3 h-48 w-48 rounded-full bg-white/10 blur-3xl" />
-                        <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-                            <div>
-                                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/25">
-                                    <Heart className="h-7 w-7 fill-white text-white" />
-                                </div>
-                                <p className="text-xs font-black tracking-[0.2em] text-rose-100">MY COLLECTION</p>
-                                <h2 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">我的收藏</h2>
-                                <p className="mt-3 max-w-xl text-sm font-medium leading-7 text-rose-50 sm:text-base">
-                                    將想比較的錄取資料留在這裡，回頭整理學校、科系與分數區間時更方便。
-                                </p>
-                            </div>
-                            <div className="rounded-2xl border border-white/20 bg-white/10 px-5 py-4 backdrop-blur-sm">
-                                <span className="block text-3xl font-black">{favoriteIds.length}</span>
-                                <span className="mt-1 block text-xs font-bold text-rose-100">筆已收藏資料</span>
-                            </div>
-                        </div>
-                    </section>
+                    <PageIntro number="06" eyebrow="SAVED FOR LATER / 我的收藏" title="把心動的選擇，" highlight="留給未來的你。" description="將值得比較的錄取資料留在這裡，慢慢整理學校、科系與分數區間。"><p className="cap-saved-count"><Heart size={18} /> 已收藏 <strong>{favoriteIds.length}</strong> 筆錄取資料</p></PageIntro>
 
                     <section className="rounded-[2rem] border border-slate-100 bg-white p-5 shadow-sm sm:p-7">
                         <div className="mb-6 flex flex-col gap-3 border-b border-slate-100 pb-5 sm:flex-row sm:items-center sm:justify-between">

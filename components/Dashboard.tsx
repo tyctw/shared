@@ -1,3 +1,4 @@
+import PageIntro from './PageIntro';
 import { useEntryYears } from '../hooks/useEntryYears';
 import React, { useMemo, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend } from 'recharts';
@@ -13,7 +14,7 @@ const formatPoints = (value: number | null) => value === null ? '—' : value.to
 const percent = (value: number, valid = true) => valid ? `${value.toFixed(1)}%` : '—';
 const panel = 'min-w-0 rounded-2xl border border-slate-200 bg-white p-5 sm:p-6';
 const selectClass = 'mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500';
-const gradeColors = ['#4338ca', '#6366f1', '#a5b4fc', '#047857', '#34d399', '#a7f3d0', '#fbbf24'];
+const gradeColors = ['#293321', '#52753a', '#8bb55a', '#bdf45b', '#cbd7b6', '#dedfca', '#b7aa7e'];
 
 function Panel({ id, title, description, children }: { id?: string; title: string; description?: string; children: React.ReactNode }) {
   return <section id={id} className={`${panel} scroll-mt-28`}><h4 className="text-base font-bold text-slate-900">{title}</h4>
@@ -31,7 +32,7 @@ function Distribution({ data, valid }: { data: { name: string; count: number; sh
       <XAxis dataKey="name" tickLine={false} axisLine={false} tick={{ fontSize: 12 }} />
       <YAxis allowDecimals={false} tickLine={false} axisLine={false} tick={{ fontSize: 12 }} />
       <Tooltip formatter={(value, _name, item) => [`${formatNumber(Number(value))} 筆（${percent(item.payload.share)}）`, '回報筆數']} />
-      <Bar dataKey="count" name="回報筆數" fill="#6366f1" radius={[4, 4, 0, 0]} maxBarSize={38} isAnimationActive={false} />
+      <Bar dataKey="count" name="回報筆數" fill="#5b7d3d" radius={[4, 4, 0, 0]} maxBarSize={38} isAnimationActive={false} />
     </BarChart>
   </ResponsiveContainer></div>
   <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">{data.map(row => <div key={row.name} className="rounded-lg bg-slate-50 px-3 py-2 text-xs">
@@ -92,11 +93,9 @@ export default function Dashboard({ entries }: Props) {
   };
 
   return <div className="space-y-6">
-    <div className="flex flex-wrap items-start justify-between gap-4">
-      <div className="flex items-center gap-3"><div className="rounded-xl bg-indigo-50 p-3 text-indigo-600"><BarChart3 className="h-6 w-6" /></div>
-        <div><h3 className="text-xl font-bold text-slate-900">數據統計中心</h3><p className="mt-1 text-sm text-slate-500">從樣本範圍、成績分布到年度變化，讀懂錄取回報。</p></div></div>
-      <button onClick={exportSummary} disabled={!stats.total} className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"><Download className="h-4 w-4" />匯出統計 CSV</button>
-    </div>
+    <PageIntro number="03" eyebrow="READ THE DATA / 數據統計" title="讓數據，" highlight="說得更清楚。" description="從樣本範圍、成績分布到年度變化，讀懂每一筆匿名分享，也看見資料的適用範圍。">
+      <div className="cap-stat-toolbar"><span>依年度、就學區與考生身分探索統計</span><button onClick={exportSummary} disabled={!stats.total} className="cap-ink-button"><Download size={16} /> 匯出統計 CSV</button></div>
+    </PageIntro>
 
     <section className={panel} aria-label="統計篩選">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -169,7 +168,7 @@ export default function Dashboard({ entries }: Props) {
 
     <Panel id="yearly-summary" title="年度回報量與積分變化" description="依會考年度整理回報筆數；回報量變化反映平台資料累積，不能直接推論錄取難度。積分只在單一就學區顯示。">
       {stats.years.length ? <>
-        <div className="h-56" aria-hidden="true"><ResponsiveContainer width="100%" height="100%"><BarChart data={stats.years} margin={{ left: -20, right: 10, top: 10, bottom: 5 }}><CartesianGrid strokeDasharray="3 3" vertical={false} /><XAxis dataKey="name" tickFormatter={value => `${value}年`} /><YAxis allowDecimals={false} /><Tooltip formatter={value => [`${formatNumber(Number(value))} 筆`, '回報筆數']} /><Bar dataKey="count" fill="#818cf8" radius={[4, 4, 0, 0]} maxBarSize={48} isAnimationActive={false} /></BarChart></ResponsiveContainer></div>
+        <div className="h-56" aria-hidden="true"><ResponsiveContainer width="100%" height="100%"><BarChart data={stats.years} margin={{ left: -20, right: 10, top: 10, bottom: 5 }}><CartesianGrid strokeDasharray="3 3" vertical={false} /><XAxis dataKey="name" tickFormatter={value => `${value}年`} /><YAxis allowDecimals={false} /><Tooltip formatter={value => [`${formatNumber(Number(value))} 筆`, '回報筆數']} /><Bar dataKey="count" fill="#8cae61" radius={[4, 4, 0, 0]} maxBarSize={48} isAnimationActive={false} /></BarChart></ResponsiveContainer></div>
         <div className="overflow-x-auto"><table className="w-full min-w-[420px] text-left text-xs"><caption className="sr-only">年度回報摘要</caption><thead className="border-b text-slate-500"><tr>{['年度', '回報筆數', '有效積分筆數', '平均積分', '中位數'].map(label => <th key={label} scope="col" className="px-2 py-3">{label}</th>)}</tr></thead><tbody>{stats.years.map(row => <tr key={row.name} className="border-b border-slate-100 last:border-0"><th scope="row" className="px-2 py-3">{row.name}</th><td className="px-2 py-3">{row.count}</td><td className="px-2 py-3">{region === 'all' ? '—' : row.points.count}</td><td className="px-2 py-3">{region === 'all' ? '—' : formatPoints(row.points.average)}</td><td className="px-2 py-3">{region === 'all' ? '—' : formatPoints(row.points.median)}</td></tr>)}</tbody></table></div>
       </> : <Empty />}
     </Panel>

@@ -66,7 +66,7 @@ export default function LegalContentPage({ kind, onBack, onNavigate }: Props) {
     event.preventDefault(); onNavigate(otherKind);
   };
   return <div className="mx-auto max-w-4xl space-y-6">
-    <header className={`rounded-2xl border p-5 sm:p-8 ${isPrivacy ? 'border-indigo-100 bg-indigo-50/50' : 'border-amber-100 bg-amber-50/50'}`}>
+    <header className={`cap-legal-intro rounded-2xl border p-5 sm:p-8 ${isPrivacy ? 'border-indigo-100 bg-indigo-50/50' : 'border-amber-100 bg-amber-50/50'}`}>
       <div className="flex items-start gap-3 sm:gap-4"><div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${isPrivacy ? 'bg-indigo-600' : 'bg-amber-600'} text-white`}>{isPrivacy ? <Shield aria-hidden="true" className="h-6 w-6" /> : <ShieldAlert aria-hidden="true" className="h-6 w-6" />}</div>
         <div className="min-w-0"><h2 className="text-2xl font-bold leading-9 text-slate-900 sm:text-3xl">{title}</h2><p className="mt-2 text-xs leading-6 text-slate-500">最後更新：{LEGAL_UPDATED_AT} · 適用於目前平台功能</p></div></div>
       <p className="mt-5 text-sm leading-7 text-slate-600">{isPrivacy ? '說明哪些資料會被處理、如何公開與保存、第三方服務的影響，以及您的資料與著作權相關權利。' : '說明回報與統計資料的性質、使用限制、官方資訊的優先性，以及平台與使用者的責任範圍。'}</p>
