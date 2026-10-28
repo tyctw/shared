@@ -94,18 +94,18 @@ export default function Dashboard({ entries }: Props) {
 
   return <div className="space-y-6">
     <PageIntro number="03" eyebrow="READ THE DATA / 數據統計" title="讓數據，" highlight="說得更清楚。" description="從樣本範圍、成績分布到年度變化，讀懂每一筆匿名分享，也看見資料的適用範圍。">
-      <div className="cap-stat-toolbar"><span>依年度、就學區與考生身分探索統計</span><button onClick={exportSummary} disabled={!stats.total} className="cap-ink-button"><Download size={16} /> 匯出統計 CSV</button></div>
+      <div className="cap-stat-toolbar"><span>依年度、就學區與考生身分探索統計</span><button onClick={exportSummary} disabled={!stats.total} className="cap-ink-button" aria-label="匯出統計 CSV"><Download size={16} /> 匯出統計 CSV</button></div>
     </PageIntro>
 
     <section className={panel} aria-label="統計篩選">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <label className="text-xs font-semibold text-slate-600">會考年度<select aria-label="統計會考年度" className={selectClass} value={year} onChange={e => setYear(e.target.value)}><option value="all">全部年度</option>{years.map(y => <option key={y} value={y}>{y} 年</option>)}</select></label>
-        <label className="text-xs font-semibold text-slate-600">就學區<select aria-label="統計就學區" className={selectClass} value={region} onChange={e => setRegion(e.target.value)}><option value="all">全部就學區</option>{REGIONS.map(r => <option key={r} value={r}>{r}</option>)}</select></label>
-        <label className="text-xs font-semibold text-slate-600">考生身分<select aria-label="統計考生身分" className={selectClass} value={identity} onChange={e => setIdentity(e.target.value)}><option value="all">全部身分</option>{identities.map(i => <option key={i} value={i}>{i}</option>)}</select></label>
+        <div className="min-w-0"><label htmlFor="stats-year" className="block text-xs font-semibold text-slate-600">會考年度</label><select id="stats-year" className={selectClass} value={year} onChange={e => setYear(e.target.value)}><option value="all">全部年度</option>{years.map(y => <option key={y} value={y}>{y} 年</option>)}</select></div>
+        <div className="min-w-0"><label htmlFor="stats-region" className="block text-xs font-semibold text-slate-600">就學區</label><select id="stats-region" className={selectClass} value={region} onChange={e => setRegion(e.target.value)}><option value="all">全部就學區</option>{REGIONS.map(r => <option key={r} value={r}>{r}</option>)}</select></div>
+        <div className="min-w-0"><label htmlFor="stats-identity" className="block text-xs font-semibold text-slate-600">考生身分</label><select id="stats-identity" className={selectClass} value={identity} onChange={e => setIdentity(e.target.value)}><option value="all">全部身分</option>{identities.map(i => <option key={i} value={i}>{i}</option>)}</select></div>
       </div>
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
         <p aria-live="polite" className="text-xs leading-6 text-slate-600">{scope} · 符合 {formatNumber(stats.total)} / 全站 {formatNumber(entries.length)} 筆</p>
-        <button onClick={() => { setYear('all'); setRegion('all'); setIdentity('all'); }} className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600"><RotateCcw className="h-3.5 w-3.5" />重設篩選</button>
+        <button onClick={() => { setYear('all'); setRegion('all'); setIdentity('all'); }} className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600" aria-label="重設篩選"><RotateCcw className="h-3.5 w-3.5" />重設篩選</button>
       </div>
       <p className="mt-2 text-xs leading-6 text-slate-500">以下為考生自願分享的樣本，可能偏向特定學校或成績；回報比例不代表全體考生分布，回報最低積分也不是官方錄取門檻。</p>
     </section>

@@ -901,6 +901,8 @@ const App: React.FC = () => {
 
   useEffect(() => {
     // Freeze the asset base before changing the URL, including subdirectory deployments.
+    const previousScrollRestoration = window.history.scrollRestoration;
+    window.history.scrollRestoration = 'manual';
     let baseElement = document.querySelector('base');
     if (!baseElement) {
       baseElement = document.createElement('base');
@@ -932,10 +934,13 @@ const App: React.FC = () => {
       setActiveTab(tab);
       setArticleSlug(route.articleSlug);
       setIsSidebarOpen(false);
-      window.scrollTo({ top: 0 });
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     };
     window.addEventListener('popstate', onPopState);
-    return () => window.removeEventListener('popstate', onPopState);
+    return () => {
+      window.history.scrollRestoration = previousScrollRestoration;
+      window.removeEventListener('popstate', onPopState);
+    };
   }, []);
 
   useEffect(() => {
@@ -1021,9 +1026,7 @@ const App: React.FC = () => {
     setArticleSlug(tab === 'insights' ? nextArticleSlug : undefined);
     setIsSidebarOpen(false);
     logUserAction('tab_change', tab);
-    window.requestAnimationFrame(() => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   };
 
   const handleTabChange = (tab: typeof activeTab) => {

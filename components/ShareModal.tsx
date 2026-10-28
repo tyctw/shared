@@ -1,4 +1,4 @@
-import navigatorIllustration from '../assets/illustrations/cap-navigator-v1.png';
+import { navigatorIllustrationSmall, navigatorShareSizes, navigatorIllustrationSrcSet } from '../assets/illustrations/navigatorImage';
 import React, { useEffect } from 'react';
 import {
   AtSign,
@@ -97,7 +97,7 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
       <button type="button" className="share-sheet-backdrop" onClick={onClose} aria-label="關閉分享視窗" />
       <div className="share-sheet share-sheet--v2">
         <header className="share-v2-top"><span><GraduationCap size={18} />會考錄取分享平台</span><button type="button" onClick={onClose} aria-label="關閉" className="share-sheet-close"><X size={19} /></button></header>
-        <div className="share-v2-intro"><div><p className="share-v2-eyebrow">GOOD THINGS ARE BETTER SHARED</p><h3 id="share-modal-title">把好工具，<br /><span>分享給同學。</span></h3><p className="share-v2-description">找方向的路上，有你一起更好。<br />把這份升學地圖，傳給正在需要的人。</p></div><img src={navigatorIllustration} width={1254} height={1254} alt="拿著望遠鏡的貓頭鷹升學領航員" /></div>
+        <div className="share-v2-intro"><div><p className="share-v2-eyebrow">GOOD THINGS ARE BETTER SHARED</p><h3 id="share-modal-title">把好工具，<br /><span>分享給同學。</span></h3><p className="share-v2-description">找方向的路上，有你一起更好。<br />把這份升學地圖，傳給正在需要的人。</p></div><img src={navigatorIllustrationSmall} srcSet={navigatorIllustrationSrcSet} sizes={navigatorShareSizes} width={192} height={192} alt="拿著望遠鏡的貓頭鷹升學領航員" decoding="async" /></div>
         <div className="share-v2-content"><section className="share-v2-qr" aria-label="掃碼分享"><p><span>01</span> 面對面，掃一下。</p><div className="share-v2-qr-frame"><QRCodeSVG value={shareUrl} size={170} level="H" fgColor="#24271e" bgColor="#fffef8" includeMargin={true} title="掃碼開啟目前頁面" /></div><span className="share-v2-qr-caption">手機掃碼，立刻開始探索 <ArrowUpRight size={12} /></span></section>
           <section className="share-v2-social" aria-label="選擇分享方式"><p><span>02</span> 傳給在意的人。</p><div className="share-v2-channels">
             <button type="button" onClick={handleLineShare} aria-label="分享到 LINE"><span className="share-v2-channel-icon"><MessageCircle size={21} /></span><span><strong>LINE</strong><small>傳給同學或升學群組</small></span><ArrowUpRight size={17} /></button>

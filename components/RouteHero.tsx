@@ -1,4 +1,4 @@
-import navigatorIllustration from '../assets/illustrations/cap-navigator-v1.png';
+import { navigatorIllustrationMedium, navigatorIllustrationSizes, navigatorIllustrationSrcSet } from '../assets/illustrations/navigatorImage';
 import React from 'react';
 import { ArrowDown, ArrowUpRight, Check, Compass, Heart, Search } from 'lucide-react';
 import type { ActiveTab } from '../utils/pageRoutes';
@@ -17,7 +17,7 @@ export default function RouteHero({ year, onNavigate }: { year: string | number;
           <div className="chapter-promises"><span><Check size={13} /> 免費查詢</span><span><Check size={13} /> 匿名分享</span><span><Check size={13} /> 一起讓資訊透明</span></div>
         </div>
         <figure className="chapter-illustration chapter-illustration--navigator">
-          <img src={navigatorIllustration} width={1254} height={1254} alt="會考平台專屬領航員：拿著望遠鏡的貓頭鷹站在升學地圖上，亮綠色路線穿過山丘，通往理想校園。" fetchPriority="high" decoding="async" />
+          <img src={navigatorIllustrationMedium} srcSet={navigatorIllustrationSrcSet} sizes={navigatorIllustrationSizes} width={384} height={384} alt="會考平台專屬領航員：拿著望遠鏡的貓頭鷹站在升學地圖上，亮綠色路線穿過山丘，通往理想校園。" fetchPriority="high" decoding="async" />
           <figcaption><span>✳</span> 每一種可能，都值得探索。</figcaption>
         </figure>
       </div>
